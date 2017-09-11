@@ -30,6 +30,7 @@ var bot = new builder.UniversalBot(connector, function (session) {
 
 bot.dialog('greetings', [
     function (session) {
+        session.send("v2");
         builder.Prompts.text(session, 'Hi! What is your name?');
     },
     function (session, results) {
