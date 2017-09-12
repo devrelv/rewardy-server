@@ -1,8 +1,14 @@
 var restify = require('restify');
 var builder = require('botbuilder');
+var mongoose = require('mongoose');
 
 const MICROSOFT_APP_ID = '929b584f-64e7-42d6-a051-97a5b1f71cdf';
-const MICROSOFT_APP_PASSWORD = 'awSiELgJeFCbaH7kn80iKgJ'
+const MICROSOFT_APP_PASSWORD = 'awSiELgJeFCbaH7kn80iKgJ';
+const MONGO_CONNECTION_STRING = 'mongodb://prod:Pp123456@ds133964.mlab.com:33964/redeembot';
+
+// Openning connection to the database
+mongoose.connect(MONGO_CONNECTION_STRING);
+var User = mongoose.model('User', { name: String });
 
 // Setup Restify Server
 var server = restify.createServer();
@@ -34,6 +40,14 @@ bot.dialog('greetings', [
     },
     function (session, results) {
         session.endDialog('Hello %s!', results.response);
+        var currentUser = new User({ name: results.response });
+        currentUser.save(function (err) {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log('User saved to db');
+          }
+        });
     }
 ]);
 
