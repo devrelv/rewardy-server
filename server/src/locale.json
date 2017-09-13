@@ -1,0 +1,119 @@
+{
+	"welcome": {
+		"en": "Hello and welcome to Vale! Use Vale Points to claim gift cards for your favorite online services."
+	},
+	"daily.gifted {{points}}": {
+		"en": "We just gifted you with {{points}}. Get more points by coming back every day."
+	},
+	"daily.alreadyGiftedSeconds {{nextTimeSeconds}}": {
+		"en": "It seems we already gifted you today. Come back in {{nextTimeSeconds}} seconds."
+	},
+	"daily.alreadyGiftedMinutes {{nextTimeMinutes}}": {
+		"en": "It seems we already gifted you today. Come back in {{nextTimeMinutes}} minutes."
+	},
+	"daily.alreadyGiftedHours {{nextTimeHours}}": {
+		"en": "It seems we already gifted you today. Come back in {{nextTimeHours}} hours."
+	},
+	"root.pleaseSelect": {
+		"en": "Hey! Please select one of the following options 👇"
+	},
+	"keyboard.root.checkCredit": {
+		"en": "Check your credit 🔍"
+	},
+	"keyboard.root.redeem": {
+		"en": "Redeem 🛍"
+	},
+	"keyboard.root.inviteFriends": {
+		"en": "Invite friends for free credit 😎"
+	},
+	"keyboard.root.getCredit": {
+		"en": "Get free credit! 💎"
+	},
+	"keyboard.getCredit.getDailyBonus": {
+		"en": "Get your daily bonus 🤞"
+	},
+	"checkCredit.loading": {
+		"en": "Calculating your credit..."
+	},
+	"checkCredit.stillLoading": {
+		"en": "Let me figure this out..."
+	},
+	"checkCredit.response {{points}}": {
+		"en": "You have {{points}}! Keep on playing for more."
+	},
+	"redeem.optionLoading": {
+		"en": "One second...We are checking your points status."
+	},
+	"redeem.shouldBuy {{points}} {{spend}} {{keyboardPositive}} {{keyboardNegative}}": {
+		"en": "You have {{points}}. Would you like to spend {{spend}} now? ({{keyboardPositive}}/{{keyboardNegative}})?"
+	},
+	"keyboard.redeem.yes": {
+		"en": "Yes"
+	},
+	"keyboard.redeem.no": {
+		"en": "No"
+	},
+	"redeem.shouldBuy.yesSelection {{option}} {{voucher}}": {
+		"en": "You got it. Voucher code for \"{{option}}\" is \"{{voucher}}\". Enjoy!"
+	},
+	"redeem.shouldBuy.noSelection": {
+		"en": "Sure thing! Save your points for something bigger."
+	},
+	"redeem.notEnoughCredit {{points}} {{miss}}": {
+		"en": "Sorry! You have {{points}}. You need {{miss}} points for this item. Invite friends or complete more offers to increase your credit."
+	},
+	"keyboard.inviteFriends.inputOther": {
+		"en": "Enter referral code"
+	},
+	"keyboard.inviteFriends.userReferralMessage": {
+		"en": "Get your referral message"
+	},
+	"inviteFriends.intro {{referral}} {{points}}": {
+		"en": "Your referral code is {{referral}}. You will earn {{points}} for each referral!"
+	},
+	"inviteFriends.inputOther.intro": {
+		"en": "Please enter the referral code you got."
+	},
+	"inviteFriends.inputOther.onEnter": {
+		"en": "One second...We are checking the referral code."
+	},
+	"inviteFriends.inputOther.onInvalid {{referral}}": {
+		"en": "Oh no. It seems this referral code is invalid ({{referral}})."
+	},
+	"inviteFriends.inputOther.onFailed": {
+		"en": "That is weird! We could not validate this code. Please try again later."
+	},
+	"inviteFriends.inputOther.sameUserId": {
+		"en": "Nice try! Invite more friends for more points!"
+	},	
+	"inviteFriends.inputOther.onExpired": {
+		"en": "It seems that this referral code has expired. Invite more friends for more points!"
+	},
+	"inviteFriends.inputOther.onValid {{points}}": {
+		"en": "Amazing. You just earned {{points}}."
+	},
+	"inviteFriends.userReferralMessage.intro": {
+		"en": "Feel free to share this message with your friends at 👇"
+	},
+	"inviteFriends.userReferralMessage.content {{points}} {{referral}}": {
+		"en": "Join \"Vale\" App referral on Viber (viber://pa?chatURI=vale). Use Vale Points to claim gift cards for your favorite online services. Get {{points}} free by entering my referral code {{referral}}."
+	},
+	"getCredit.intro": {
+		"en": "Please check out our offer wall 👇"
+	},
+	"general.valePoints": {
+		"en": "Vale Points"
+	},
+	"keyboard.returnMainMenu" : {
+		"en": "Return to Main Menu"
+	},
+	"error.couldNotFindUser": {
+		"en": "That is weird! We could not find your user details. Please leave the bot and try again."
+	},
+	"error.couldNotFigureSelection": {
+		"en": "Darn. Could not understand this. Try choosing one of the options on the screen."
+	},
+	"general.legalNotice" : {
+		"en": "You should know and agree that whenever you click the following url, you will be transferred to a website operated by a third party for which Viber is not liable, and Viber will provide such website with your user id, and your actions on such website are subject to such third party's terms of use and privacy policy, to which you agree by making the action. The coupons you redeem may be limited by certain terms appearing on the coupon."
+	}
+}
