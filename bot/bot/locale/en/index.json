@@ -1,7 +1,10 @@
 {
-    "welcome_title": "Welcome to the Contoso Flowers",
-    "welcome_subtitle": "These are the flowers you are looking for!",
-    "contoso_flowers": "Contoso Flowers",
+    "welcome_title": "Hello and welcome to Vale! ",
+    "welcome_subtitle": "Use Vale Points to claim gift cards for your favorite online services.",
+    "keyboard.root.checkCredit": "Check your credit 🔍",
+    "keyboard.root.redeem": "Redeem 🛍",
+    "keyboard.root.inviteFriends": "Invite friends for free credit 😎",
+    "keyboard.root.getCredit": "Get free credit! 💎",
     "main_options_order_flowers": "Order flowers",
     "main_options_talk_to_support": "Talk to support",
     "main_options_settings": "Settings",

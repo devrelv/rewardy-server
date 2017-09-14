@@ -9,29 +9,22 @@ var connector = new builder.ChatConnector({
 
 // Welcome Dialog
 var MainOptions = {
-    Shop: 'main_options_order_flowers',
-    Support: 'main_options_talk_to_support'
+    CheckCredit: 'keyboard.root.checkCredit',
+    Redeem: 'keyboard.root.redeem',
+    InviteFriends: 'keyboard.root.inviteFriends',
+    GetCredit: 'keyboard.root.getCredit'
 };
 
 var bot = new builder.UniversalBot(connector, function (session) {
 
-    if (localizedRegex(session, [MainOptions.Shop]).test(session.message.text)) {
-        // dal.saveUsername('test');
-        // Order Flowers
-        return session.beginDialog('shop:/');
-    }
-
     var welcomeCard = new builder.HeroCard(session)
         .title('welcome_title')
         .subtitle('welcome_subtitle')
-        .images([
-            new builder.CardImage(session)
-                .url('https://placeholdit.imgix.net/~text?txtsize=56&txt=Contoso%20Flowers&w=640&h=330')
-                .alt('contoso_flowers')
-        ])
         .buttons([
-            builder.CardAction.imBack(session, session.gettext(MainOptions.Shop), MainOptions.Shop),
-            builder.CardAction.imBack(session, session.gettext(MainOptions.Support), MainOptions.Support)
+            builder.CardAction.imBack(session, session.gettext(MainOptions.CheckCredit), MainOptions.CheckCredit),
+            builder.CardAction.imBack(session, session.gettext(MainOptions.GetCredit), MainOptions.GetCredit),
+            builder.CardAction.imBack(session, session.gettext(MainOptions.InviteFriends), MainOptions.InviteFriends),
+            builder.CardAction.imBack(session, session.gettext(MainOptions.Redeem), MainOptions.Redeem)
         ]);
 
     session.send(new builder.Message(session)
