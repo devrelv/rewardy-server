@@ -1,10 +1,6 @@
 var builder = require('botbuilder');
 var siteUrl = require('./site-url');
-var mongoose = require('mongoose');
-
-// Openning connection to the database
-mongoose.connect(process.env.MONGO_CONNECTION_STRING);
-var User = mongoose.model('User', { name: String });
+var dal = require('./dal');
 
 var connector = new builder.ChatConnector({
     appId: process.env.MICROSOFT_APP_ID,
@@ -20,6 +16,7 @@ var MainOptions = {
 var bot = new builder.UniversalBot(connector, function (session) {
 
     if (localizedRegex(session, [MainOptions.Shop]).test(session.message.text)) {
+        // dal.saveUsername('test');
         // Order Flowers
         return session.beginDialog('shop:/');
     }
@@ -71,7 +68,7 @@ bot.use({
         var supportRegex = localizedRegex(session, ['main_options_talk_to_support', 'help']);
 
         if (settingsRegex.test(text)) {
-            // interrupt and trigger 'settings' dialog 
+            // interrupt and trigger 'settings' dialog
             return session.beginDialog('settings:/');
         } else if (supportRegex.test(text)) {
             // interrupt and trigger 'help' dialog
@@ -114,7 +111,7 @@ var connectorListener = connector.listen();
 function listen() {
     return function (req, res) {
         // Capture the url for the hosted application
-        // We'll later need this url to create the checkout link 
+        // We'll later need this url to create the checkout link
         var url = req.protocol + '://' + req.get('host');
         siteUrl.save(url);
         connectorListener(req, res);
