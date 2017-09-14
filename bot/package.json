@@ -1,7 +1,7 @@
 {
-  "name": "botbuilder-sample-contosoflowers",
+  "name": "reward-bot",
   "version": "1.0.0",
-  "description": "Bot Builder Sample - Contoso Flowers",
+  "description": "Reward bot",
   "scripts": {
     "start": "node app.js"
   },
