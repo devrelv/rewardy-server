@@ -5,14 +5,7 @@
   "scripts": {
     "start": "node app.js"
   },
-  "author": "Microsoft Corp.",
-  "license": "MIT",
-  "keywords": [
-    "botbuilder",
-    "bots",
-    "chatbots",
-    "botbuilder-samples"
-  ],
+  "author": "Itamar & Tal",
   "bugs": {
     "url": "https://github.com/Microsoft/BotBuilder-Samples/issues"
   },
