@@ -7,6 +7,8 @@ var connector = new builder.ChatConnector({
     appPassword: process.env.MICROSOFT_APP_PASSWORD
 });
 
+var userId = '123'; // TODO: get the real userId
+
 // Welcome Dialog
 var MainOptions = {
     CheckCredit: 'keyboard.root.checkCredit',
@@ -30,6 +32,33 @@ var bot = new builder.UniversalBot(connector, function (session) {
     session.send(new builder.Message(session)
         .addAttachment(welcomeCard));
 });
+
+bot.dialog('CheckCredit', [
+        function (session) {
+            session.say(session.gettext('checkCredit.loading'));
+
+            // getting the credits
+            dal.getUserCredits(userId, showUserCredits);
+            
+
+            function showUserCredits(creditsResult) {
+                var message = '';
+                if (!creditsResult.valid) {
+                    message = creditsResult.error_message;
+                } else {
+                    var numOfCredits = creditsResult.result;
+                    message = session.gettext('checkCredit.response {{points}}').replace('{{points}}', numOfCredits);
+                }
+                session.endDialog(message);
+
+        }
+    }
+]).triggerAction({ matches: [
+    /Check your credit/i
+ ]});
+
+
+ 
 
 // Enable Conversation Data persistence
 bot.set('persistConversationData', true);

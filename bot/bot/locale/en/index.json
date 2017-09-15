@@ -8,5 +8,8 @@
     "main_options_talk_to_support": "Talk to support",
     "main_options_settings": "Settings",
     "help": "Help",
-    "thank_you": "Support will contact you shortly. Have a nice day :)"
+    "thank_you": "Support will contact you shortly. Have a nice day :)",
+    "checkCredit.loading": "Calculating your credit...",
+    "checkCredit.response {{points}}": "You have {{points}}! Keep on playing for more. 💪",
+    "error.couldNotFindUser" : "That is weird! We could not find your user details. Please leave the bot and try again."
 }

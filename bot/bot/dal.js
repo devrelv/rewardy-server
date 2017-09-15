@@ -103,8 +103,8 @@ let ReferralUser = mongoose.model('ReferralUserSchema', ReferralUserSchema);
 function saveUserToDatabase(userId, language) {
     let newBotUser = new BotUser({
         user_id: userId,
-        points: defaultStartPoints,
-        language: language || defaultUserLanguage
+        points: consts.defaultStartPoints,
+        language: language || consts.defaultUserLanguage
     });
 
     newBotUser.save(function(err) {
@@ -127,8 +127,38 @@ function saveDeviceUserToDatabase(userId, deviceType) {
     });
 }
 
+function getUserCredits(userId, callback) {
+    var response = {};
+    BotUser.findOne({
+        'user_id': userId
+    }, function(err, botUser) {
+        if (err) {
+            console.log('error in getUserCredits');
+            console.log(err);
+            response = {
+                valid: false,
+                error_message: 'error.couldNotFindUser'
+            }
+        } else if (!botUser) {
+            console.log('Could not find the bot user value in the data base');
+            response = {
+                valid: false,
+                error_message: 'error.couldNotFindUser'
+            }
+            saveUserToDatabase(userId);
+        } else {
+            response = {
+                valid: true,
+                result: botUser.points
+            }
+        }
+        return callback(response);
+    });
+}
+
 module.exports = {
     saveUserToDatabase: saveUserToDatabase,
     saveUserToDatabase: saveUserToDatabase,
     saveDeviceUserToDatabase: saveDeviceUserToDatabase,
+    getUserCredits: getUserCredits,
 };
