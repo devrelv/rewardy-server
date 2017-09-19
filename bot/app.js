@@ -18,7 +18,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Register your web app routes here
 app.get('/', function (req, res, next) {
-  res.render('index', { title: 'Contoso Flowers' });
+  res.render('index', { title: 'Reward app' });
 });
 
 // Register Checkout page

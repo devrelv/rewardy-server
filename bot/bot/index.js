@@ -17,17 +17,31 @@ var MainOptions = {
     GetCredit: 'keyboard.root.getCredit'
 };
 
+function createRootButtons(session, builder) {
+    return [
+        builder.CardAction.imBack(session, session.gettext(MainOptions.CheckCredit), MainOptions.CheckCredit),
+        builder.CardAction.imBack(session, session.gettext(MainOptions.GetCredit), MainOptions.GetCredit),
+        builder.CardAction.imBack(session, session.gettext(MainOptions.InviteFriends), MainOptions.InviteFriends),
+        builder.CardAction.imBack(session, session.gettext(MainOptions.Redeem), MainOptions.Redeem)
+    ];
+}
+
+
+function sendRootMenu(session, builder) {
+    var card = new builder.HeroCard()
+        .title(session.gettext('main.root.title'))
+        .buttons(createRootButtons(session, builder));
+
+    session.send(new builder.Message(session)
+        .addAttachment(card));
+}
+
 var bot = new builder.UniversalBot(connector, function (session) {
 
     var welcomeCard = new builder.HeroCard(session)
         .title('welcome_title')
         .subtitle('welcome_subtitle')
-        .buttons([
-            builder.CardAction.imBack(session, session.gettext(MainOptions.CheckCredit), MainOptions.CheckCredit),
-            builder.CardAction.imBack(session, session.gettext(MainOptions.GetCredit), MainOptions.GetCredit),
-            builder.CardAction.imBack(session, session.gettext(MainOptions.InviteFriends), MainOptions.InviteFriends),
-            builder.CardAction.imBack(session, session.gettext(MainOptions.Redeem), MainOptions.Redeem)
-        ]);
+        .buttons(createRootButtons(session, builder));
 
     session.send(new builder.Message(session)
         .addAttachment(welcomeCard));
@@ -42,15 +56,17 @@ bot.dialog('CheckCredit', [
             
 
             function showUserCredits(creditsResult) {
-                var message = '';
+                var messageText = '';
                 if (!creditsResult.valid) {
-                    message = creditsResult.error_message;
+                    messageText = creditsResult.error_message;
                 } else {
                     var numOfCredits = creditsResult.result;
-                    message = session.gettext('checkCredit.response {{points}}').replace('{{points}}', numOfCredits);
+                    messageText = session.gettext('checkCredit.response {{points}}').replace('{{points}}', numOfCredits);
                 }
-                session.endDialog(message);
 
+                session.endDialog(messageText);
+
+                sendRootMenu(session, builder);
         }
     }
 ]).triggerAction({ matches: [
