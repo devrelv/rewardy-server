@@ -1,13 +1,14 @@
 var builder = require('botbuilder');
 var siteUrl = require('./site-url');
 var dal = require('./dal');
+var consts = require('./const');
 
 var connector = new builder.ChatConnector({
     appId: process.env.MICROSOFT_APP_ID,
     appPassword: process.env.MICROSOFT_APP_PASSWORD
 });
 
-var userId = '123'; // TODO: get the real userId
+var userId = '1234'; // TODO: get the real userId - Replace this variable with the user object (the id will be inside)
 
 // Welcome Dialog
 var MainOptions = {
@@ -47,33 +48,115 @@ var bot = new builder.UniversalBot(connector, function (session) {
         .addAttachment(welcomeCard));
 });
 
+// TODO: CheckCredit - Remove the TriggerAction and attach it to the root dialog with URL as in the flowers example
 bot.dialog('CheckCredit', [
         function (session) {
             session.say(session.gettext('checkCredit.loading'));
 
             // getting the credits
-            dal.getUserCredits(userId, showUserCredits);
-            
-
-            function showUserCredits(creditsResult) {
-                var messageText = '';
-                if (!creditsResult.valid) {
-                    messageText = creditsResult.error_message;
+            dal.getBotUserById(userId).then(botUser => {
+                messageText = '';
+                if (!botUser) {
+                    console.log('Could not find the bot user value in the database');
+                    dal.saveUserToDatabase(userId);
+                    messageText = 'error.couldNotFindUser';
                 } else {
-                    var numOfCredits = creditsResult.result;
+                    var numOfCredits = botUser.points;
                     messageText = session.gettext('checkCredit.response {{points}}').replace('{{points}}', numOfCredits);
                 }
 
                 session.endDialog(messageText);
-
                 sendRootMenu(session, builder);
-        }
+        }).catch(err => {
+            console.log('error in getBotUserById');
+            console.log(err);
+
+            session.endDialog('error.couldNotFindUser');
+            sendRootMenu(session, builder);
+        })
     }
 ]).triggerAction({ matches: [
     /Check your credit/i
  ]});
 
+// TODO: GetCredits - Remove the TriggerAction and attach it to the root dialog with URL as in the flowers example
+bot.dialog('GetCredits', [
+    function (session) {
+        session.say(session.gettext('getCredit.intro'));
+        dal.getDeviceByUserId(userId).then(userResult => {
+            if (!userResult) {
+                // That's the first time we encounter this user. Share the legal notice!
+                session.say(session.gettext('general.legalNotice'));
 
+                // User is missing. Fetch details and save to database
+                // TODO: Use the equivalent for bot.getUserDetails
+                // This is the source code:
+                    // bot.getUserDetails(session.userProfile)
+                    // .then(userDetails => {
+                    //     let deviceType = extractDeviceTypeFromUserDetails(userDetails.primary_device_os);
+                    //     dal.saveDeviceUserToDatabase(userId, deviceType);
+                    //     sendUserOfferWallUrl(session, deviceType, userId);
+                    // }).catch(function(e) {
+                    //     console.error('Failed to extract with error: ' + e); 
+                    //     let fallbackDeviceType = consts.DEVICE_TYPE_DESKTOP;
+                    //     dal.saveDeviceUserToDatabase(userId, fallbackDeviceType);
+                    //     sendUserOfferWallUrl(session, fallbackDeviceType, userId);
+                    // });
+
+                // Until we have the bot.getUserDetails function, we can use this:
+                console.log('error in getDeviceByUserId');
+                console.log('DeviceUser does not exist');
+                let fallbackDeviceType = consts.DEVICE_TYPE_DESKTOP;
+                dal.saveDeviceUserToDatabase(userId, fallbackDeviceType);
+                sendUserOfferWallUrl(session, fallbackDeviceType, userId);
+            } else {
+                sendUserOfferWallUrl(session, userResult.type, userId);                
+            }
+        }).catch(err => {
+            sendUserOfferWallUrl(session, consts.DEVICE_TYPE_DESKTOP, userId);
+            console.log('error in getDeviceByUserId');
+            console.log(err);            
+        });
+}
+]).triggerAction({ matches: [
+/Get free credit/i
+]});
+
+function sendUserOfferWallUrl(session, deviceType, userId) {
+    session.send(offerWallLinkForUser(deviceType, userId));
+}
+
+function extractDeviceTypeFromUserDetails(deviceTypeString) {
+    if (!deviceTypeString) {
+        return consts.DEVICE_TYPE_DESKTOP;
+    }
+
+    let parsedType = consts.DEVICE_TYPE_DESKTOP;
+    let compareModel = deviceTypeString.toLowerCase();
+    if (compareModel.includes('android')) {
+        parsedType = consts.DEVICE_TYPE_ANDROID;
+    }
+    else if (compareModel.includes('ios')) {
+        parsedType = consts.DEVICE_TYPE_APPLE;
+    }
+
+    return parsedType;
+}
+
+function offerWallLinkForUser(deviceType, userId) {
+    let appId;
+    if (deviceType === consts.DEVICE_TYPE_ANDROID) {
+        appId = consts.SPONSOR_PAY_APP_ID_ANDROID;
+    }
+    else if (deviceType === consts.DEVICE_TYPE_APPLE) {
+        appId = consts.SPONSOR_PAY_APP_ID_APPLE;
+    }
+    else { // Desktop or unknown
+        appId = consts.SPONSOR_PAY_APP_ID_DESKTOP;
+    }
+
+    return `http://iframe.sponsorpay.com/?appid=${appId}&uid=${userId}`;
+}
  
 
 // Enable Conversation Data persistence
