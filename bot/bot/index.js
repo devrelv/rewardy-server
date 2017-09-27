@@ -39,13 +39,15 @@ function sendRootMenu(session, builder) {
 
 var bot = new builder.UniversalBot(connector, function (session) {
 
+    session.beginDialog('login:/');
+    /*
     var welcomeCard = new builder.HeroCard(session)
         .title('welcome_title')
         .subtitle('welcome_subtitle')
         .buttons(createRootButtons(session, builder));
 
     session.send(new builder.Message(session)
-        .addAttachment(welcomeCard));
+        .addAttachment(welcomeCard));*/
 });
 
 // TODO: CheckCredit - Remove the TriggerAction and attach it to the root dialog with URL as in the flowers example
@@ -176,6 +178,7 @@ bot.library(require('./dialogs/details').createLibrary());
 bot.library(require('./dialogs/checkout').createLibrary());
 bot.library(require('./dialogs/settings').createLibrary());
 bot.library(require('./dialogs/help').createLibrary());
+bot.library(require('./dialogs/login').createLibrary());
 
 // Validators
 bot.library(require('./validators').createLibrary());
