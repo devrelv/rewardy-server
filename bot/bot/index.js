@@ -1,42 +1,173 @@
 var builder = require('botbuilder');
 var siteUrl = require('./site-url');
 var dal = require('./dal');
+var consts = require('./const');
 
 var connector = new builder.ChatConnector({
     appId: process.env.MICROSOFT_APP_ID,
     appPassword: process.env.MICROSOFT_APP_PASSWORD
 });
 
+var userId = '1234'; // TODO: get the real userId - Replace this variable with the user object (the id will be inside)
+
 // Welcome Dialog
 var MainOptions = {
-    Shop: 'main_options_order_flowers',
-    Support: 'main_options_talk_to_support'
+    CheckCredit: 'keyboard.root.checkCredit',
+    Redeem: 'keyboard.root.redeem',
+    InviteFriends: 'keyboard.root.inviteFriends',
+    GetCredit: 'keyboard.root.getCredit'
 };
 
-var bot = new builder.UniversalBot(connector, function (session) {
+function createRootButtons(session, builder) {
+    return [
+        builder.CardAction.imBack(session, session.gettext(MainOptions.CheckCredit), MainOptions.CheckCredit),
+        builder.CardAction.imBack(session, session.gettext(MainOptions.GetCredit), MainOptions.GetCredit),
+        builder.CardAction.imBack(session, session.gettext(MainOptions.InviteFriends), MainOptions.InviteFriends),
+        builder.CardAction.imBack(session, session.gettext(MainOptions.Redeem), MainOptions.Redeem)
+    ];
+}
 
-    if (localizedRegex(session, [MainOptions.Shop]).test(session.message.text)) {
-        // dal.saveUsername('test');
-        // Order Flowers
-        return session.beginDialog('shop:/');
-    }
 
-    var welcomeCard = new builder.HeroCard(session)
-        .title('welcome_title')
-        .subtitle('welcome_subtitle')
-        .images([
-            new builder.CardImage(session)
-                .url('https://placeholdit.imgix.net/~text?txtsize=56&txt=Contoso%20Flowers&w=640&h=330')
-                .alt('contoso_flowers')
-        ])
-        .buttons([
-            builder.CardAction.imBack(session, session.gettext(MainOptions.Shop), MainOptions.Shop),
-            builder.CardAction.imBack(session, session.gettext(MainOptions.Support), MainOptions.Support)
-        ]);
+function sendRootMenu(session, builder) {
+    var card = new builder.HeroCard()
+        .title(session.gettext('main.root.title'))
+        .buttons(createRootButtons(session, builder));
 
     session.send(new builder.Message(session)
-        .addAttachment(welcomeCard));
-});
+        .addAttachment(card));
+}
+
+var bot = new builder.UniversalBot(connector, [
+    function (session, args, next) {
+        // We already have email. Just skip to the root menu
+        if (session.userData.sender && session.userData.sender.email) {
+            return next();
+        }
+
+        return session.beginDialog('login:/');
+    },
+    function (session, args, next) {
+        var welcomeCard = new builder.HeroCard(session)
+            .title('welcome_title')
+            .subtitle('welcome_subtitle')
+            .buttons(createRootButtons(session, builder));
+
+        session.send(new builder.Message(session)
+            .addAttachment(welcomeCard));
+    }
+
+]);
+
+// TODO: CheckCredit - Remove the TriggerAction and attach it to the root dialog with URL as in the flowers example
+bot.dialog('CheckCredit', [
+        function (session) {
+            session.say(session.gettext('checkCredit.loading'));
+
+            // getting the credits
+            dal.getBotUserById(userId).then(botUser => {
+                messageText = '';
+                if (!botUser) {
+                    console.log('Could not find the bot user value in the database');
+                    dal.saveUserToDatabase(userId);
+                    messageText = 'error.couldNotFindUser';
+                } else {
+                    var numOfCredits = botUser.points;
+                    messageText = session.gettext('checkCredit.response {{points}}').replace('{{points}}', numOfCredits);
+                }
+
+                session.endDialog(messageText);
+                sendRootMenu(session, builder);
+        }).catch(err => {
+            console.log('error in getBotUserById');
+            console.log(err);
+
+            session.endDialog('error.couldNotFindUser');
+            sendRootMenu(session, builder);
+        })
+    }
+]).triggerAction({ matches: [
+    /Check your credit/i
+ ]});
+
+// TODO: GetCredits - Remove the TriggerAction and attach it to the root dialog with URL as in the flowers example
+bot.dialog('GetCredits', [
+    function (session) {
+        session.say(session.gettext('getCredit.intro'));
+        dal.getDeviceByUserId(userId).then(userResult => {
+            if (!userResult) {
+                // That's the first time we encounter this user. Share the legal notice!
+                session.say(session.gettext('general.legalNotice'));
+
+                // User is missing. Fetch details and save to database
+                // TODO: Use the equivalent for bot.getUserDetails
+                // This is the source code:
+                    // bot.getUserDetails(session.userProfile)
+                    // .then(userDetails => {
+                    //     let deviceType = extractDeviceTypeFromUserDetails(userDetails.primary_device_os);
+                    //     dal.saveDeviceUserToDatabase(userId, deviceType);
+                    //     sendUserOfferWallUrl(session, deviceType, userId);
+                    // }).catch(function(e) {
+                    //     console.error('Failed to extract with error: ' + e); 
+                    //     let fallbackDeviceType = consts.DEVICE_TYPE_DESKTOP;
+                    //     dal.saveDeviceUserToDatabase(userId, fallbackDeviceType);
+                    //     sendUserOfferWallUrl(session, fallbackDeviceType, userId);
+                    // });
+
+                // Until we have the bot.getUserDetails function, we can use this:
+                console.log('error in getDeviceByUserId');
+                console.log('DeviceUser does not exist');
+                let fallbackDeviceType = consts.DEVICE_TYPE_DESKTOP;
+                dal.saveDeviceUserToDatabase(userId, fallbackDeviceType);
+                sendUserOfferWallUrl(session, fallbackDeviceType, userId);
+            } else {
+                sendUserOfferWallUrl(session, userResult.type, userId);                
+            }
+        }).catch(err => {
+            sendUserOfferWallUrl(session, consts.DEVICE_TYPE_DESKTOP, userId);
+            console.log('error in getDeviceByUserId');
+            console.log(err);            
+        });
+}
+]).triggerAction({ matches: [
+/Get free credit/i
+]});
+
+function sendUserOfferWallUrl(session, deviceType, userId) {
+    session.send(offerWallLinkForUser(deviceType, userId));
+}
+
+function extractDeviceTypeFromUserDetails(deviceTypeString) {
+    if (!deviceTypeString) {
+        return consts.DEVICE_TYPE_DESKTOP;
+    }
+
+    let parsedType = consts.DEVICE_TYPE_DESKTOP;
+    let compareModel = deviceTypeString.toLowerCase();
+    if (compareModel.includes('android')) {
+        parsedType = consts.DEVICE_TYPE_ANDROID;
+    }
+    else if (compareModel.includes('ios')) {
+        parsedType = consts.DEVICE_TYPE_APPLE;
+    }
+
+    return parsedType;
+}
+
+function offerWallLinkForUser(deviceType, userId) {
+    let appId;
+    if (deviceType === consts.DEVICE_TYPE_ANDROID) {
+        appId = consts.SPONSOR_PAY_APP_ID_ANDROID;
+    }
+    else if (deviceType === consts.DEVICE_TYPE_APPLE) {
+        appId = consts.SPONSOR_PAY_APP_ID_APPLE;
+    }
+    else { // Desktop or unknown
+        appId = consts.SPONSOR_PAY_APP_ID_DESKTOP;
+    }
+
+    return `http://iframe.sponsorpay.com/?appid=${appId}&uid=${userId}`;
+}
+ 
 
 // Enable Conversation Data persistence
 bot.set('persistConversationData', true);
@@ -55,30 +186,10 @@ bot.library(require('./dialogs/details').createLibrary());
 bot.library(require('./dialogs/checkout').createLibrary());
 bot.library(require('./dialogs/settings').createLibrary());
 bot.library(require('./dialogs/help').createLibrary());
+bot.library(require('./dialogs/login').createLibrary());
 
 // Validators
 bot.library(require('./validators').createLibrary());
-
-// Trigger secondary dialogs when 'settings' or 'support' is called
-bot.use({
-    botbuilder: function (session, next) {
-        var text = session.message.text;
-
-        var settingsRegex = localizedRegex(session, ['main_options_settings']);
-        var supportRegex = localizedRegex(session, ['main_options_talk_to_support', 'help']);
-
-        if (settingsRegex.test(text)) {
-            // interrupt and trigger 'settings' dialog
-            return session.beginDialog('settings:/');
-        } else if (supportRegex.test(text)) {
-            // interrupt and trigger 'help' dialog
-            return session.beginDialog('help:/');
-        }
-
-        // continue normal flow
-        next();
-    }
-});
 
 // Send welcome when conversation with bot is started, by initiating the root dialog
 bot.on('conversationUpdate', function (message) {

@@ -103,8 +103,8 @@ let ReferralUser = mongoose.model('ReferralUserSchema', ReferralUserSchema);
 function saveUserToDatabase(userId, language) {
     let newBotUser = new BotUser({
         user_id: userId,
-        points: defaultStartPoints,
-        language: language || defaultUserLanguage
+        points: consts.defaultStartPoints,
+        language: language || consts.defaultUserLanguage
     });
 
     newBotUser.save(function(err) {
@@ -127,8 +127,52 @@ function saveDeviceUserToDatabase(userId, deviceType) {
     });
 }
 
+function getBotUserById(userId, callback) {
+    return new Promise((resolve, reject)=>{
+        BotUser.findOne({
+            'user_id': userId
+        }, function(err, botUser) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(botUser);
+            } 
+        });
+    });
+    
+}
+
+function getDeviceByUserId(userId, callback) {
+    return new Promise((resolve, reject) => {
+        DeviceUser.findOne({
+            'user_id': userId
+        }, function(err, botUser) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(botUser);
+            } 
+        });
+    });
+}
+
+function saveDeviceUserToDatabase(userId, deviceType){
+    let newDeviceUser = new DeviceUser({
+        user_id: userId,
+        type: deviceType
+    });
+
+    newDeviceUser.save(function(err) {
+        if (err) {
+            console.log(err);
+        }
+    });
+}
+
 module.exports = {
     saveUserToDatabase: saveUserToDatabase,
-    saveUserToDatabase: saveUserToDatabase,
+    saveDeviceUserToDatabase: saveDeviceUserToDatabase,
+    getBotUserById: getBotUserById,
+    getDeviceByUserId: getDeviceByUserId,
     saveDeviceUserToDatabase: saveDeviceUserToDatabase,
 };

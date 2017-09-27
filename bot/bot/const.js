@@ -19,5 +19,7 @@ module.exports = {
    
     SPONSOR_PAY_APP_ID_DESKTOP : '104180',
     SPONSOR_PAY_APP_ID_APPLE : '104295',
-    SPONSOR_PAY_APP_ID_ANDROID : '104296'
+    SPONSOR_PAY_APP_ID_ANDROID : '104296',
+
+    defaultStartPoints: 100,
 };
