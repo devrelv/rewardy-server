@@ -37,18 +37,26 @@ function sendRootMenu(session, builder) {
         .addAttachment(card));
 }
 
-var bot = new builder.UniversalBot(connector, function (session) {
+var bot = new builder.UniversalBot(connector, [
+    function (session, args, next) {
+        // We already have email. Just skip to the root menu
+        if (session.userData.sender && session.userData.sender.email) {
+            return next();
+        }
 
-    session.beginDialog('login:/');
-    /*
-    var welcomeCard = new builder.HeroCard(session)
-        .title('welcome_title')
-        .subtitle('welcome_subtitle')
-        .buttons(createRootButtons(session, builder));
+        return session.beginDialog('login:/');
+    },
+    function (session, args, next) {
+        var welcomeCard = new builder.HeroCard(session)
+            .title('welcome_title')
+            .subtitle('welcome_subtitle')
+            .buttons(createRootButtons(session, builder));
 
-    session.send(new builder.Message(session)
-        .addAttachment(welcomeCard));*/
-});
+        session.send(new builder.Message(session)
+            .addAttachment(welcomeCard));
+    }
+
+]);
 
 // TODO: CheckCredit - Remove the TriggerAction and attach it to the root dialog with URL as in the flowers example
 bot.dialog('CheckCredit', [
@@ -182,27 +190,6 @@ bot.library(require('./dialogs/login').createLibrary());
 
 // Validators
 bot.library(require('./validators').createLibrary());
-
-// Trigger secondary dialogs when 'settings' or 'support' is called
-bot.use({
-    botbuilder: function (session, next) {
-        var text = session.message.text;
-
-        var settingsRegex = localizedRegex(session, ['main_options_settings']);
-        var supportRegex = localizedRegex(session, ['main_options_talk_to_support', 'help']);
-
-        if (settingsRegex.test(text)) {
-            // interrupt and trigger 'settings' dialog
-            return session.beginDialog('settings:/');
-        } else if (supportRegex.test(text)) {
-            // interrupt and trigger 'help' dialog
-            return session.beginDialog('help:/');
-        }
-
-        // continue normal flow
-        next();
-    }
-});
 
 // Send welcome when conversation with bot is started, by initiating the root dialog
 bot.on('conversationUpdate', function (message) {

@@ -6,14 +6,7 @@ var utils = require('../utils');
 
 lib.dialog('/', [
     function (session) {
-        var promptMessage;
-        if (session.userData.sender && session.userData.sender.email) {
-            promptMessage = session.gettext('your_current_email', session.userData.sender.email);
-        }
-        else {
-            promptMessage = 'type_email_or_return';
-        }
-        session.send(promptMessage);
+        session.send('type_email_or_return');
         return session.beginDialog('email');
     },
     function (session, args) {
