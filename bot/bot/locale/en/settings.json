@@ -4,7 +4,7 @@
     "edit_phone": "Edit phone number",
     "edit_addresses": "Edit your addresses",
     "cancel": "Go back",
-    "type_email_or_return": "Type your email or use (B)ack to return to the menu.",
+    "type_email_or_return": "Type your email",
     "your_current_email": "This is your current email: %s.\n\nType a new email if you need to update, or use (B)ack to return to the menu.",
     "type_phone_or_return": "Type your phone number or use (B)ack to return to the menu.",
     "your_current_phone": "This is your current phone number: %s.\n\nType a new number if you need to update, or use (B)ack to return to the menu.",
