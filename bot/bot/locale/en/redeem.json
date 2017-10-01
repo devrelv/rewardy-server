@@ -1,0 +1,9 @@
+{
+    "redeem.optionLoading": "One second...We are checking your points status.",
+    "redeem.shouldBuy {{points}} {{spend}} {{keyboardPositive}} {{keyboardNegative}}": "You have {{points}}. Would you like to spend {{spend}} now? ({{keyboardPositive}}/{{keyboardNegative}})?",
+    "keyboard.redeem.yes": "Yes",
+    "keyboard.redeem.no": "No",
+    "redeem.shouldBuy.yesSelection {{option}} {{voucher}}": "You got it. Voucher code for \"{{option}}\" is \"{{voucher}}\". Enjoy!",
+    "redeem.shouldBuy.noSelection": "Sure thing! Save your points for something bigger.",
+    "redeem.notEnoughCredit {{points}} {{miss}}": "Sorry! You have {{points}}. You need {{miss}} points for this item. Invite friends or complete more offers to increase your credit."
+}
