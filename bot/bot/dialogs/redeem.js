@@ -1,49 +1,90 @@
 var builder = require('botbuilder');
 
-var lib = new builder.Library('login');
-var validators = require('../validators');
-var utils = require('../utils');
+var lib = new builder.Library('redeem');
+var Promise = require('bluebird');
+var Store = require('./store');
+
+// Helpers
+function hotelAsAttachment(hotel) {
+    return new builder.HeroCard()
+        .title(hotel.name)
+        .subtitle('%d stars. %d reviews. From $%d per night.', hotel.rating, hotel.numberOfReviews, hotel.priceStarting)
+        .images([new builder.CardImage().url(hotel.image)])
+        .buttons([
+            new builder.CardAction()
+                .title('More details')
+                .type('openUrl')
+                .value('https://www.bing.com/search?q=hotels+in+' + encodeURIComponent(hotel.location))
+        ]);
+}
+
+Date.prototype.addDays = function (days) {
+    var date = new Date(this.valueOf());
+    date.setDate(date.getDate() + days);
+    return date;
+};
+
 // https://github.com/Microsoft/BotBuilder-Samples/tree/master/Node/cards-CarouselCards
 lib.dialog('/', [
+    // Destination
     function (session) {
-        session.send('type_email_or_return');
-        return session.beginDialog('email');
+        session.send('Welcome to the Hotels finder!');
+        builder.Prompts.text(session, 'Please enter your destination');
     },
-    function (session, args) {
-        return session.endDialog();
+    function (session, results, next) {
+        session.dialogData.destination = results.response;
+        session.send('Looking for hotels in %s', results.response);
+        next();
+    },
+
+    // Check-in
+    function (session) {
+        builder.Prompts.time(session, 'When do you want to check in?');
+    },
+    function (session, results, next) {
+        session.dialogData.checkIn = results.response.resolution.start;
+        next();
+    },
+
+    // Nights
+    function (session) {
+        builder.Prompts.number(session, 'How many nights do you want to stay?');
+    },
+    function (session, results, next) {
+        session.dialogData.nights = results.response;
+        next();
+    },
+
+    // Search...
+    function (session) {
+        var destination = session.dialogData.destination;
+        var checkIn = new Date(session.dialogData.checkIn);
+        var checkOut = checkIn.addDays(session.dialogData.nights);
+
+        session.send(
+            'Ok. Searching for Hotels in %s from %d/%d to %d/%d...',
+            destination,
+            checkIn.getMonth() + 1, checkIn.getDate(),
+            checkOut.getMonth() + 1, checkOut.getDate());
+
+        // Async search
+        Store
+            .searchVouchers(destination, checkIn, checkOut)
+            .then(function (hotels) {
+                // Results
+                session.send('I found in total %d hotels for your dates:', hotels.length);
+
+                var message = new builder.Message()
+                    .attachmentLayout(builder.AttachmentLayout.carousel)
+                    .attachments(hotels.map(hotelAsAttachment));
+
+                session.send(message);
+
+                // End
+                session.endDialog();
+            });
     }
 ]);
-
-// Email edit
-lib.dialog('email', editOptionDialog(
-    function (input) { return validators.EmailRegex.test(input); },
-    'invalid_email_address',
-    function (session, email) { saveSenderSetting(session, 'email', email); }));
-
-function saveSenderSetting(session, key, value) {
-    session.userData.sender = session.userData.sender || {};
-    session.userData.sender[key] = value;
-}
-
-function editOptionDialog(validationFunc, invalidMessage, saveFunc) {
-    return new builder.SimpleDialog(function (session, args, next) {
-        // check dialog was just forwarded
-        if (!session.dialogData.loop) {
-            session.dialogData.loop = true;
-            session.sendBatch();
-            return;
-        }
-
-        if (!validationFunc(session.message.text)) {
-            // invalid
-            session.send(invalidMessage);
-        } else {
-            // save
-            saveFunc(session, session.message.text);
-            session.endDialogWithResult({ updated: true });
-        }
-    });
-}
 
 // Export createLibrary() function
 module.exports.createLibrary = function () {

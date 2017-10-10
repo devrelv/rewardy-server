@@ -27,7 +27,6 @@ function createRootButtons(session, builder) {
     ];
 }
 
-
 function sendRootMenu(session, builder) {
     var card = new builder.HeroCard()
         .title(session.gettext('main.root.title'))
@@ -47,6 +46,12 @@ var bot = new builder.UniversalBot(connector, [
         return session.beginDialog('login:/');
     },
     function (session, args, next) {
+
+        if (localizedRegex(session, [MainOptions.Redeem]).test(session.message.text)) {
+            // Order Flowers
+            return session.beginDialog('redeem:/');
+        }
+
         var welcomeCard = new builder.HeroCard(session)
             .title('welcome_title')
             .subtitle('welcome_subtitle')
@@ -187,6 +192,7 @@ bot.library(require('./dialogs/checkout').createLibrary());
 bot.library(require('./dialogs/settings').createLibrary());
 bot.library(require('./dialogs/help').createLibrary());
 bot.library(require('./dialogs/login').createLibrary());
+bot.library(require('./dialogs/redeem').createLibrary());
 
 // Validators
 bot.library(require('./validators').createLibrary());
