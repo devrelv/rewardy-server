@@ -1,7 +1,7 @@
 var builder = require('botbuilder');
-var siteUrl = require('./site-url');
-var dal = require('./dal');
-var consts = require('./const');
+var siteUrl = require('./core/site-url');
+var dal = require('./core/dal');
+var consts = require('./core/const');
 
 var connector = new builder.ChatConnector({
     appId: process.env.MICROSOFT_APP_ID,
@@ -173,7 +173,7 @@ bot.library(require('./login').createLibrary());
 bot.library(require('./redeem').createLibrary());
 
 // Validators
-bot.library(require('./validators').createLibrary());
+bot.library(require('./core/validators').createLibrary());
 
 // Send welcome when conversation with bot is started, by initiating the root dialog
 bot.on('conversationUpdate', function (message) {

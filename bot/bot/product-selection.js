@@ -1,8 +1,8 @@
 var _ = require('lodash');
 var builder = require('botbuilder');
 var products = require('../services/products');
-var SimpleWaterfallDialog = require('./SimpleWaterfallDialog');
-var CarouselPagination = require('./CarouselPagination');
+var SimpleWaterfallDialog = require('./simple-waterfall-dialog');
+var CarouselPagination = require('./carousel-pagination');
 
 var carouselOptions = {
     showMoreTitle: 'title_show_more',

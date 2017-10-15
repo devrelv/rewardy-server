@@ -1,7 +1,7 @@
 var util = require('util');
 var builder = require('botbuilder');
-var botUtils = require('./utils');
-var siteUrl = require('./site-url');
+var botUtils = require('./core/utils');
+var siteUrl = require('./core/site-url');
 var orderService = require('../services/orders');
 
 // Checkout flow

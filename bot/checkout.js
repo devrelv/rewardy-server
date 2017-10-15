@@ -4,7 +4,7 @@ var router = express.Router();
 
 var orderService = require('./services/orders');
 var bot = require('./bot');
-var botUtils = require('./bot/utils');
+var botUtils = require('./bot/core/utils');
 
 /* GET Checkout */
 router.get('/', function (req, res, next) {

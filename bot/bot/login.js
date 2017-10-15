@@ -1,10 +1,10 @@
 var builder = require('botbuilder');
 
 var lib = new builder.Library('login');
-var validators = require('./validators');
-var utils = require('./utils');
-var dal = require('./dal');
-var consts = require('./const');
+var validators = require('./core/validators');
+var utils = require('./core/utils');
+var dal = require('./core/dal');
+var consts = require('./core/const');
 var uuid = require('uuid');
 
 
