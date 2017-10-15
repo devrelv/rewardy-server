@@ -1,25 +1,21 @@
-var Promise = require('bluebird');
+const Promise = require('bluebird');
+const Voucher = require('./core/voucher');
+const fs = require('fs');
+const path = require('path');
+var _ = require('lodash');
 
 module.exports = {
-	searchVouchers: function (destination, checkInDate, checkOutDate) {
+	fetchVouchers: function () {
 		return new Promise(function (resolve) {
+			let vouchersJson = fs.readFileSync(path.join(__dirname, '../data') + '/vouchers.json', { encoding: 'utf8' });
+			let loadedVouchers = JSON.parse(vouchersJson);
 
-			// Filling the voucher results manually just for demo purposes. TODO: Use our server for this.
-			var vouchers = [];
-			for (var i = 1; i <= 5; i++) {
-				vouchers.push({
-					
-					name: destination + ' Hotel ' + i,
-					location: destination,
-					rating: Math.ceil(Math.random() * 5),
-					numberOfReviews: Math.floor(Math.random() * 5000) + 1,
-					priceStarting: Math.floor(Math.random() * 450) + 80,
-					image: 'https://placeholdit.imgix.net/~text?txtsize=35&txt=Hotel+' + i + '&w=500&h=260'
+			let vouchers = _.forEach(loadedVouchers)
+				.map(function (loadedVoucher) {
+					return new Voucher(loadedVoucher.id, loadedVoucher.title, loadedVoucher.description, loadedVoucher.imageUrl, loadedVoucher.points);
 				});
-			}
-
-			// complete promise with a timer to simulate async response
-			setTimeout(function () { resolve(vouchers); }, 1000);
+			
+			resolve(vouchers);
 		});
 	}
 };

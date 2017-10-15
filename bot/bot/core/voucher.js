@@ -6,7 +6,7 @@ function Voucher(voucherId, title, description, imageUrl, points) {
     this.description = description;
     this.imageUrl = imageUrl;
     this.points = points;
-
+    
     Object.freeze(this);
 }
 

@@ -1,0 +1,30 @@
+[
+	{
+		"id": "amazon",
+		"title": "$10 Gift Card",
+		"description": "Online Shopping for Electronics, Apparel, Books & more",
+		"imageUrl": "https://github.com/devrelv/vale/blob/master/redeem_amazon.png?raw=true",
+		"points": 1000
+	},
+	{
+		"id": "xbox",
+		"title": "$10 Gift Card",
+		"description": "Games and entertainment on Xbox or Windows",
+		"imageUrl": "https://github.com/devrelv/vale/blob/master/redeem_xbox.png?raw=true",
+		"points": 1000
+	},
+	{
+		"id": "itunes",
+		"title": "$10 Gift Card",
+		"description": "App Store, iTunes Store and even iBooks Store",
+		"imageUrl": "https://github.com/devrelv/vale/blob/master/redeem_itunes.png?raw=true",
+		"points": 1000
+	},
+	{
+		"id": "google",
+		"title": "$10 Gift Card",
+		"description": "Music, movies, TV shows, books, and Android apps and games",
+		"imageUrl": "https://github.com/devrelv/vale/blob/master/redeem_google.png?raw=true",
+		"points": 1000
+	}
+]
