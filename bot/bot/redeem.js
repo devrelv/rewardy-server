@@ -12,8 +12,8 @@ function voucherAsAttachment(voucher) {
         .images([new builder.CardImage().url(voucher.imageUrl)])
         .buttons([
             new builder.CardAction()
-                .title('More details') // TODO: Switch to action
-                .type('openUrl')
+                .title(voucher.cta) // TODO: Switch to action
+                .type('postBack')
                 .value('https://www.bing.com/search?q=hotels+in+' + encodeURIComponent(voucher.points))
         ]);
 }
