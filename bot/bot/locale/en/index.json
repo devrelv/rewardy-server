@@ -15,5 +15,6 @@
     "error.couldNotFindUser" : "That is weird! We could not find your user details. Please leave the bot and try again.",
     "getCredit.intro": "Please check out our offer wall 👇",
     "general.legalNotice" : "You should know and agree that whenever you click the following url, you will be transferred to a website operated by a third party for which Viber is not liable, and Viber will provide such website with your user id, and your actions on such website are subject to such third party's terms of use and privacy policy, to which you agree by making the action. The coupons you redeem may be limited by certain terms appearing on the coupon.",
-    "error_occured_try_again" : "Ohh no.. error occured. Please try again"
+    "error_occured_try_again" : "Ohh no.. error occured. Please try again",
+    "general.type_to_continue": "Type 'help' for assistence or anything else to get back to the menu"
 }
