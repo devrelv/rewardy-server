@@ -32,6 +32,15 @@ let BotUserSchema = new Schema({
         required: true,
         unique: true
     },
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    name: {
+        type: String,
+        required: true
+    },
     language: {
         type: String,
         required: true,
@@ -100,11 +109,13 @@ let ReferralUser = mongoose.model('ReferralUserSchema', ReferralUserSchema);
 //     return;
 // }
 
-function saveUserToDatabase(userId, language) {
+function saveUserToDatabase(userDetails, language) {
     let newBotUser = new BotUser({
-        user_id: userId,
+        user_id: userDetails.userId,
+        email: userDetails.email,
+        name: userDetails.name,
         points: consts.defaultStartPoints,
-        language: language || consts.defaultUserLanguage
+        language: userDetails.language || consts.defaultUserLanguage
     });
 
     newBotUser.save(function(err) {
@@ -169,10 +180,25 @@ function saveDeviceUserToDatabase(userId, deviceType){
     });
 }
 
+function getBotUserByEmail(email) {
+    return new Promise((resolve, reject) => {
+        BotUser.findOne({
+            'email': email
+        }, function(err, botUser) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(botUser);
+            } 
+        });
+    });
+}
+
 module.exports = {
     saveUserToDatabase: saveUserToDatabase,
     saveDeviceUserToDatabase: saveDeviceUserToDatabase,
     getBotUserById: getBotUserById,
     getDeviceByUserId: getDeviceByUserId,
     saveDeviceUserToDatabase: saveDeviceUserToDatabase,
+    getBotUserByEmail: getBotUserByEmail,
 };

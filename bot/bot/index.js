@@ -8,8 +8,6 @@ var connector = new builder.ChatConnector({
     appPassword: process.env.MICROSOFT_APP_PASSWORD
 });
 
-var userId = '1234'; // TODO: get the real userId - Replace this variable with the user object (the id will be inside)
-
 // Welcome Dialog
 var MainOptions = {
     CheckCredit: 'keyboard.root.checkCredit',
@@ -65,40 +63,20 @@ var bot = new builder.UniversalBot(connector, [
 
 // TODO: CheckCredit - Remove the TriggerAction and attach it to the root dialog with URL as in the flowers example
 bot.dialog('CheckCredit', [
-        function (session) {
-            session.say(session.gettext('checkCredit.loading'));
-
-            // getting the credits
-            dal.getBotUserById(userId).then(botUser => {
-                messageText = '';
-                if (!botUser) {
-                    console.log('Could not find the bot user value in the database');
-                    dal.saveUserToDatabase(userId);
-                    messageText = 'error.couldNotFindUser';
-                } else {
-                    var numOfCredits = botUser.points;
-                    messageText = session.gettext('checkCredit.response {{points}}').replace('{{points}}', numOfCredits);
-                }
-
-                session.endDialog(messageText);
-                sendRootMenu(session, builder);
-        }).catch(err => {
-            console.log('error in getBotUserById');
-            console.log(err);
-
-            session.endDialog('error.couldNotFindUser');
-            sendRootMenu(session, builder);
-        })
+    function (session) {
+        session.say(session.gettext('checkCredit.loading'));
+        messageText = session.gettext('checkCredit.response {{points}}').replace('{{points}}', session.userData.sender.points);
+        session.say(messageText);
     }
 ]).triggerAction({ matches: [
     /Check your credit/i
  ]});
 
-// TODO: GetCredits - Remove the TriggerAction and attach it to the root dialog with URL as in the flowers example
-bot.dialog('GetCredits', [
+// TODO: GetMoreCredits - Remove the TriggerAction and attach it to the root dialog with URL as in the flowers example
+bot.dialog('GetMoreCredits', [
     function (session) {
         session.say(session.gettext('getCredit.intro'));
-        dal.getDeviceByUserId(userId).then(userResult => {
+        dal.getDeviceByUserId(session.userData.sender.userId).then(userResult => {
             if (!userResult) {
                 // That's the first time we encounter this user. Share the legal notice!
                 session.say(session.gettext('general.legalNotice'));
@@ -122,13 +100,13 @@ bot.dialog('GetCredits', [
                 console.log('error in getDeviceByUserId');
                 console.log('DeviceUser does not exist');
                 let fallbackDeviceType = consts.DEVICE_TYPE_DESKTOP;
-                dal.saveDeviceUserToDatabase(userId, fallbackDeviceType);
-                sendUserOfferWallUrl(session, fallbackDeviceType, userId);
+                dal.saveDeviceUserToDatabase(session.userData.sender.userId, fallbackDeviceType);
+                sendUserOfferWallUrl(session, fallbackDeviceType, session.userData.sender.userId);
             } else {
-                sendUserOfferWallUrl(session, userResult.type, userId);                
+                sendUserOfferWallUrl(session, userResult.type, session.userData.sender.userId);                
             }
         }).catch(err => {
-            sendUserOfferWallUrl(session, consts.DEVICE_TYPE_DESKTOP, userId);
+            sendUserOfferWallUrl(session, consts.DEVICE_TYPE_DESKTOP, session.userData.sender.userId);
             console.log('error in getDeviceByUserId');
             console.log(err);            
         });
