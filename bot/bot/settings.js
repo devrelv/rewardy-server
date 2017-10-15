@@ -1,7 +1,7 @@
 var util = require('util');
 var builder = require('botbuilder');
-var validators = require('../validators');
-var utils = require('../utils');
+var validators = require('./validators');
+var utils = require('./utils');
 
 var SettingChoice = {
     Email: 'edit_email',

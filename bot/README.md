@@ -268,7 +268,7 @@ This helper provides an easy way to display results to the user, handle paginati
 
 ````JavaScript
 var Products = require('../services/products');
-var CarouselPagination = require('./dialogs/CarouselPagination');
+var CarouselPagination = require('./CarouselPagination');
 var DefaultCategory = 'Flower 2';
 
 bot.dialog('/', [

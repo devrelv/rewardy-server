@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var builder = require('botbuilder');
-var products = require('../../services/products');
+var products = require('../services/products');
 var SimpleWaterfallDialog = require('./SimpleWaterfallDialog');
 var CarouselPagination = require('./CarouselPagination');
 

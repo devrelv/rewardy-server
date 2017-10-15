@@ -1,8 +1,8 @@
 var util = require('util');
 var builder = require('botbuilder');
-var botUtils = require('../utils');
-var siteUrl = require('../site-url');
-var orderService = require('../../services/orders');
+var botUtils = require('./utils');
+var siteUrl = require('./site-url');
+var orderService = require('../services/orders');
 
 // Checkout flow
 var RestartMessage = 'restart';

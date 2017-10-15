@@ -162,15 +162,15 @@ bot.set('localizerSettings', {
 });
 
 // Sub-Dialogs
-bot.library(require('./dialogs/shop').createLibrary());
-bot.library(require('./dialogs/product-selection').createLibrary());
-bot.library(require('./dialogs/delivery').createLibrary());
-bot.library(require('./dialogs/details').createLibrary());
-bot.library(require('./dialogs/checkout').createLibrary());
-bot.library(require('./dialogs/settings').createLibrary());
-bot.library(require('./dialogs/help').createLibrary());
-bot.library(require('./dialogs/login').createLibrary());
-bot.library(require('./dialogs/redeem').createLibrary());
+bot.library(require('./shop').createLibrary());
+bot.library(require('./product-selection').createLibrary());
+bot.library(require('./delivery').createLibrary());
+bot.library(require('./details').createLibrary());
+bot.library(require('./checkout').createLibrary());
+bot.library(require('./settings').createLibrary());
+bot.library(require('./help').createLibrary());
+bot.library(require('./login').createLibrary());
+bot.library(require('./redeem').createLibrary());
 
 // Validators
 bot.library(require('./validators').createLibrary());
