@@ -2,11 +2,16 @@ var builder = require('botbuilder');
 var siteUrl = require('./core/site-url');
 var dal = require('./core/dal');
 var consts = require('./core/const');
+var mailSender = require('./core/mail-sender.js');
 
 var connector = new builder.ChatConnector({
     appId: process.env.MICROSOFT_APP_ID,
     appPassword: process.env.MICROSOFT_APP_PASSWORD
 });
+
+// Mail sending tests
+// mailSender.sendCustomMail('yaari.tal@gmail.com', 'Test Mail', 'test mail', '<b>Test</b> Mail');
+// mailSender.sendTemplateMail(consts.MAIL_TEMPLATE_WELCOME, 'yaari.tal@gmail.com', [{key: '%NAME%', value: 'Tal'}]);
 
 // Welcome Dialog
 var MainOptions = {

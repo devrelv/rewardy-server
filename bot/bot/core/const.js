@@ -22,4 +22,8 @@ module.exports = {
     SPONSOR_PAY_APP_ID_ANDROID : '104296',
 
     defaultStartPoints: 100,
+
+    MAIL_TEMPLATE_WELCOME: 'welcome_mail',
+    MAIL_TEMPLATE_REDEEM_REQUEST: 'redeem_request',
+    MAIL_TEMPLATE_REDEEM_HELP_QUESTION: 'help_question'
 };
