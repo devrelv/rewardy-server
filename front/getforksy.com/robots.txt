@@ -1,8 +1,0 @@
-User-agent: *
-Allow: /$
-Allow: /apple-icon.png
-Allow: /i/fb-sharing.png
-Allow: /coach
-Allow: /privacy.html
-Allow: /terms.html
-Disallow: /*
