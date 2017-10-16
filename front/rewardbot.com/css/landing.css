@@ -2,7 +2,7 @@
 @import url("https://fonts.googleapis.com/css?family=Roboto:400,500,700");
 @font-face {
     font-family: 'MuseoSansCyrl-900';
-    src: url('../fonts/MuseoSansCyrl-900.eot?') format('embedded-opentype'),
+    src: url('../fonts/MuseoSansCyrl-900.eot') format('embedded-opentype'),
          url('../fonts/MuseoSansCyrl-900.woff') format('woff'), 
          url('../fonts/MuseoSansCyrl-900.ttf')  format('truetype'), 
          url('../fonts/MuseoSansCyrl-900.svg') format('svg');
