@@ -2,6 +2,7 @@ import { version } from '../../package.json';
 import { Router } from 'express';
 
 const request = require('request');
+const monetizationHandler = require('./monetization-handler');
 
 export default ({ config, db }) => {
 
@@ -9,6 +10,10 @@ export default ({ config, db }) => {
 
 	api.get('/', (req, res) => {
 		res.json({ version });
+	});
+	api.get('/updateAllCredits', (req, res) => {
+		monetizationHandler.updateAllCredits(db);
+		res.send("Done");
 	});
 
 	return api;

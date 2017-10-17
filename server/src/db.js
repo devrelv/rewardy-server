@@ -1,4 +1,24 @@
+const dal = require('./dal')
+
 export default callback => {
-	// connect to a database if needed, then pass it to `callback`:
-	callback();
+    dal.openConnection();
+	callback(dal);
 }
+
+// export function getAllMonetizationPartners() {
+// 	return new Promise((resolve, reject) => {
+//         MonetizationPartner.find({}, function(err, data) {
+//             if (err) {
+//                 reject(err);
+//             } else {
+//                 resolve(data);
+//             } 
+//         });
+//     });
+// }
+
+// module.exports = {
+// 	getAllMonetizationPartners: getAllMonetizationPartners
+// }
+
+
