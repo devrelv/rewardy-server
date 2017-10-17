@@ -1205,31 +1205,3 @@
   });
 
 }());
-
-/**
- * ----------------------------------------------------------------------
- * Webflow: Interactions: Init
- */
-Webflow.require('ix').init([
-    {"slug":"main-animation","name":"Main Animation","value":{"style":{"title":"Hide That"},"triggers":[{"type":"scroll", "preload":true,"loopA":true,"stepsA":[
-        {"wait":100,"opacity":1,"transition":"opacity 500ms ease 0ms","x":"0px","y":"262px","z":"0px"},
-        {"wait":1800,"transition":"transform 500ms ease 0ms","x":"0px","y":"155px","z":"0px"},
-        {"wait":3600,"transition":"transform 500ms ease 0ms","x":"0px","y":"0px","z":"0px"},
-        {"wait":3600,"transition":"transform 500ms ease 0ms","x":"-230px","y":"0px","z":"0px"},
-        {"wait":3600,"transition":"transform 500ms ease 0ms","x":"-460px","y":"0px","z":"0px"},
-        {"wait":400,"opacity":0,"transition":"opacity 500ms ease 0ms","x":"-460px","y":"0px","z":"0px"},
-        {"x":"0px","y":"262px","z":"0px"}
-    ],"stepsB":[]}, {"type":"scroll","preload":true, selector: ".screen-message", "loopA":true,"stepsA":[
-        {"wait":5400,"opacity":1,"transition":"opacity 500ms ease 0ms"},
-        {"wait":7800,"opacity":0,"transition":"opacity 500ms ease 0ms"}
-    ],"stepsB":[]}]}},
-    {"slug":"main-animation-2","name":"Main Animation 2","value":{"style":{"title":"Hide That"},"triggers":[{"type":"scroll", "preload":true,"loopA":true,"stepsA":[
-        {"wait":100,"opacity":1,"transition":"transform 500ms ease 0ms, opacity 500ms ease 0ms","x":"0px","y":"331px","z":"0px"},
-        {"wait":1800,"transition":"transform 500ms ease 0ms","x":"0px","y":"265px","z":"0px"},
-        {"wait":3600,"transition":"transform 500ms ease 0ms","x":"0px","y":"155px","z":"0px"},
-        {"wait":2000,"transition":"transform 500ms ease 0ms","x":"0px","y":"89px","z":"0px"},
-        {"wait":4200,"transition":"transform 500ms ease 0ms","x":"0px","y":"-43px","z":"0px"},
-        {"opacity":0,"transition":"opacity 500ms ease 0ms"},
-        {"x":"0px","y":"331px","z":"0px"}
-    ],"stepsB":[]}]}}
-]);
