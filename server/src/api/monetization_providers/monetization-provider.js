@@ -3,8 +3,11 @@
 function MonetizationProvider() {
 }
 
-MonetizationProvider.prototype.getByDates = function (fromDate, toDate) {
+MonetizationProvider.prototype.getUsersConfirmedActionsByDates = function (fromDate, toDate) {
     throw new Error("Abstract method!");    
+}
+MonetizationProvider.prototype.getAvailableOffers = function () {
+    throw new Error("Abstract method!");        
 }
 
 module.exports = MonetizationProvider;

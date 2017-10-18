@@ -8,8 +8,15 @@ function DailyBonus () {
 DailyBonus.prototype = Object.create(MonetizationProvider.prototype);
 DailyBonus.prototype.constructor = DailyBonus;
 
-DailyBonus.prototype.getByDates = function(fromDate, toDate) {
+DailyBonus.prototype.getUsersConfirmedActionsByDates = function(fromDate, toDate) {
     console.log('DailyBonus get by dates');
+    return new Promise((resolve, reject) => {
+        resolve([]);
+    });
+}
+
+DailyBonus.prototype.getAvailableOffers = function () {
+    throw new Error("Not implemented");
 }
 
 module.exports = DailyBonus;
