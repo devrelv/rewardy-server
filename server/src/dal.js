@@ -34,9 +34,48 @@ let MonetizationPartnerSchema = new Schema({
     last_full_fetch: {
         type: String,
         default: Date.now,
+    },
+    has_offers: {
+        type: Boolean,
+        required: true,
+        default: 0
     }
 });
 let MonetizationPartner = mongoose.model('MonetizationPartner', MonetizationPartnerSchema);
+
+let OfferSchema = new Schema({
+    id: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    partnerId: {
+        type: String,
+        required: true
+    },
+    fetchDate: {
+        type: String,
+        required: true
+    },
+    imageUrl: {
+        type: String,
+    },
+    downloadLink: {
+        type: String,
+    },
+    title: {
+        type: String,
+    },
+    description: {
+        type: String,
+    },
+    credits: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+});
+let Offer = mongoose.model('Offer', OfferSchema);
 
 function openConnection() {
     console.log('####### connecting to the database #######');
@@ -54,21 +93,49 @@ function getAllMonetizationPartners() {
             } 
         });
     });
-    // let newMoney = new MonetizationPartner({
-    //     id: '2',
-    //     name: 'Test'
-    // });
+}
+function getAllMonetizationPartnersWithOffers() {
+	return new Promise((resolve, reject) => {
+        MonetizationPartner.find({'has_offers': true}, function(err, data) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data);
+            } 
+        });
+    });
+}
 
-    // newMoney.save(function(err) {
-    //     if (err) {
-    //         console.log(err);
-    //     }
-    // });
+function saveOffers(offers) {
+    // TODO: Move Offer definition to external file and use it in all places instead of making this conversion
+    // TODO: Save the offers as a batch instead of one by one
+    console.log('saving offers: ', offers);
+    let convertedOffers = [];
+    for (let i=0; i<offers.length; i++) {
+        let newOffer = new Offer({
+            id: offers[i].id,
+            partnerId: offers[i].partnerId,
+            fetchDate: offers[i].fetchDate,
+            imageUrl: offers[i].imageUrl,
+            downloadLink: offers[i].downloadLink,
+            title: offers[i].title,
+            description: offers[i].description,
+            credits: offers[i].credits
+        });
+
+        newOffer.save(function(err) {
+            if (err) {
+                console.log(err);
+            }
+        });
+    }
 }
 
 module.exports = {
     openConnection: openConnection,
-	getAllMonetizationPartners: getAllMonetizationPartners,
+    getAllMonetizationPartners: getAllMonetizationPartners,
+    getAllMonetizationPartnersWithOffers: getAllMonetizationPartnersWithOffers,
+    saveOffers: saveOffers
 }
 
 

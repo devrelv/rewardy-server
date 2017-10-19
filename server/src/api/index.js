@@ -15,6 +15,10 @@ export default ({ config, db }) => {
 		monetizationHandler.updateAllCredits(db);
 		res.send("Done");
 	});
+	api.get('/insertOffersToDB', (req, res) => {
+		monetizationHandler.insertOffersToDB(db);
+		res.send("Done");
+	});
 
 	return api;
 }
