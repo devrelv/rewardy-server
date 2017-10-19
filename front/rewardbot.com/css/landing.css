@@ -389,6 +389,10 @@ h2, .h2 {
         }
 }
 
+.facebook-1 {
+    overflow: hidden;
+}
+
 /* Screen */
 .screen {
     width:230px;
