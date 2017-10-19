@@ -17,7 +17,9 @@ lib.dialog('/', [
             } else {
                 session.say(session.gettext('invite.invited_friends {{numOfFirends}}').replace('{{numOfFriends}}', invitedFriends.length));                
             }
+            // TODO: Add the real amount of credits (instead of 50)
             session.say(session.gettext('invite.explanation {{numOfCredits}}').replace('{{numOfCredits}}', '50') + '\n\r' + session.gettext('invite.before_link'));
+            // TODO: Change the URL from someUrl.com to the real one (when available)
             session.say('http://someUrl.com?referrer=' + session.userData.sender.user_id);
         }).catch(err => {
             console.log('getInvitedFriendsByUserId error: ', err);
