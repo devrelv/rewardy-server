@@ -60,11 +60,22 @@ let BotUserSchema = new Schema({
         default: Date.now,
         required: true
     },
-    referred_user: {
-        type: String,
-        required: false,
-        default: '',
-    },
+    source: {
+        type: {
+            type: String,
+            required: false,
+            default: ''
+        }, 
+        id: {
+            type: String,
+            required: false,
+            default: ''
+        },
+        additional_data: {
+            type: Schema.Types.Mixed,
+            required: false
+        }
+    }
 });
 
 let BotUser = mongoose.model('BotUser', BotUserSchema);
@@ -202,7 +213,8 @@ function getBotUserByEmail(email) {
 function getInvitedFriendsByUserId(userId) {
     return new Promise((resolve, reject) => {
         BotUser.find({
-            'referred_user': userId
+            'source.type': 'friend',
+            'source.id': userId
         }, function(err, data) {
             if (err) {
                 reject(err);
