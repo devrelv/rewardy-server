@@ -59,7 +59,12 @@ let BotUserSchema = new Schema({
         type: Date,
         default: Date.now,
         required: true
-    }
+    },
+    referred_user: {
+        type: String,
+        required: false,
+        default: '',
+    },
 });
 
 let BotUser = mongoose.model('BotUser', BotUserSchema);
@@ -194,6 +199,20 @@ function getBotUserByEmail(email) {
     });
 }
 
+function getInvitedFriendsByUserId(userId) {
+    return new Promise((resolve, reject) => {
+        BotUser.find({
+            'referred_user': userId
+        }, function(err, data) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data);
+            } 
+        });
+    });
+}
+
 module.exports = {
     saveUserToDatabase: saveUserToDatabase,
     saveDeviceUserToDatabase: saveDeviceUserToDatabase,
@@ -201,4 +220,5 @@ module.exports = {
     getDeviceByUserId: getDeviceByUserId,
     saveDeviceUserToDatabase: saveDeviceUserToDatabase,
     getBotUserByEmail: getBotUserByEmail,
+    getInvitedFriendsByUserId: getInvitedFriendsByUserId,
 };

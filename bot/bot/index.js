@@ -59,7 +59,10 @@ var bot = new builder.UniversalBot(connector, [
         } else if (localizedRegex(session, [MainOptions.GetCredit]).test(session.message.text)) {
             // Check Credits flow
             return session.beginDialog('get-free-credits:/');            
-        } 
+        } else if (localizedRegex(session, [MainOptions.InviteFriends]).test(session.message.text)) {
+            // Invite Friends flow
+            return session.beginDialog('invite:/');            
+        }
 
         var welcomeCard = new builder.HeroCard(session)
             .title('welcome_title')
@@ -94,6 +97,7 @@ bot.library(require('./login').createLibrary());
 bot.library(require('./redeem').createLibrary());
 bot.library(require('./check-credits').createLibrary());
 bot.library(require('./get-free-credits').createLibrary());
+bot.library(require('./invite').createLibrary());
 
 // Validators
 bot.library(require('./core/validators').createLibrary());
