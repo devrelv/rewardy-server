@@ -64,6 +64,9 @@ var bot = new builder.UniversalBot(connector, [
         } else if (localizedRegex(session, [MainOptions.InviteFriends]).test(session.message.text)) {
             // Invite Friends flow
             return session.beginDialog('invite:/');            
+        } else if (localizedRegex(session, [MainOptions.Help]).test(session.message.text)) {
+            // Invite Friends flow
+            return session.beginDialog('help:/');            
         }
 
         var welcomeCard = new builder.HeroCard(session)

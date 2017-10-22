@@ -1,6 +1,6 @@
 {
-    "help.intro" : "Looks like you need some help??\n\rAm I right? (type 'yes' or 'no')",
-    "help.no_help_needed": "Ok, no help needed. if you need me, just type 'help'\n\rGetting back to main menu",
+    "help.intro" : "Looks like you need some help..\n\rAm I right? (type 'yes' or 'no')",
+    "help.no_help_needed": "Ok\n\rGetting back to main menu",
     "help.leave_question": "Please write your question now and we will get back to you as soon as possible:",
     "help.email_confirmation {{email}}": "the answer will be sent to your email ({{email}})",
     "help.fill_email": "what is the email address you want to receive the answer at?",

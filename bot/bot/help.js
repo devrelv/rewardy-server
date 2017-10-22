@@ -7,13 +7,13 @@ var consts = require('./core/const');
 
 
 // The dialog stack is cleared and this dialog is invoked when the user enters 'help'.
-lib.dialog('help', [
+lib.dialog('/', [
     function (session) {
         builder.Prompts.confirm(session, session.gettext('help.intro'));
     },
     function (session, args, next) {
         if (args.response) {
-            if (!session.userData.sender.email) {
+            if (!session.userData.sender || !session.userData.sender.email) {
                 builder.Prompts.text(session, session.gettext('help.fill_email'));
             } else {
                 next();
@@ -33,9 +33,9 @@ lib.dialog('help', [
     function (session, args, next) {
         
     },
-    ]).triggerAction({matches: /\bhelp\b/i,});
+]);
+//]).triggerAction({matches: /\bhelp\b/i,});
 
-// TODO: get the message and send us an email from support
 lib.dialog('help_get_user_message', [
     function (session) {
         builder.Prompts.text(session, session.gettext('help.email_confirmation {{email}}').replace('{{email}}', session.userData.sender.email) + '\n\r' + session.gettext('help.leave_question'));
@@ -44,7 +44,7 @@ lib.dialog('help_get_user_message', [
         builder.Prompts.confirm(session, session.gettext('help.confirm_sending'));
     }, function (session, args) {
         if (args.response) {
-             // TODO: change it to support email
+             // TODO: change yaari.tal@gmail.com to support email
             mailSender.sendTemplateMail(consts.MAIL_TEMPLATE_HELP_QUESTION, 'yaari.tal@gmail.com', 
                     [{key: '%USER_EMAIL%', value: session.userData.sender.email},
                     {key: '%DATE%', value: (new Date()).toUTCString()},
