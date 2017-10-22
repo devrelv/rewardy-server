@@ -3,20 +3,20 @@ var mongoose = require('mongoose');
 // TODO: Move to .env
 const MONGO_CONNECTION_STRING = 'mongodb://prod:Pp123456@ds133964.mlab.com:33964/redeembot';
 
-const mongodbOptions = {
-    server: {
-        socketOptions: {
-            keepAlive: 300000,
-            connectTimeoutMS: 30000
-        }
-    },
-    replset: {
-        socketOptions: {
-            keepAlive: 300000,
-            connectTimeoutMS: 30000
-        }
-    }
-};
+// const mongodbOptions = {
+//     server: {
+//         socketOptions: {
+//             keepAlive: 300000,
+//             connectTimeoutMS: 30000
+//         }
+//     },
+//     replset: {
+//         socketOptions: {
+//             keepAlive: 300000,
+//             connectTimeoutMS: 30000
+//         }
+//     }
+// };
 
 let Schema = mongoose.Schema;
 
@@ -79,7 +79,9 @@ let Offer = mongoose.model('Offer', OfferSchema);
 
 function openConnection() {
     console.log('####### connecting to the database #######');
-    mongoose.connect(MONGO_CONNECTION_STRING, mongodbOptions);
+    mongoose.Promise = require('bluebird');
+    mongoose.connect(process.env.MONGO_CONNECTION_STRING, {useMongoClient: true});
+    // mongoose.connect(MONGO_CONNECTION_STRING, mongodbOptions);
     
 }
 function getAllMonetizationPartners() {

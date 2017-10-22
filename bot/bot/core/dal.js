@@ -3,23 +3,26 @@
 var mongoose = require('mongoose');
 var consts = require('./const')
 
-const mongodbOptions = {
-    server: {
-        socketOptions: {
-            keepAlive: 300000,
-            connectTimeoutMS: 30000
-        }
-    },
-    replset: {
-        socketOptions: {
-            keepAlive: 300000,
-            connectTimeoutMS: 30000
-        }
-    }
-};
+// const mongodbOptions = {
+//     server: {
+//         socketOptions: {
+//             keepAlive: 300000,
+//             connectTimeoutMS: 30000
+//         }
+//     },
+//     replset: {
+//         socketOptions: {
+//             keepAlive: 300000,
+//             connectTimeoutMS: 30000
+//         }
+//     },
+//     useMongoClient: true
+// };
 
 console.log('####### connecting to the database #######');
-mongoose.connect(process.env.MONGO_CONNECTION_STRING, mongodbOptions);
+// mongoose.connect(process.env.MONGO_CONNECTION_STRING, mongodbOptions);
+mongoose.Promise = require('bluebird');
+mongoose.connect(process.env.MONGO_CONNECTION_STRING, {useMongoClient: true});
 
 // Data Model
 var User = mongoose.model('User', { name: String });

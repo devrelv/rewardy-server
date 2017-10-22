@@ -11,7 +11,7 @@ var consts = require('./core/const');
 lib.dialog('/', [
     function (session) {
         session.say(session.gettext('getCredit.intro'));
-        dal.getDeviceByUserId(session.userData.sender.userId).then(userResult => {
+        dal.getDeviceByUserId(session.userData.sender.user_id).then(userResult => {
             if (!userResult) {
                 // That's the first time we encounter this user. Share the legal notice!
                 session.say(session.gettext('general.legalNotice'));
@@ -33,14 +33,14 @@ lib.dialog('/', [
 
                 // Until we have the bot.getUserDetails function, we can use this:
                 let fallbackDeviceType = consts.DEVICE_TYPE_DESKTOP;
-                dal.saveDeviceUserToDatabase(session.userData.sender.userId, fallbackDeviceType);
-                sendUserOfferWallUrl(session, fallbackDeviceType, session.userData.sender.userId);
+                dal.saveDeviceUserToDatabase(session.userData.sender.user_id, fallbackDeviceType);
+                sendUserOfferWallUrl(session, fallbackDeviceType, session.userData.sender.user_id);
             } else {
-                sendUserOfferWallUrl(session, userResult.type, session.userData.sender.userId);                
+                sendUserOfferWallUrl(session, userResult.type, session.userData.sender.user_id);                
             }
             session.endDialog();
         }).catch(err => {
-            sendUserOfferWallUrl(session, consts.DEVICE_TYPE_DESKTOP, session.userData.sender.userId);
+            sendUserOfferWallUrl(session, consts.DEVICE_TYPE_DESKTOP, session.userData.sender.user_id);
             console.log('error in getDeviceByUserId');
             console.log(err);            
         });
@@ -48,10 +48,10 @@ lib.dialog('/', [
 ]);
 
 function sendUserOfferWallUrl(session, deviceType, userId) {
-    session.send(offerWallLinkForUser(deviceType, userId));
+    session.send(offerWallLinkForUser(session, deviceType, userId));
 }
 
-function offerWallLinkForUser(deviceType, userId) {
+function offerWallLinkForUser(session, deviceType, userId) {
     let appId;
     if (deviceType === consts.DEVICE_TYPE_ANDROID) {
         appId = consts.SPONSOR_PAY_APP_ID_ANDROID;
@@ -63,7 +63,7 @@ function offerWallLinkForUser(deviceType, userId) {
         appId = consts.SPONSOR_PAY_APP_ID_DESKTOP;
     }
 
-    return `http://iframe.sponsorpay.com/?appid=${appId}&uid=${userId}`;
+    return 'http://iframe.sponsorpay.com/?appid=${appId}&uid=' + session.userData.sender.user_id;
 }
 
 
