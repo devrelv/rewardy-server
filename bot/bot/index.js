@@ -18,7 +18,8 @@ var MainOptions = {
     CheckCredit: 'keyboard.root.checkCredit',
     Redeem: 'keyboard.root.redeem',
     InviteFriends: 'keyboard.root.inviteFriends',
-    GetCredit: 'keyboard.root.getCredit'
+    GetCredit: 'keyboard.root.getCredit',
+    Help: 'keyboard.root.help'
 };
 
 function createRootButtons(session, builder) {
@@ -26,7 +27,8 @@ function createRootButtons(session, builder) {
         builder.CardAction.imBack(session, session.gettext(MainOptions.CheckCredit), MainOptions.CheckCredit),
         builder.CardAction.imBack(session, session.gettext(MainOptions.GetCredit), MainOptions.GetCredit),
         builder.CardAction.imBack(session, session.gettext(MainOptions.InviteFriends), MainOptions.InviteFriends),
-        builder.CardAction.imBack(session, session.gettext(MainOptions.Redeem), MainOptions.Redeem)
+        builder.CardAction.imBack(session, session.gettext(MainOptions.Redeem), MainOptions.Redeem),
+        builder.CardAction.imBack(session, session.gettext(MainOptions.Help), MainOptions.Help)
     ];
 }
 
@@ -74,6 +76,8 @@ var bot = new builder.UniversalBot(connector, [
     }
 
 ]);
+
+
  
 
 // Enable Conversation Data persistence
@@ -98,6 +102,7 @@ bot.library(require('./redeem').createLibrary());
 bot.library(require('./check-credits').createLibrary());
 bot.library(require('./get-free-credits').createLibrary());
 bot.library(require('./invite').createLibrary());
+bot.library(require('./help').createLibrary());
 
 // Validators
 bot.library(require('./core/validators').createLibrary());

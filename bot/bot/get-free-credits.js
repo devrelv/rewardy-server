@@ -2,7 +2,6 @@ var builder = require('botbuilder');
 
 var lib = new builder.Library('get-free-credits');
 var Promise = require('bluebird');
-var Store = require('./store');
 var dal = require('./core/dal');
 var consts = require('./core/const');
 
