@@ -3,6 +3,7 @@ import { Router } from 'express';
 
 const request = require('request');
 const monetizationHandler = require('./monetization-handler');
+const consts = require('./consts');
 
 export default ({ config, db }) => {
 
@@ -17,6 +18,10 @@ export default ({ config, db }) => {
 	});
 	api.get('/insertOffersToDB', (req, res) => {
 		monetizationHandler.insertOffersToDB(db);
+		res.send("Done");
+	});
+	api.get('/postback/superrewards', (req, res) => {
+		monetizationHandler.postback_superrewards(db, req);
 		res.send("Done");
 	});
 
