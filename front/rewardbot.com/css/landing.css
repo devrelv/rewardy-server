@@ -61,7 +61,8 @@ body {
     font: 16px/24px 'Roboto', sans-serif;
     letter-spacing: -0.19px;
 }
-h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
+
+h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6, label, .label {
     font-family:'MuseoSansCyrl-900', Georgia, serif;
     margin-top:0;
     color: #1E1435;
@@ -393,15 +394,18 @@ h2, .h2 {
     overflow: hidden;
 }
 
+.invite_explain {
+    text-align: center;
+    margin: 25px auto;
+}
+
 .invite_container {
     width: 500px;
     margin: 25px auto;
 }
 
 form {
-    padding: 20px;
-    background: #2c3e50;
-    color: #fff;
+    padding: 0px 10px;
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
     border-radius: 4px;
@@ -411,34 +415,40 @@ form label,
 form input,
 form button {
     border: 0;
-    margin-bottom: 3px;
     display: block;
     width: 100%;
 }
 
+form label {
+    margin-bottom: 2px;
+}
+
 form input {
-    height: 25px;
-    line-height: 25px;
-    background: #fff;
-    color: #000;
-    padding: 0 6px;
+    border: 1px solid #DDD;
+    margin-bottom: 5px;
+    color: #666;
+    padding: 10px;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
 }
 
 form button {
-    height: 30px;
-    line-height: 30px;
-    background: #e67e22;
-    color: #fff;
-    margin-top: 10px;
+    background: #ED6347;
+    color: #FFF;
+    padding: 10px 20px;
+    margin-top: 15px;
     cursor: pointer;
+}
+
+form button:hover {
+    background: #C12B05;
 }
 
 form .error {
     color: #ff0000;
 }
+
 
 /* Screen */
 .screen {
