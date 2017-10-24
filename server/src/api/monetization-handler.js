@@ -1,7 +1,8 @@
 'use strict';
 var uuid = require('uuid');
 const consts = require('./consts');
-
+const requestIp = require('request-ip');
+var url = require('url');
 
 const Stub = require('./monetization_providers/stub');
 const Fyber = require('./monetization_providers/fyber');
@@ -93,9 +94,6 @@ function insertOffersToDB(db) {
         
     });
 }
-
-const requestIp = require('request-ip');
-var url = require('url');
 
 function postback_superrewards(db, req, partnerName) {
     /* Query Params

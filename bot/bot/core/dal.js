@@ -60,8 +60,7 @@ let BotUserSchema = new Schema({
     },
     last_daily_bonus: {
         type: Date,
-        default: Date.now,
-        required: true
+        default: Date.now
     },
     source: {
         type: {

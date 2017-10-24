@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var consts = require('./api/consts')
 
 // TODO: Move to .env
 const MONGO_CONNECTION_STRING = 'mongodb://prod:Pp123456@ds133964.mlab.com:33964/redeembot';
@@ -114,6 +115,60 @@ let UserActionSchema = new Schema({
 });
 let UserAction = mongoose.model('UserAction', UserActionSchema);
 
+// TODO: Add "Common Objects" module
+let BotUserSchema = new Schema({
+    user_id: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    name: {
+        type: String,
+        required: true
+    },
+    language: {
+        type: String,
+        required: true,
+        default: consts.defaultUserLanguage,
+    },
+    points: {
+        type: Number,
+        required: true
+    },
+    created_at: {
+        type: Date,
+        default: Date.now,
+        required: true
+    },
+    last_daily_bonus: {
+        type: Date,
+        default: Date.now
+    },
+    source: {
+        type: {
+            type: String,
+            required: false,
+            default: ''
+        }, 
+        id: {
+            type: String,
+            required: false,
+            default: ''
+        },
+        additional_data: {
+            type: Schema.Types.Mixed,
+            required: false
+        }
+    }
+});
+
+let BotUser = mongoose.model('BotUser', BotUserSchema);
+
 function openConnection() {
     console.log('####### connecting to the database #######');
     mongoose.Promise = require('bluebird');
@@ -192,8 +247,30 @@ function addUserAction(partnerTransactionId, userId, offerId, offerCredits, tota
                 resolve();
             }
         })
+    });    
+}
+
+function saveFriendReferralNewBotUser(id, name, email, referrerUserId) {
+    let botUser = new BotUser({
+        user_id: id,
+        email: email,
+        name: name,
+        points: consts.default_points,
+        last_daily_bonus: null,
+        source: {type: consts.friends_referral_code,
+                id: referrerUserId}
     });
-    
+
+    return new Promise((resolve, reject) => {
+        botUser.save(function(err) {
+            if (err) {
+                console.log(err);
+                reject(err);
+            } else {
+                resolve();
+            }
+        })
+    });    
     
 }
 
@@ -202,7 +279,8 @@ module.exports = {
     getAllMonetizationPartners: getAllMonetizationPartners,
     getAllMonetizationPartnersWithOffers: getAllMonetizationPartnersWithOffers,
     saveOffers: saveOffers,
-    addUserAction: addUserAction
+    addUserAction: addUserAction,
+    saveFriendReferralNewBotUser : saveFriendReferralNewBotUser 
 }
 
 

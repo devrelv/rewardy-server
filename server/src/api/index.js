@@ -4,6 +4,7 @@ import { Router } from 'express';
 const request = require('request');
 const monetizationHandler = require('./monetization-handler');
 const consts = require('./consts');
+const registration = require('./registration');
 
 export default ({ config, db }) => {
 
@@ -22,6 +23,10 @@ export default ({ config, db }) => {
 	});
 	api.get('/postback/superrewards', (req, res) => {
 		monetizationHandler.postback_superrewards(db, req);
+		res.send("Done");
+	});
+	api.get('/register', (req, res) => {
+		registration.registerUserFromLink(db, req);
 		res.send("Done");
 	});
 
