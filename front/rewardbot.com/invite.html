@@ -36,24 +36,45 @@
     <meta property="og:image:height"       content="192">
 
     <link rel="stylesheet" type="text/css" href="css/landing.css">
-    
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
         crossorigin="anonymous"></script>
-        
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    <script type="text/javascript">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.min.js"></script>
+    <script src="js/webflow.js"></script>
+    <script src="js/retina.min.js"></script>
 
+    <script type="text/javascript">
+    
+        // Wait for the DOM to be ready
         $(document).ready(function () {
-            function getQueryStringValue(key) {
-                return decodeURIComponent(window.location.search.replace(new RegExp("^(?:.*[&\\?]" + encodeURIComponent(key).replace(/[\.\+\*]/g, "\\$&") + "(?:\\=([^&]*))?)?.*$", "i"), "$1"));
-            }
-            iframe = document.getElementById('offers__frame');
-            iframe.src = iframe.src + '&uid=' + getQueryStringValue("uid");
+            // Initialize form validation on the registration form.
+            // It has the name attribute "registration"
+            $("form[name='registration']").validate({
+                // Specify validation rules
+                rules: {
+                    // The key name on the left side is the name attribute
+                    // of an input field. Validation rules are defined
+                    // on the right side
+                    firstname: "required",
+                    lastname: "required",
+                    email: {
+                        required: true,
+                        // Specify that email should be validated
+                        // by the built-in "email" rule
+                        email: true
+                    }
+                },
+                // Specify validation error messages
+                messages: {
+                    firstname: "Please enter your first name",
+                    lastname: "Please enter your last name",
+                    email: "Please enter a valid email address"
+                },
+                // Make sure the form is submitted to the destination defined
+                // in the "action" attribute of the form when valid
+                submitHandler: function (form) {
+                    form.submit();
+                }
+            });
         });
     </script>
 </head>
@@ -65,12 +86,32 @@
     <div class="section">
         <div class="section__content">
             <div class="container">
-
-                <iframe id="offers__frame" src="https://wall.superrewards.com/super/offers?h=nnmpqyqoson.132373782645" frameborder="0" width="728"
-                    height="1750" scrolling="no">
-                </iframe>
+                <div class="intro">
+                    <img src="img/hero@2x.png" class="intro__img" alt="">
+                    <h1 class="intro__title">Welcome to Rewardy</h1>
+                    <div class="intro__text">
+                        <div class="intro__text-line">Discover Awesome Apps. Earn Cash <u>Rewards</u>.</div>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
+
+    <div class="invite_container">
+        <h2>Use this invite link to get a referral bonus</h2>
+        <form action="" name="registration">
+
+            <label for="firstname">First Name</label>
+            <input type="text" name="firstname" id="firstname" placeholder="John">
+
+            <label for="lastname">Last Name</label>
+            <input type="text" name="lastname" id="lastname" placeholder="McClane">
+
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email" placeholder="Something like John@Nakatomi.com">
+
+            <button type="submit">Send the invite link to my mail</button>
+        </form>
     </div>
 </div>
 
