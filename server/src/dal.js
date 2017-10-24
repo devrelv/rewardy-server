@@ -77,10 +77,47 @@ let OfferSchema = new Schema({
 });
 let Offer = mongoose.model('Offer', OfferSchema);
 
+let UserActionSchema = new Schema({
+    id: { /* ourTransactionId */
+        type: String,
+        required: true,
+        unique: true
+    },
+    partner: {
+        type: String,
+        required: true
+    },
+    partnerTransactionId: {
+        type: String,
+        required: true
+    },
+    userId: {
+        type: String,
+        required: true
+    },
+    offerId: {
+        type: String,
+        required: true
+    },
+    offerCredits: {
+        type: Number,
+        required: true
+    },
+    totalCredits: {
+        type: Number
+    },
+    date: {
+        type: Date,
+        required: true,
+        default: Date.now
+    }
+});
+let UserAction = mongoose.model('UserAction', UserActionSchema);
+
 function openConnection() {
     console.log('####### connecting to the database #######');
     mongoose.Promise = require('bluebird');
-    mongoose.connect(process.env.MONGO_CONNECTION_STRING, {useMongoClient: true});
+    mongoose.connect(MONGO_CONNECTION_STRING, {useMongoClient: true});
     // mongoose.connect(MONGO_CONNECTION_STRING, mongodbOptions);
     
 }
@@ -133,11 +170,39 @@ function saveOffers(offers) {
     }
 }
 
+// TODO: Save the UserActionSchema
+function addUserAction(partnerTransactionId, userId, offerId, offerCredits, totalCredits, partner, date, innerTransactionId) {
+    let newUserAction = new UserAction({
+        id: innerTransactionId,
+        partner: partner,
+        partnerTransactionId: partnerTransactionId,
+        userId: userId,
+        offerId: offerId,
+        offerCredits: offerCredits,
+        totalCredits: totalCredits,
+        date: date
+    });
+
+    return new Promise((resolve, reject) => {
+        newUserAction.save(function(err) {
+            if (err) {
+                console.log(err);
+                reject(err);
+            } else {
+                resolve();
+            }
+        })
+    });
+    
+    
+}
+
 module.exports = {
     openConnection: openConnection,
     getAllMonetizationPartners: getAllMonetizationPartners,
     getAllMonetizationPartnersWithOffers: getAllMonetizationPartnersWithOffers,
-    saveOffers: saveOffers
+    saveOffers: saveOffers,
+    addUserAction: addUserAction
 }
 
 
