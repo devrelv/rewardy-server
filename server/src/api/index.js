@@ -43,10 +43,12 @@ export default ({ config, db }) => {
     	lastName - registered user first name
     	invitationCode - the invitation code
 	*/
-	// TODO: Return the correct result on res (for error handling)
 	api.get('/register', (req, res) => {
-		registration.registerUserFromLink(db, req);
-		res.send("Done");
+		registration.registerUserFromLink(db, req).then(k => {
+			res.send({result: "Success", info: "Done"}); // Redirect to success web page (with next steps)
+		}).catch(err => {
+			res.status(500).send({result: "Error", info: err}); // Redirect to "error occured" web page
+		});
 	});
 
 	/*
@@ -56,10 +58,12 @@ export default ({ config, db }) => {
     	firstName - registered user first name
     	lastName - registered user first name
 	*/
-	// TODO: Return the correct result on res (for error handling)
 	api.get('/sendReferalMail', (req,res) => {
-		registration.sendEmailToReferral(req);
-		res.send("Done");
+		registration.sendEmailToReferral(req).then(k=>{
+			res.send({result: "Success", info: "Done"});
+		}).catch(err => {
+			res.status(500).send({result: "Error", info: err});
+		});
 	});
 
 	return api;

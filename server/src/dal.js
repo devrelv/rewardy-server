@@ -251,27 +251,30 @@ function addUserAction(partnerTransactionId, userId, offerId, offerCredits, tota
 }
 
 function saveFriendReferralNewBotUser(id, name, email, referrerUserId) {
-    let botUser = new BotUser({
-        user_id: id,
-        email: email,
-        name: name,
-        points: consts.default_points,
-        last_daily_bonus: null,
-        source: {type: consts.friends_referral_code,
-                id: referrerUserId}
-    });
-
     return new Promise((resolve, reject) => {
-        botUser.save(function(err) {
-            if (err) {
-                console.log(err);
-                reject(err);
-            } else {
-                resolve();
-            }
-        })
-    });    
-    
+        try {
+            let botUser = new BotUser({
+                user_id: id,
+                email: email,
+                name: name,
+                points: consts.default_points,
+                last_daily_bonus: null,
+                source: {type: consts.friends_referral_code,
+                        id: referrerUserId}
+                });
+            botUser.save(function(err) {
+                if (err) {
+                    console.log(err);
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            })
+        }
+        catch (err) {
+            reject(err);
+        }
+    });
 }
 
 module.exports = {
