@@ -225,28 +225,56 @@ function saveOffers(offers) {
     }
 }
 
-// TODO: Save the UserActionSchema
 function addUserAction(partnerTransactionId, userId, offerId, offerCredits, totalCredits, partner, date, innerTransactionId) {
-    let newUserAction = new UserAction({
-        id: innerTransactionId,
-        partner: partner,
-        partnerTransactionId: partnerTransactionId,
-        userId: userId,
-        offerId: offerId,
-        offerCredits: offerCredits,
-        totalCredits: totalCredits,
-        date: date
-    });
-
     return new Promise((resolve, reject) => {
-        newUserAction.save(function(err) {
-            if (err) {
-                console.log(err);
-                reject(err);
-            } else {
-                resolve();
-            }
-        })
+        try {        
+            let newUserAction = new UserAction({
+            id: innerTransactionId,
+            partner: partner,
+            partnerTransactionId: partnerTransactionId,
+            userId: userId,
+            offerId: offerId,
+            offerCredits: offerCredits,
+            totalCredits: totalCredits,
+            date: date
+            });
+
+            newUserAction.save(function(err) {
+                if (err) {
+                    console.log(err);
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        }
+        catch (err) {
+            reject(err);
+        }
+    });    
+}
+
+function increaseUserCredits(userId, credits) {
+    return new Promise((resolve, reject) => {
+        try {   
+            BotUser.findOne({user_id: userId}, (err,res)=> {
+                if (err) {
+                    reject(err);
+                } else {
+                    var currentPoints = Number(res.points) + Number(credits);
+                    BotUser.update({user_id: userId}, {$set: {points: currentPoints}}, (err, res) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve();
+                        }
+                    });
+                }
+            });
+        }
+        catch (err) {
+            reject(err);
+        }
     });    
 }
 
@@ -283,7 +311,8 @@ module.exports = {
     getAllMonetizationPartnersWithOffers: getAllMonetizationPartnersWithOffers,
     saveOffers: saveOffers,
     addUserAction: addUserAction,
-    saveFriendReferralNewBotUser : saveFriendReferralNewBotUser 
+    saveFriendReferralNewBotUser : saveFriendReferralNewBotUser,
+    increaseUserCredits: increaseUserCredits,
 }
 
 

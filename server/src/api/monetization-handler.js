@@ -110,7 +110,7 @@ function postback_superrewards(db, req, partnerName) {
     //var clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress ||req.connection.socket.remoteAddress;
 
     // Add this line for debug:
-    //allowedIPs.push(clientIp);
+    // allowedIPs.push(clientIp);
 
     // Validating request IP
     if (allowedIPs.indexOf(clientIp) == -1) {
@@ -134,7 +134,9 @@ function postback_superrewards(db, req, partnerName) {
     var date = new Date();
     var innerTransactionId = uuid.v1();
 
-    db.addUserAction(partnerTransactionId, userId, offerId, offerCredits, totalCredits, partner, date, innerTransactionId);
+    db.addUserAction(partnerTransactionId, userId, offerId, offerCredits, totalCredits, partner, date, innerTransactionId).then(k=> {
+        db.increaseUserCredits(userId, offerCredits);
+    });
 
 }
 
