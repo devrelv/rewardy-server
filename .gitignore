@@ -213,5 +213,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-#logs
-/server/logs/*.log
+#Server logs
+#/server/logs/*.log
