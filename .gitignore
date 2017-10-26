@@ -214,4 +214,4 @@ $RECYCLE.BIN/
 *.lnk
 
 #logs
-/server/logs/*
+/server/logs/*.log
