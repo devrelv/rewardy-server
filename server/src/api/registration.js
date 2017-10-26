@@ -4,8 +4,8 @@ var uuid = require('uuid');
 var consts = require('./consts.js');
 const nodemailer = require('nodemailer');
 var fs = require('fs');
-
-
+const logger = require('../logger');
+const serializeError = require('serialize-error');
 
 function registerUserFromLink (db, req) {
     return new Promise((resolve, reject) => {        
@@ -18,6 +18,7 @@ function registerUserFromLink (db, req) {
             // Verifying the invitationId
             var generatedInvitationId = generateInvitationCode(firstName, lastName, email, referrerUserId);
             if (invitationId != generatedInvitationId) {
+                logger.log.error('registerUserFromLink: incorrect invitation code', {data: {invitationId: invitationId, generatedInvitationId: generatedInvitationId}, request: req});
                 reject("incorrect invitation code");
             }
     
@@ -26,10 +27,12 @@ function registerUserFromLink (db, req) {
             db.saveFriendReferralNewBotUser(id, name, email, referrerUserId).then(k=> {
                 resolve();
             }).catch(err => {
+                logger.log.error('registerUserFromLink: saveFriendReferralNewBotUser rejected', {error: serializeError(err), request: req});
                 reject(err)
             });
         }
         catch (err) {
+            logger.log.error('registerUserFromLink: error occured', {error: serializeError(err), request: req});
             reject(err);
         }
         
@@ -56,16 +59,16 @@ function sendEmailToReferral(req) {
             
             var verificationUrl = getVerificationUrl(referrerUserId, email, firstName, lastName, invitationCode);
             inviteHtmlContent = inviteHtmlContent.replace('%EMAIL_VERIFICATION_URL%', verificationUrl);
-            
-            console.log(inviteHtmlContent);
     
             sendCustomMail(email, 'Rewardy - Email Verification', null, inviteHtmlContent).then(k=>{
                 resolve();
             }).catch(error => {
+                logger.log.error('sendEmailToReferral: sendCustomMail rejevted', {error: serializeError(error), request: req});
                 reject(error);
             });
         }
         catch (ex) {
+            logger.log.error('sendEmailToReferral: error occured', {error: ex, request: req});
             reject(ex);
         }        
     });
@@ -77,41 +80,42 @@ function getVerificationUrl(referrerUserId, email, firstName, lastName, invitati
 }
 
 function sendCustomMail(toEmail, subject, text, html) {
-    // create reusable transporter object using the default SMTP transport
-    let transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true, // true for 465, false for other ports
-        auth: {
-            user: consts.EMAIL_USERNAME, // generated ethereal user
-            pass: consts.EMAIL_PASSWORD  // generated ethereal password
-        }
-    });
-
-    var toEmailAsString;
-    if (Array.isArray(toEmail)) {
-        toEmailAsString = toEmail.join(',');
-    } else {
-        toEmailAsString = toEmail;
-    }
-    // setup email data with unicode symbols
-    let mailOptions = {
-        from: '"' + consts.EMAIL_SENDER_NAME + '" <' + consts.EMAIL_USERNAME + '>', // sender address
-        to: toEmailAsString, // list of receivers
-        subject: subject, // Subject line
-        // text: text, // plain text body
-        html: html // html body
-    };
-
-    // send mail with defined transport object
     return new Promise((resolve, reject) => {
         try {
+            // create reusable transporter object using the default SMTP transport
+            let transporter = nodemailer.createTransport({
+                host: 'smtp.gmail.com',
+                port: 465,
+                secure: true, // true for 465, false for other ports
+                auth: {
+                    user: consts.EMAIL_USERNAME, // generated ethereal user
+                    pass: consts.EMAIL_PASSWORD  // generated ethereal password
+                }
+            });
+
+            var toEmailAsString;
+            if (Array.isArray(toEmail)) {
+                toEmailAsString = toEmail.join(',');
+            } else {
+                toEmailAsString = toEmail;
+            }
+            // setup email data with unicode symbols
+            let mailOptions = {
+                from: '"' + consts.EMAIL_SENDER_NAME + '" <' + consts.EMAIL_USERNAME + '>', // sender address
+                to: toEmailAsString, // list of receivers
+                subject: subject, // Subject line
+                // text: text, // plain text body
+                html: html // html body
+            };
+
+            // send mail with defined transport object
             transporter.sendMail(mailOptions, sendMailCallback);
             
             function sendMailCallback(error, info) {
                 if (error) {
                     // if using google - don't forget to enable less secure apps on google https://www.google.com/settings/security/lesssecureapps
                     // return console.log(error);
+                    logger.log.error('sendCustomMail: sendMailCallback error', {error: serializeError(error)});
                     reject(error);
                 } else {
                     // console.log('Message sent: %s', info.messageId);
@@ -125,6 +129,7 @@ function sendCustomMail(toEmail, subject, text, html) {
             }
         }
         catch (ex) {
+            logger.log.error('sendCustomMail: error occured', {error: ex});
             reject(ex);
         }
         

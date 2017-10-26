@@ -1,3 +1,5 @@
+var winston = require('winston');
+
 module.exports = {
     PARTNER_SUPER_REWARDS : 'Super Rewards',
     PARTNER_FYBER : 'Fyber',

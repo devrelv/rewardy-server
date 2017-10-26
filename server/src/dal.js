@@ -1,5 +1,8 @@
 var mongoose = require('mongoose');
 var consts = require('./api/consts')
+const logger = require('./logger');
+const serializeError = require('serialize-error');
+
 
 // TODO: Move to .env
 const MONGO_CONNECTION_STRING = 'mongodb://prod:Pp123456@ds133964.mlab.com:33964/redeembot';
@@ -170,19 +173,31 @@ let BotUserSchema = new Schema({
 let BotUser = mongoose.model('BotUser', BotUserSchema);
 
 function openConnection() {
-    console.log('####### connecting to the database #######');
-    mongoose.Promise = require('bluebird');
-    mongoose.connect(MONGO_CONNECTION_STRING, {useMongoClient: true});
-    // mongoose.connect(MONGO_CONNECTION_STRING, mongodbOptions);
+    try {
+        logger.log.info('dal: ####### connecting to the database #######');
+        mongoose.Promise = require('bluebird');
+        mongoose.connect(MONGO_CONNECTION_STRING, {useMongoClient: true}).then(
+            ()=>{
+            logger.log.info('dal: connected to database');        
+            }
+        ).catch(err => {
+            logger.log.error('dal: openConnection mongoose.connect error occured', {error: serializeError(err)});
+            setTimeout(() => {throw err;}); // The setTimeout is a trick to enable the throw err
+        });
+    } catch (err) {
+        logger.log.log('error','dal: openConnection error occured (' + ex.message + ')', {error: serializeError(err)});
+        throw err;
+    }
+    
     
 }
 function getAllMonetizationPartners() {
 	return new Promise((resolve, reject) => {
         MonetizationPartner.find({}, function(err, data) {
             if (err) {
+                logger.log.error('dal: getAllMonetizationPartners.find error', {error: serializeError(err)});        
                 reject(err);
             } else {
-                console.log('getAllMonetizationPartners data: ', data);
                 resolve(data);
             } 
         });
@@ -192,6 +207,7 @@ function getAllMonetizationPartnersWithOffers() {
 	return new Promise((resolve, reject) => {
         MonetizationPartner.find({'has_offers': true}, function(err, data) {
             if (err) {
+                logger.log.error('dal: getAllMonetizationPartnersWithOffers.find error', {error: serializeError(err)});        
                 reject(err);
             } else {
                 resolve(data);
@@ -203,26 +219,31 @@ function getAllMonetizationPartnersWithOffers() {
 function saveOffers(offers) {
     // TODO: Move Offer definition to external file and use it in all places instead of making this conversion
     // TODO: Save the offers as a batch instead of one by one
-    console.log('saving offers: ', offers);
-    let convertedOffers = [];
-    for (let i=0; i<offers.length; i++) {
-        let newOffer = new Offer({
-            id: offers[i].id,
-            partnerId: offers[i].partnerId,
-            fetchDate: offers[i].fetchDate,
-            imageUrl: offers[i].imageUrl,
-            downloadLink: offers[i].downloadLink,
-            title: offers[i].title,
-            description: offers[i].description,
-            credits: offers[i].credits
-        });
-
-        newOffer.save(function(err) {
-            if (err) {
-                console.log(err);
-            }
-        });
+    try {
+        let convertedOffers = [];
+        for (let i=0; i<offers.length; i++) {
+            let newOffer = new Offer({
+                id: offers[i].id,
+                partnerId: offers[i].partnerId,
+                fetchDate: offers[i].fetchDate,
+                imageUrl: offers[i].imageUrl,
+                downloadLink: offers[i].downloadLink,
+                title: offers[i].title,
+                description: offers[i].description,
+                credits: offers[i].credits
+            });
+    
+            newOffer.save(function(err) {
+                if (err) {
+                    logger.log.error('dal: saveOffers.save error', {error: serializeError(err)});                        
+                }
+            });
+        }
+    } catch (err) {
+        logger.log.error('dal: saveOffers error occured', {error: serializeError(err)});                        
+        throw err;
     }
+    
 }
 
 function addUserAction(partnerTransactionId, userId, offerId, offerCredits, totalCredits, partner, date, innerTransactionId) {
@@ -242,6 +263,7 @@ function addUserAction(partnerTransactionId, userId, offerId, offerCredits, tota
             newUserAction.save(function(err) {
                 if (err) {
                     console.log(err);
+                    logger.log.error('dal: addUserAction.save error', {error: serializeError(err)});                        
                     reject(err);
                 } else {
                     resolve();
@@ -249,6 +271,7 @@ function addUserAction(partnerTransactionId, userId, offerId, offerCredits, tota
             });
         }
         catch (err) {
+            logger.log.error('dal: addUserAction error occured', {error: serializeError(err)});                        
             reject(err);
         }
     });    
@@ -264,6 +287,7 @@ function increaseUserCredits(userId, credits) {
                     var currentPoints = Number(res.points) + Number(credits);
                     BotUser.update({user_id: userId}, {$set: {points: currentPoints}}, (err, res) => {
                         if (err) {
+                            logger.log.error('dal: increaseUserCredits.update error', {error: serializeError(err)});                        
                             reject(err);
                         } else {
                             resolve();
@@ -273,6 +297,7 @@ function increaseUserCredits(userId, credits) {
             });
         }
         catch (err) {
+            logger.log.error('dal: increaseUserCredits error occured', {error: serializeError(err)});                        
             reject(err);
         }
     });    
@@ -292,6 +317,7 @@ function saveFriendReferralNewBotUser(id, name, email, referrerUserId) {
                 });
             botUser.save(function(err) {
                 if (err) {
+                    logger.log.error('dal: saveFriendReferralNewBotUser.save error', {error: serializeError(err)});                        
                     console.log(err);
                     reject(err);
                 } else {
@@ -300,6 +326,7 @@ function saveFriendReferralNewBotUser(id, name, email, referrerUserId) {
             })
         }
         catch (err) {
+            logger.log.error('dal: saveFriendReferralNewBotUser error', {error: serializeError(err)});                        
             reject(err);
         }
     });
