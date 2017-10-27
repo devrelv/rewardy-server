@@ -3,6 +3,11 @@ var siteUrl = require('./core/site-url');
 var dal = require('./core/dal');
 var consts = require('./core/const');
 var mailSender = require('./core/mail-sender.js');
+const logger = require('./core/logger');
+const serializeError = require('serialize-error');
+
+
+logger.log.info('Bot started');
 
 var connector = new builder.ChatConnector({
     appId: process.env.MICROSOFT_APP_ID,
@@ -51,31 +56,37 @@ var bot = new builder.UniversalBot(connector, [
         return session.beginDialog('login:/');
     },
     function (session, args, next) {
-
-        if (localizedRegex(session, [MainOptions.Redeem]).test(session.message.text)) {
-            // Redeem flow
-            return session.beginDialog('redeem:/');
-        } else if (localizedRegex(session, [MainOptions.CheckCredit]).test(session.message.text)) {
-            // Check Credits flow
-            return session.beginDialog('check-credits:/');            
-        } else if (localizedRegex(session, [MainOptions.GetCredit]).test(session.message.text)) {
-            // Check Credits flow
-            return session.beginDialog('get-free-credits:/');            
-        } else if (localizedRegex(session, [MainOptions.InviteFriends]).test(session.message.text)) {
-            // Invite Friends flow
-            return session.beginDialog('invite:/');            
-        } else if (localizedRegex(session, [MainOptions.Help]).test(session.message.text)) {
-            // Invite Friends flow
-            return session.beginDialog('help:/');            
+        try {
+            if (localizedRegex(session, [MainOptions.Redeem]).test(session.message.text)) {
+                // Redeem flow
+                return session.beginDialog('redeem:/');
+            } else if (localizedRegex(session, [MainOptions.CheckCredit]).test(session.message.text)) {
+                // Check Credits flow
+                return session.beginDialog('check-credits:/');            
+            } else if (localizedRegex(session, [MainOptions.GetCredit]).test(session.message.text)) {
+                // Check Credits flow
+                return session.beginDialog('get-free-credits:/');            
+            } else if (localizedRegex(session, [MainOptions.InviteFriends]).test(session.message.text)) {
+                // Invite Friends flow
+                return session.beginDialog('invite:/');            
+            } else if (localizedRegex(session, [MainOptions.Help]).test(session.message.text)) {
+                // Invite Friends flow
+                return session.beginDialog('help:/');            
+            }
+    
+            var welcomeCard = new builder.HeroCard(session)
+                .title('welcome_title')
+                .subtitle('welcome_subtitle')
+                .buttons(createRootButtons(session, builder));
+    
+            session.send(new builder.Message(session)
+                .addAttachment(welcomeCard));
         }
-
-        var welcomeCard = new builder.HeroCard(session)
-            .title('welcome_title')
-            .subtitle('welcome_subtitle')
-            .buttons(createRootButtons(session, builder));
-
-        session.send(new builder.Message(session)
-            .addAttachment(welcomeCard));
+        catch (err) {
+            logger.log.error('index: builder.UniversalBot error occured', {error: serializeError(err)});
+            throw err;            
+        }
+        
     }
 
 ]);
@@ -113,6 +124,8 @@ bot.library(require('./core/validators').createLibrary());
 // Send welcome when conversation with bot is started, by initiating the root dialog
 bot.on('conversationUpdate', function (message) {
     if (message.membersAdded) {
+        logger.log.info('conversation started', {members: message.membersAdded});
+        
         message.membersAdded.forEach(function (identity) {
             if (identity.id === message.address.bot.id) {
                 bot.beginDialog(message.address, '/');
@@ -124,16 +137,23 @@ bot.on('conversationUpdate', function (message) {
 // Cache of localized regex to match selection from main options
 var LocalizedRegexCache = {};
 function localizedRegex(session, localeKeys) {
-    var locale = session.preferredLocale();
-    var cacheKey = locale + ":" + localeKeys.join('|');
-    if (LocalizedRegexCache.hasOwnProperty(cacheKey)) {
-        return LocalizedRegexCache[cacheKey];
+    try {
+        var locale = session.preferredLocale();
+        var cacheKey = locale + ":" + localeKeys.join('|');
+        if (LocalizedRegexCache.hasOwnProperty(cacheKey)) {
+            return LocalizedRegexCache[cacheKey];
+        }
+    
+        var localizedStrings = localeKeys.map(function (key) { return session.localizer.gettext(locale, key); });
+        var regex = new RegExp('^(' + localizedStrings.join('|') + ')', 'i');
+        LocalizedRegexCache[cacheKey] = regex;
+        return regex;
+    } 
+    catch (err) {
+        logger.log.error('index: localizedRegex error occured', {error: serializeError(err)});
+        throw err;        
     }
-
-    var localizedStrings = localeKeys.map(function (key) { return session.localizer.gettext(locale, key); });
-    var regex = new RegExp('^(' + localizedStrings.join('|') + ')', 'i');
-    LocalizedRegexCache[cacheKey] = regex;
-    return regex;
+    
 }
 
 // Connector listener wrapper to capture site url

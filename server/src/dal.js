@@ -235,7 +235,7 @@ function saveOffers(offers) {
     
             newOffer.save(function(err) {
                 if (err) {
-                    logger.log.error('dal: saveOffers.save error', {error: serializeError(err)});                        
+                    logger.log.error('dal: saveOffers.save error', {error: serializeError(err), newOffer: newOffer});                        
                 }
             });
         }
@@ -263,7 +263,7 @@ function addUserAction(partnerTransactionId, userId, offerId, offerCredits, tota
             newUserAction.save(function(err) {
                 if (err) {
                     console.log(err);
-                    logger.log.error('dal: addUserAction.save error', {error: serializeError(err)});                        
+                    logger.log.error('dal: addUserAction.save error', {error: serializeError(err), newUserAction: newUserAction});                        
                     reject(err);
                 } else {
                     resolve();
@@ -282,12 +282,13 @@ function increaseUserCredits(userId, credits) {
         try {   
             BotUser.findOne({user_id: userId}, (err,res)=> {
                 if (err) {
+                    logger.log.error('dal: increaseUserCredits BotUser.findOne error', {error: serializeError(err), user_id: userId});                        
                     reject(err);
                 } else {
                     var currentPoints = Number(res.points) + Number(credits);
                     BotUser.update({user_id: userId}, {$set: {points: currentPoints}}, (err, res) => {
                         if (err) {
-                            logger.log.error('dal: increaseUserCredits.update error', {error: serializeError(err)});                        
+                            logger.log.error('dal: increaseUserCredits.update error', {error: serializeError(err), user_id: userId, points: currentPoints});                        
                             reject(err);
                         } else {
                             resolve();
@@ -317,7 +318,7 @@ function saveFriendReferralNewBotUser(id, name, email, referrerUserId) {
                 });
             botUser.save(function(err) {
                 if (err) {
-                    logger.log.error('dal: saveFriendReferralNewBotUser.save error', {error: serializeError(err)});                        
+                    logger.log.error('dal: saveFriendReferralNewBotUser.save error', {error: serializeError(err), botUser: botUser});                        
                     console.log(err);
                     reject(err);
                 } else {

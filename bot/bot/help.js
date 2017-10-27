@@ -4,6 +4,8 @@ var lib = new builder.Library('help');
 var validators = require('./core/validators');
 var mailSender = require('./core/mail-sender.js');
 var consts = require('./core/const');
+const logger = require('./core/logger');
+const serializeError = require('serialize-error');
 
 
 // The dialog stack is cleared and this dialog is invoked when the user enters 'help'.
@@ -12,15 +14,19 @@ lib.dialog('/', [
         builder.Prompts.confirm(session, session.gettext('help.intro'));
     },
     function (session, args, next) {
-        if (args.response) {
-            if (!session.userData.sender || !session.userData.sender.email) {
-                builder.Prompts.text(session, session.gettext('help.fill_email'));
+        try {
+            if (args.response) {
+                if (!session.userData.sender || !session.userData.sender.email) {
+                    builder.Prompts.text(session, session.gettext('help.fill_email'));
+                } else {
+                    next();
+                }
             } else {
-                next();
+                session.endDialog(session.gettext('help.no_help_needed'));
+                session.replaceDialog('/');
             }
-        } else {
-            session.endDialog(session.gettext('help.no_help_needed'));
-            session.replaceDialog('/');
+        } catch (err) {
+            logger.log.error('help: / dialog, 2nd func error', {error: serializeError(err)});            
         }
     },
     function (session, args, next) {
@@ -29,10 +35,7 @@ lib.dialog('/', [
         } else {
             session.replaceDialog('help_get_user_message');
         }
-    },
-    function (session, args, next) {
-        
-    },
+    }
 ]);
 //]).triggerAction({matches: /\bhelp\b/i,});
 
@@ -54,6 +57,8 @@ lib.dialog('help_get_user_message', [
                 session.endDialog(session.gettext('help.message_received'));
                 session.replaceDialog('/');
             }).catch (err => {
+                logger.log.error('help: help_get_user_message dialog, 3rd func mailSender.sendTemplateMail error', {error: serializeError(err)});            
+            
                 session.say(session.gettext('help.error_sending_email'));
                 session.replaceDialog('help_get_user_message');
             });
