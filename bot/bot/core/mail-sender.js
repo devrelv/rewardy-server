@@ -1,53 +1,62 @@
 'use strict';
 const nodemailer = require('nodemailer');
 const mailTemplates = require('./mail-templates.js');
-
-// create reusable transporter object using the default SMTP transport
-let transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // true for 465, false for other ports
-    auth: {
-        user: process.env.EMAIL_USERNAME, // generated ethereal user
-        pass: process.env.EMAIL_PASSWORD  // generated ethereal password
-    }
-});
+const logger = require('./logger');
+const serializeError = require('serialize-error');
 
 function sendCustomMail(toEmail, subject, text, html) {
-    var toEmailAsString;
-    if (Array.isArray(toEmail)) {
-        toEmailAsString = toEmail.join(',');
-    } else {
-        toEmailAsString = toEmail;
-    }
-    // setup email data with unicode symbols
-    let mailOptions = {
-        from: '"' + process.env.EMAIL_SENDER_NAME + '" <' + process.env.EMAIL_USERNAME + '>', // sender address
-        to: toEmailAsString, // list of receivers
-        subject: subject, // Subject line
-        text: text, // plain text body
-        html: html // html body
-    };
-
     // send mail with defined transport object
     return new Promise((resolve, reject) => {
-        transporter.sendMail(mailOptions, sendMailCallback);
-        
-        function sendMailCallback(error, info) {
-            if (error) {
-                // if using google - don't forget to enable less secure apps on google https://www.google.com/settings/security/lesssecureapps
-                // return console.log(error);
-                reject(error);
+        try {
+            var toEmailAsString;
+            if (Array.isArray(toEmail)) {
+                toEmailAsString = toEmail.join(',');
             } else {
-                // console.log('Message sent: %s', info.messageId);
-                // // Preview only available when sending through an Ethereal account
-                // console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-                resolve(info);
-        
-                // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@blurdybloop.com>
-                // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+                toEmailAsString = toEmail;
+            }
+            // setup email data with unicode symbols
+            let mailOptions = {
+                from: '"' + process.env.EMAIL_SENDER_NAME + '" <' + process.env.EMAIL_USERNAME + '>', // sender address
+                to: toEmailAsString, // list of receivers
+                subject: subject, // Subject line
+                text: text, // plain text body
+                html: html // html body
+            };
+    
+            // create reusable transporter object using the default SMTP transport
+            let transporter = nodemailer.createTransport({
+                host: 'smtp.gmail.com',
+                port: 465,
+                secure: true, // true for 465, false for other ports
+                auth: {
+                    user: process.env.EMAIL_USERNAME, // generated ethereal user
+                    pass: process.env.EMAIL_PASSWORD  // generated ethereal password
+                }
+            });
+            transporter.sendMail(mailOptions, sendMailCallback);
+            
+            function sendMailCallback(error, info) {
+                if (err) {
+                    // if using google - don't forget to enable less secure apps on google https://www.google.com/settings/security/lesssecureapps
+                    // return console.log(error);
+                    logger.log.error('mail-sender: sendCustomMail sendMailCallback error', {error: serializeError(err), arguments: {toEmail: toEmail, subject: subject, text: text, html: html}});            
+                    reject(err);
+                } else {
+                    // console.log('Message sent: %s', info.messageId);
+                    // // Preview only available when sending through an Ethereal account
+                    // console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+                    resolve(info);
+            
+                    // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@blurdybloop.com>
+                    // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+                }
             }
         }
+        catch (err) {
+            logger.log.error('mail-sender: sendCustomMail error occured', {error: serializeError(err), arguments: {toEmail: toEmail, subject: subject, text: text, html: html}});
+            throw err;
+        }
+        
     });
 }
 
@@ -58,6 +67,7 @@ function sendTemplateMail(templateId, toEmail, data) {
         this.sendCustomMail(toEmail, mailData.subject, mailData.text, mailData.html).then(res => {
             resolve(res);            
         }).catch(err => {
+            logger.log.error('mail-sender: sendTemplateMail error', {error: serializeError(err), arguments: {templateId: templateId, toEmail: toEmail, data: data}});
             reject(err);
         });
     });

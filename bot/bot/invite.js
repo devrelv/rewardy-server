@@ -5,7 +5,8 @@ var dal = require('./core/dal');
 var consts = require('./core/const');
 
 var lib = new builder.Library('invite');
-
+const logger = require('./core/logger');
+const serializeError = require('serialize-error');
 
 // TODO: Load locale + save & fetch device in the user data also after query (or in the login)
 lib.dialog('/', [
@@ -21,7 +22,7 @@ lib.dialog('/', [
             // TODO: Change the URL from someUrl.com to the real one (when available)
             session.say('http://someUrl.com?referrer=' + session.userData.sender.user_id);
         }).catch(err => {
-            console.log('getInvitedFriendsByUserId error: ', err);
+            logger.log.debug('invite calling getInvitedFriendsByUserId error', {error: serializeError(err)});
         });
     }
 ]);

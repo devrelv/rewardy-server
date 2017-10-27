@@ -5,44 +5,50 @@ var Promise = require('bluebird');
 var dal = require('./core/dal');
 var consts = require('./core/const');
 
+const logger = require('./core/logger');
+const serializeError = require('serialize-error');
 
 // TODO: Load locale + save & fetch device in the user data also after query (or in the login)
 lib.dialog('/', [
     function (session) {
-        session.say(session.gettext('getCredit.intro'));
-        dal.getDeviceByUserId(session.userData.sender.user_id).then(userResult => {
-            if (!userResult) {
-                // That's the first time we encounter this user. Share the legal notice!
-                session.say(session.gettext('general.legalNotice'));
-
-                // User is missing. Fetch details and save to database
-                // TODO: Use the equivalent for bot.getUserDetails
-                // This is the source code:
-                    // bot.getUserDetails(session.userProfile)
-                    // .then(userDetails => {
-                    //     let deviceType = extractDeviceTypeFromUserDetails(userDetails.primary_device_os);
-                    //     dal.saveDeviceUserToDatabase(userId, deviceType);
-                    //     sendUserOfferWallUrl(session, deviceType, userId);
-                    // }).catch(function(e) {
-                    //     console.error('Failed to extract with error: ' + e); 
-                    //     let fallbackDeviceType = consts.DEVICE_TYPE_DESKTOP;
-                    //     dal.saveDeviceUserToDatabase(userId, fallbackDeviceType);
-                    //     sendUserOfferWallUrl(session, fallbackDeviceType, userId);
-                    // });
-
-                // Until we have the bot.getUserDetails function, we can use this:
-                let fallbackDeviceType = consts.DEVICE_TYPE_DESKTOP;
-                dal.saveDeviceUserToDatabase(session.userData.sender.user_id, fallbackDeviceType);
-                sendUserOfferWallUrl(session, fallbackDeviceType, session.userData.sender.user_id);
-            } else {
-                sendUserOfferWallUrl(session, userResult.type, session.userData.sender.user_id);                
-            }
-            session.endDialog();
-        }).catch(err => {
-            sendUserOfferWallUrl(session, consts.DEVICE_TYPE_DESKTOP, session.userData.sender.user_id);
-            console.log('error in getDeviceByUserId');
-            console.log(err);            
-        });
+        try{
+            session.say(session.gettext('getCredit.intro'));
+            dal.getDeviceByUserId(session.userData.sender.user_id).then(userResult => {
+                if (!userResult) {
+                    // That's the first time we encounter this user. Share the legal notice!
+                    session.say(session.gettext('general.legalNotice'));
+    
+                    // User is missing. Fetch details and save to database
+                    // TODO: Use the equivalent for bot.getUserDetails
+                    // This is the source code:
+                        // bot.getUserDetails(session.userProfile)
+                        // .then(userDetails => {
+                        //     let deviceType = extractDeviceTypeFromUserDetails(userDetails.primary_device_os);
+                        //     dal.saveDeviceUserToDatabase(userId, deviceType);
+                        //     sendUserOfferWallUrl(session, deviceType, userId);
+                        // }).catch(function(e) {
+                        //     console.error('Failed to extract with error: ' + e); 
+                        //     let fallbackDeviceType = consts.DEVICE_TYPE_DESKTOP;
+                        //     dal.saveDeviceUserToDatabase(userId, fallbackDeviceType);
+                        //     sendUserOfferWallUrl(session, fallbackDeviceType, userId);
+                        // });
+    
+                    // Until we have the bot.getUserDetails function, we can use this:
+                    let fallbackDeviceType = consts.DEVICE_TYPE_DESKTOP;
+                    dal.saveDeviceUserToDatabase(session.userData.sender.user_id, fallbackDeviceType);
+                    sendUserOfferWallUrl(session, fallbackDeviceType, session.userData.sender.user_id);
+                } else {
+                    sendUserOfferWallUrl(session, userResult.type, session.userData.sender.user_id);                
+                }
+                session.endDialog();
+            }).catch(err => {
+                logger.log.error('get-free-credits: dal.getDeviceByUserId error', {error: serializeError(err)});
+                sendUserOfferWallUrl(session, consts.DEVICE_TYPE_DESKTOP, session.userData.sender.user_id);
+            });
+        } catch (err) {
+            logger.log.error('get-free-credits: error occured', {error: serializeError(err)});
+            throw err;
+        }
     }
 ]);
 
