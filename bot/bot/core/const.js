@@ -22,6 +22,7 @@ module.exports = {
     SPONSOR_PAY_APP_ID_ANDROID : '104296',
 
     defaultStartPoints: 100,
+    referralBonusPoints: 50,
 
     MAIL_TEMPLATE_WELCOME: 'welcome_mail',
     MAIL_TEMPLATE_REDEEM_REQUEST: 'redeem_request',

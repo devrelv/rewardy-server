@@ -19,7 +19,7 @@ lib.dialog('/', [
                 session.say(session.gettext('invite.invited_friends', invitedFriends.length));                
             }
             // TODO: Add the real amount of credits (instead of 50)
-            session.say(session.gettext('invite.explanation', '50') + '\n\r' + session.gettext('invite.before_link'));
+            session.say(session.gettext('invite.explanation', consts.referralBonusPoints) + '\n\r' + session.gettext('invite.before_link'));
             // TODO: Change the URL from someUrl.com to the real one (when available)
             session.say('http://rewardy.co?invite?referrer=' + session.userData.sender.user_id);
             back_to_menu.sendBackToMainMenu(session, builder);            
