@@ -25,6 +25,7 @@
     "lodash": "^4.17.4",
     "mongoose": "^4.11.13",
     "nodemailer": "^4.2.0",
+    "object-hash": "^1.2.0",
     "pug": "^2.0.0-beta6",
     "serialize-error": "^2.1.0",
     "serve-favicon": "^2.4.5",

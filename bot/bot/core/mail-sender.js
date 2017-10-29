@@ -25,7 +25,7 @@ function sendCustomMail(toEmail, subject, text, html) {
     
             // create reusable transporter object using the default SMTP transport
             let transporter = nodemailer.createTransport({
-                host: 'smtp.gmail.com',
+                host: 'smtp.zoho.com',
                 port: 465,
                 secure: true, // true for 465, false for other ports
                 auth: {
@@ -35,10 +35,9 @@ function sendCustomMail(toEmail, subject, text, html) {
             });
             transporter.sendMail(mailOptions, sendMailCallback);
             
-            function sendMailCallback(error, info) {
+            function sendMailCallback(err, info) {
                 if (err) {
                     // if using google - don't forget to enable less secure apps on google https://www.google.com/settings/security/lesssecureapps
-                    // return console.log(error);
                     logger.log.error('mail-sender: sendCustomMail sendMailCallback error', {error: serializeError(err), arguments: {toEmail: toEmail, subject: subject, text: text, html: html}});            
                     reject(err);
                 } else {

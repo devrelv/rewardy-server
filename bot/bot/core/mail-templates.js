@@ -3,6 +3,7 @@ const MailTemplate = require('./mail-template');
 const Consts = require('./const');
 const logger = require('./logger');
 const serializeError = require('serialize-error');
+var fs = require('fs');
 
 var mailTemplates = [];
 try {
@@ -18,6 +19,12 @@ try {
                 'This is the user as sent by the user at %DATE%:<br/><b>%USER_MESSAGE%</b><br/><br/>User Details:<br/>%USER_DETAILS%',
                 'This is the user as sent by the user at %DATE%: %USER_MESSAGE%    User Details:  %USER_DETAILS%');
     mailTemplates.push(helpTemplate);
+
+    var redeem_confirm_content = fs.readFileSync('./bot/email_templates/redeem_confirm.html', 'utf8');
+
+    // %VOUCHER_TITLE%, %VOUCHER_STORE%, %VOUCHER_CTA%, %VOUCHER_IMAGE_URL%, %REDEEM_CONFIRMATION_URL%
+    var redeem_confirm = new MailTemplate(Consts.MAIL_TEMPLATE_REDEEM_CONFIRMATION, 'Rewardy Voucher Confirmation', redeem_confirm_content,redeem_confirm_content);
+    mailTemplates.push(redeem_confirm);
 }
 catch (err) {
     logger.log.error('mail-templates: noScope error occured', {error: serializeError(err)});

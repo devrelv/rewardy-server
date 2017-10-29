@@ -4,6 +4,7 @@ var lib = new builder.Library('get-free-credits');
 var Promise = require('bluebird');
 var dal = require('./core/dal');
 var consts = require('./core/const');
+const back_to_menu = require('./back-to-menu');
 
 const logger = require('./core/logger');
 const serializeError = require('serialize-error');
@@ -12,11 +13,10 @@ const serializeError = require('serialize-error');
 lib.dialog('/', [
     function (session) {
         try{
-            session.say(session.gettext('getCredit.intro'));
             dal.getDeviceByUserId(session.userData.sender.user_id).then(userResult => {
                 if (!userResult) {
                     // That's the first time we encounter this user. Share the legal notice!
-                    session.say(session.gettext('general.legalNotice'));
+                    session.say(session.gettext('getCredit.legalNotice'));
     
                     // User is missing. Fetch details and save to database
                     // TODO: Use the equivalent for bot.getUserDetails
@@ -40,10 +40,11 @@ lib.dialog('/', [
                 } else {
                     sendUserOfferWallUrl(session, userResult.type, session.userData.sender.user_id);                
                 }
-                session.endDialog();
+                back_to_menu.sendBackToMainMenu(session, builder);
             }).catch(err => {
                 logger.log.error('get-free-credits: dal.getDeviceByUserId error', {error: serializeError(err)});
                 sendUserOfferWallUrl(session, consts.DEVICE_TYPE_DESKTOP, session.userData.sender.user_id);
+                back_to_menu.sendBackToMainMenu(session, builder);
             });
         } catch (err) {
             logger.log.error('get-free-credits: error occured', {error: serializeError(err)});
@@ -53,7 +54,7 @@ lib.dialog('/', [
 ]);
 
 function sendUserOfferWallUrl(session, deviceType, userId) {
-    session.send(offerWallLinkForUser(session, deviceType, userId));
+    session.send(session.gettext('getCredit.intro') + '\n\r' + offerWallLinkForUser(session, deviceType, userId));
 }
 
 function offerWallLinkForUser(session, deviceType, userId) {
@@ -68,7 +69,7 @@ function offerWallLinkForUser(session, deviceType, userId) {
         appId = consts.SPONSOR_PAY_APP_ID_DESKTOP;
     }
 
-    return 'http://iframe.sponsorpay.com/?appid=${appId}&uid=' + session.userData.sender.user_id;
+    return 'https://rewardy.co/offers.html?uid=' + session.userData.sender.user_id;
 }
 
 

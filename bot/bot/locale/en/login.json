@@ -1,6 +1,7 @@
 {
-    "type_email_or_return": "Type your email",
-    "invalid_email_address": "Something is wrong with that email address. Please try again.",
+    "welcome_message": "Hello and welcome to Rewardy.co! Let's get started! 👻👻👻",
+    "type_email_or_return": "Please type your email address",
+    "invalid_email_address": "⚠ Something is wrong with that email address.\n\rPlease type your email address again.",
     "get_name": "What is your name?",
-    "welcome_back {{name}}": "Welcome back {{name}}, I'm happy to see you again"    
+    "welcome_back": "Welcome back %s, I'm happy to see you again"    
 }

@@ -10,7 +10,7 @@ var uuid = require('uuid');
 
 lib.dialog('/', [
     function (session) {
-        session.send('type_email_or_return');
+        session.send(session.gettext('welcome_message') + '\n\r' + session.gettext('type_email_or_return'));
         return session.beginDialog('email');
     },
     function (session, args) {
@@ -27,13 +27,14 @@ lib.dialog('email', editOptionDialog(
     }));
 
 lib.dialog('userDetails', [
-    function (session) {
+    function (session) { // TODO: ask the user to confirm his email in case of typo
         builder.Prompts.text(session, 'get_name');
     },
     function (session, result) {
         session.userData.sender.name = result.response;
-        session.userData.sender.userId = uuid.v1();
+        session.userData.sender.user_id = uuid.v1();
         session.userData.sender.language = session.userData.sender.language || consts.defaultUserLanguage;
+        session.userData.sender.points = consts.defaultStartPoints;
         //saveSenderSettingFull(session, session.userData.sender); 
         dal.saveUserToDatabase(session.userData.sender);
         // Getting more info from user if needed using builder.Prompt.text(session, 'xxxxx');
@@ -78,9 +79,8 @@ function editOptionDialog(validationFunc, invalidMessage, saveFunc) {
                     // Ask more questions about the user and save to DB + userData.sender
                     session.beginDialog('userDetails');
                 } else {
-                    // TODO: handle the json parameter better {{name}}
                     session.userData.sender = userDataFromDB;
-                    session.send(session.gettext('welcome_back {{name}}').replace('{{name}}', session.userData.sender.name));
+                    session.send(session.gettext('welcome_back', session.userData.sender.name));
                     session.endDialogWithResult({ updated: true });
                 }
             

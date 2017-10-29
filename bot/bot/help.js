@@ -41,14 +41,13 @@ lib.dialog('/', [
 
 lib.dialog('help_get_user_message', [
     function (session) {
-        builder.Prompts.text(session, session.gettext('help.email_confirmation {{email}}').replace('{{email}}', session.userData.sender.email) + '\n\r' + session.gettext('help.leave_question'));
+        builder.Prompts.text(session, session.gettext('help.leave_question', session.userData.sender.email));
     }, function (session, args) {
          session.privateConversationData = { userQuestion: args.response };
         builder.Prompts.confirm(session, session.gettext('help.confirm_sending'));
     }, function (session, args) {
         if (args.response) {
-             // TODO: change yaari.tal@gmail.com to support email
-            mailSender.sendTemplateMail(consts.MAIL_TEMPLATE_HELP_QUESTION, 'yaari.tal@gmail.com', 
+            mailSender.sendTemplateMail(consts.MAIL_TEMPLATE_HELP_QUESTION, 'hello@rewardy.co', 
                     [{key: '%USER_EMAIL%', value: session.userData.sender.email},
                     {key: '%DATE%', value: (new Date()).toUTCString()},
                     {key: '%USER_MESSAGE%', value: session.privateConversationData.userQuestion},

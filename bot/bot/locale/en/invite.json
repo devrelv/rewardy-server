@@ -1,6 +1,6 @@
 {
-    "invite.invited_friends {{numOfFirends}}": "{{numOfFriends}} friends already making money thanks to you",
+    "invite.invited_friends": "%s friends already making money thanks to you",
     "invite.no_invited_friends" : "You didn't invite any friends yet",
-    "invite.explanation {{numOfCredits}}": "Invite friends and earn free credits!\n\rYou will get {{numOfCredits}} credits for every friend that use us. Start making money with your friends.",
+    "invite.explanation": "Invite friends and earn free credits!\n\rYou will get %s credits for every friend that use us. Start making money with your friends.",
     "invite.before_link": "Just send the following link to your friends and you will get free credits:"
 }

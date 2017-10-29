@@ -7,6 +7,7 @@ var consts = require('./core/const');
 var lib = new builder.Library('invite');
 const logger = require('./core/logger');
 const serializeError = require('serialize-error');
+const back_to_menu = require('./back-to-menu');
 
 // TODO: Load locale + save & fetch device in the user data also after query (or in the login)
 lib.dialog('/', [
@@ -15,14 +16,16 @@ lib.dialog('/', [
             if (invitedFriends.length == 0) {
                 session.say(session.gettext('invite.no_invited_friends'));
             } else {
-                session.say(session.gettext('invite.invited_friends {{numOfFirends}}').replace('{{numOfFriends}}', invitedFriends.length));                
+                session.say(session.gettext('invite.invited_friends', invitedFriends.length));                
             }
             // TODO: Add the real amount of credits (instead of 50)
-            session.say(session.gettext('invite.explanation {{numOfCredits}}').replace('{{numOfCredits}}', '50') + '\n\r' + session.gettext('invite.before_link'));
+            session.say(session.gettext('invite.explanation', '50') + '\n\r' + session.gettext('invite.before_link'));
             // TODO: Change the URL from someUrl.com to the real one (when available)
-            session.say('http://someUrl.com?referrer=' + session.userData.sender.user_id);
+            session.say('http://rewardy.co?invite?referrer=' + session.userData.sender.user_id);
+            back_to_menu.sendBackToMainMenu(session, builder);            
         }).catch(err => {
             logger.log.debug('invite calling getInvitedFriendsByUserId error', {error: serializeError(err)});
+            back_to_menu.sendBackToMainMenu(session, builder);            
         });
     }
 ]);

@@ -25,5 +25,8 @@ module.exports = {
 
     MAIL_TEMPLATE_WELCOME: 'welcome_mail',
     MAIL_TEMPLATE_REDEEM_REQUEST: 'redeem_request',
-    MAIL_TEMPLATE_HELP_QUESTION: 'help_question'
+    MAIL_TEMPLATE_HELP_QUESTION: 'help_question',
+    MAIL_TEMPLATE_REDEEM_CONFIRMATION: 'redeem_confirmation',
+
+    SERVER_API_URL: 'http://127.0.0.1:8080/api/' // TODO: Replace with real server ip    
 };

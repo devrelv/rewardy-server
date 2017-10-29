@@ -76,7 +76,7 @@ var bot = new builder.UniversalBot(connector, [
     
             var welcomeCard = new builder.HeroCard(session)
                 .title('welcome_title')
-                .subtitle('welcome_subtitle')
+                .subtitle(session.gettext('welcome_subtitle', session.userData.sender.name))
                 .buttons(createRootButtons(session, builder));
     
             session.send(new builder.Message(session)

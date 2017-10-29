@@ -1,4 +1,4 @@
 {
-    "checkCredit.response {{points}}": "You have {{points}}! Keep on playing for more. 💪",
-    "general.type_to_continue": "Type help for assistence or anything else to get back to the menu"
+    "checkCredit.response": "You have %s points!\n\rKeep on playing for more. 💪",
+    "general.type_to_continue": "Type any key get back to the menu"
 }

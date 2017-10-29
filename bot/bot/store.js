@@ -12,7 +12,7 @@ module.exports = {
 
 			let vouchers = _.forEach(loadedVouchers)
 				.map(function (loadedVoucher) {
-					return new Voucher(loadedVoucher.id, loadedVoucher.title, loadedVoucher.description, loadedVoucher.imageUrl, loadedVoucher.points, loadedVoucher.cta);
+					return new Voucher(loadedVoucher.id, loadedVoucher.title, loadedVoucher.store, loadedVoucher.description, loadedVoucher.imageUrl, loadedVoucher.points, loadedVoucher.cta);
 				});
 			
 			resolve(vouchers);

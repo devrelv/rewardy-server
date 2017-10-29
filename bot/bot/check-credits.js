@@ -4,14 +4,18 @@ var lib = new builder.Library('check-credits');
 var Promise = require('bluebird');
 const logger = require('./core/logger');
 const serializeError = require('serialize-error');
+const consts = require('./core/const');
+const back_to_menu = require('./back-to-menu');
 
 // TODO: Load the locale
 lib.dialog('/', [
     function (session) {
         try {
-            messageText = session.gettext('checkCredit.response {{points}}').replace('{{points}}', session.userData.sender.points);
-            session.say(messageText);
-            session.endDialog(session.gettext('general.type_to_continue'));
+            if (!session.userData.sender.points) {
+                session.userData.sender.points = consts.defaultStartPoints;
+            }
+            session.say(session.gettext('checkCredit.response', session.userData.sender.points));
+            back_to_menu.sendBackToMainMenu(session, builder);
         } catch (err) {
             logger.log.error('check-credits: error occured', {error: serializeError(err)});
             throw err;
