@@ -23,6 +23,7 @@ module.exports = {
 
     defaultStartPoints: 100,
     referralBonusPoints: 50,
+    minimumCompletedOffersForReferalToCount: 2,
 
     MAIL_TEMPLATE_WELCOME: 'welcome_mail',
     MAIL_TEMPLATE_REDEEM_REQUEST: 'redeem_request',

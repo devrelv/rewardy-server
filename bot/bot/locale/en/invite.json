@@ -1,6 +1,6 @@
 {
     "invite.invited_friends": "%s friends already making money thanks to you",
     "invite.no_invited_friends" : "You didn't invite any friends yet",
-    "invite.explanation": "Invite friends and earn free credits!\n\rYou will get %s credits for every friend that use us. Start making money with your friends.",
+    "invite.explanation": "Invite friends and earn free credits!\n\rFor every friend you get to join Rewardy, we’ll give you a free %s points.\n\rTo qualify, your friend has to confirm their account and complete at least %s offers.",
     "invite.before_link": "Just send the following link to your friends and you will get free credits:"
 }
