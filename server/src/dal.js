@@ -262,7 +262,6 @@ function addUserAction(partnerTransactionId, userId, offerId, offerCredits, tota
 
             newUserAction.save(function(err) {
                 if (err) {
-                    console.log(err);
                     logger.log.error('dal: addUserAction.save error', {error: serializeError(err), newUserAction: newUserAction});                        
                     reject(err);
                 } else {
@@ -277,7 +276,7 @@ function addUserAction(partnerTransactionId, userId, offerId, offerCredits, tota
     });    
 }
 
-function increaseUserCredits(userId, credits) {
+function increaseUserCredits(userId, credits, isUpdateDailyBonusDate) {
     return new Promise((resolve, reject) => {
         try {   
             BotUser.findOne({user_id: userId}, (err,res)=> {
@@ -286,7 +285,11 @@ function increaseUserCredits(userId, credits) {
                     reject(err);
                 } else {
                     var currentPoints = Number(res.points) + Number(credits);
-                    BotUser.update({user_id: userId}, {$set: {points: currentPoints}}, (err, res) => {
+                    var updateFields = {points: currentPoints};
+                    if (isUpdateDailyBonusDate) {
+                        updateFields.last_daily_bonus = new Date();
+                    }
+                    BotUser.update({user_id: userId}, {$set: updateFields}, (err, res) => {
                         if (err) {
                             logger.log.error('dal: increaseUserCredits.update error', {error: serializeError(err), user_id: userId, points: currentPoints});                        
                             reject(err);
@@ -312,14 +315,12 @@ function saveFriendReferralNewBotUser(id, name, email, referrerUserId) {
                 email: email,
                 name: name,
                 points: consts.default_points,
-                last_daily_bonus: null,
                 source: {type: consts.friends_referral_code,
                         id: referrerUserId}
                 });
             botUser.save(function(err) {
                 if (err) {
                     logger.log.error('dal: saveFriendReferralNewBotUser.save error', {error: serializeError(err), botUser: botUser});                        
-                    console.log(err);
                     reject(err);
                 } else {
                     resolve();
@@ -333,6 +334,30 @@ function saveFriendReferralNewBotUser(id, name, email, referrerUserId) {
     });
 }
 
+function getUserLastBonusDate(userId) {
+    return new Promise((resolve, reject) => {
+        try {
+            BotUser.findOne({user_id: userId},
+                (err,res) => {
+                if (err) {
+                    logger.log.error('dal: getUserLastBonusDate findOne error', {error: serializeError(err), userId: userId});                        
+                    reject(err);
+                } else {
+                    if (res) {
+                        resolve(res.last_daily_bonus);
+                    } else {
+                        reject('user ' + userId + ' not found');
+                    }
+                }
+            })
+        }
+        catch (err) {
+            logger.log.error('dal: getUserLastBonusDate error', {error: serializeError(err), userId: userId});                        
+            reject(err);
+        }
+    });
+}
+
 module.exports = {
     openConnection: openConnection,
     getAllMonetizationPartners: getAllMonetizationPartners,
@@ -341,6 +366,7 @@ module.exports = {
     addUserAction: addUserAction,
     saveFriendReferralNewBotUser : saveFriendReferralNewBotUser,
     increaseUserCredits: increaseUserCredits,
+    getUserLastBonusDate: getUserLastBonusDate
 }
 
 

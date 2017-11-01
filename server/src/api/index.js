@@ -5,6 +5,9 @@ const request = require('request');
 const monetizationHandler = require('./monetization-handler');
 const consts = require('./consts');
 const registration = require('./registration');
+const voucher_redeem = require('./voucher-redeem');
+const daily_bonus = require('./daily-bonus');
+
 const logger = require('../logger');
 
 export default ({ config, db }) => {
@@ -68,6 +71,35 @@ export default ({ config, db }) => {
 		logger.log.debug('request to /sendReferalMail made', {request: req});
 		registration.sendEmailToReferral(req).then(k=>{
 			res.send({result: "Success", info: "Done"});
+		}).catch(err => {
+			res.status(500).send({result: "Error", info: err});
+		});
+	});
+
+	/*
+		Query arguments:
+		vid - confirmed voucher id
+    	uid - confirming user id
+    	userEmail - confirming user email address
+    	code - verificationCode
+	*/
+	api.get('/confirm_voucher', (req, res) => {
+		logger.log.debug('request to /confirm_voucher made', {request: req});
+		voucher_redeem.confirm(db, req).then(() => {
+			res.send({result: "Success", info: "Done"}); // Redirect to success web page (with next steps)
+		}).catch(err => {
+			res.status(500).send({result: "Error", info: err}); // Redirect to "error occured" web page
+		});
+	});
+
+	/*
+		Query arguments:
+		uid - user id for checking & giving a daily bonus
+	*/
+	api.get('/daily_bonus', (req, res) => {
+		logger.log.debug('request to /daily_bonus made', {request: req});
+		daily_bonus.handleUser(db, req).then((result) => {
+			res.send(result);
 		}).catch(err => {
 			res.status(500).send({result: "Error", info: err});
 		});
