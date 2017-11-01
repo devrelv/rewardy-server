@@ -30,21 +30,21 @@
     <meta property="og:url"                content="https://rewardbot.com" />
     <meta property="og:title" content="RewardBot – Discover Awesome Apps. Earn Cash Rewards." />
     <meta name="description" content="The First Rewards ChatBot - Get Free iTunes, Amazon, Xbox Gift Cards. Available on all chat apps!">
-    <meta name="keywords" content="appnana, appnana.com,nanas,featurepoints,featurepoints.com,chat bot,app redeem,app nana,appjoy,app joy,free giftcard,apptrailers,junowallet,junowallet.com,ipoll,money maker app,playmobs,tango,wrapp,gift card,amazon,google play,itunes,free clash of clan gems,free gems,giftcard,gift card,free gift card,free app rewards,win free app">
+    <meta name="keywords" content="featurepoints,featurepoints.com,chat bot,app redeem,appnana,app nana,appjoy,app joy,free giftcard,apptrailers,junowallet,junowallet.com,ipoll,money maker app,playmobs,tango,wrapp,gift card,amazon,google play,itunes,free clash of clan gems,free gems,giftcard,gift card,free gift card,free app rewards,win free app">
     <meta property="og:image"              content="https://rewardbot.com/apple-icon.png" />
     <meta property="og:image:width"        content="192">
     <meta property="og:image:height"       content="192">
 
-<link rel="stylesheet" type="text/css" href="css/landing.min.css">
+    <link rel="stylesheet" type="text/css" href="css/landing.min.css">
+
+    <script src="js/webflow.min.js"></script>
+    <script src="js/retina.min.js"></script>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-109048713-1"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
-
-        function gtag() {
-            dataLayer.push(arguments);
-        }
+        function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
 
         gtag('config', 'UA-109048713-1');
@@ -61,54 +61,9 @@
             <div class="container">
                 <div class="intro">
                     <img src="img/hero@2x.png" class="intro__img" alt="">
-                    <h1 class="intro__title">I am Rewardy</h1>
+                    <h1 class="intro__title">Congratulations! You're verified!</h1>
                     <div class="intro__text">
                         <div class="intro__text-line">Discover Awesome Apps. Earn Cash <u>Rewards</u>.</div>
-                    </div>
-                    <div class="section__action">
-                        <div class="button-group">
-							<a href="https://m.me/reward?ref=landing" class="section__action-button button button_messenger">
-                    			<svg class="button__icon icon icon_messenger">
-                    				<use xlink:href="#shape-messenger" />
-                    			</svg>
-								ADD TO MESSENGER
-							</a>
-							<a href="https://chats.viber.com/reward" class="section__action-button button button_viber">
-                    			<svg class="button__icon icon icon_viber">
-                    				<use xlink:href="#shape-viber" />
-                    			</svg>
-								ADD TO VIBER
-							</a>
-                        </div>
-                        <div class="section__action-text">
-                            You can also find @RewardBot
-                            on <a class="kik" href="https://bots.kik.com/#/reward">Kik</a> and <a class="telegram" href="https://telegram.me/reward?start=landing">Telegram</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="section">
-        <div class="section__cnt">
-            <div class="container">
-                <div class="section__content">
-                    <div class="section__img-block">
-                        <div class="screen">
-                            <img src="img/screens/1@2x.png" alt="" class="screen__img">
-                        </div>
-                            <div class="screen-message">Message Rewardy…</div>
-                    </div>
-                    <div class="section__body">
-                        <h2 class="section__title h1">The fastest way to<br>get free gift cards</h2>
-                        <div class="section__text">
-                            <ul>
-                                <li>I’m <b>not an app</b>, I’m a friend on your messenger 🤖</li>
-                                <li>Earn points by trying <b>simple</b> tasks 😎</li>
-                                <li>Redeem points for gift cards to top retailers like Amazon, Starbucks, PayPal cash, and more 🛍️</li>
-                            </ul>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -126,11 +81,12 @@
                         <div class="screen-message">Message Rewardy…</div>
                     </div>
                     <div class="section__body">
-                        <h2 class="section__title h1">Perfect solution <br>for a few spare minutes</h2>
+                        <h2 class="section__title h1">Follow those steps<br>to claim your reward</h2>
                         <div class="section__text">
                             <ul>
-                                <li>Every new user can get points FOR FREE ⭐</li>
-                                <li>Refer your friends and earn points 💰</li>
+                                <li>Open Rewardy on your favorite chat app 🤖</li>
+                                <li>Enter your email when asked 🤓</li>
+                                <li>Make an action and get your bonus 💰</li>
                             </ul>
                         </div>
 
@@ -171,31 +127,6 @@
         </ul>
     </nav>
 </footer>
-
-<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-    crossorigin="anonymous"></script>
-<script src="js/webflow.min.js"></script>
-<script src="js/retina.min.js"></script>
-
-<script>
-        $(function () {
-            $('.section__action-button.button_messenger').on('click', function () {
-                ga('send', 'event', 'Landing', 'Click', 'Messenger');
-            });
-
-            $('.section__action-button.button_viber').on('click', function () {
-                ga('send', 'event', 'Landing', 'Click', 'Viber');
-            });
-
-            $('.section__action-text .kik').on('click', function () {
-                ga('send', 'event', 'Landing', 'Click', 'Kik');
-            });
-
-            $('.section__action-text .telegram').on('click', function () {
-                ga('send', 'event', 'Landing', 'Click', 'Telegram');
-            });
-        });
-</script>
 
 </body>
 </html>
