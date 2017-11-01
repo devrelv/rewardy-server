@@ -14,4 +14,5 @@ module.exports = {
     EMAIL_PASSWORD: 'hg68tuyg',
     EMAIL_SENDER_NAME: 'Rewardy',
     SERVER_API_URL: 'http://127.0.0.1:8080/api/', // TODO: Replace with real server ip + Move to a common props file
+    EMAIL_VOUCHERS_GENERETOR: 'hello@rewardy.co' // The email to send the vouchers redeem requests
 }
