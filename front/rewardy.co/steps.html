@@ -128,5 +128,27 @@
     </nav>
 </footer>
 
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+
+<script>
+        $(function () {
+            $('.section__action-button.button_messenger').on('click', function () {
+                ga('send', 'event', 'Landing', 'Click', 'Messenger');
+            });
+
+            $('.section__action-button.button_viber').on('click', function () {
+                ga('send', 'event', 'Landing', 'Click', 'Viber');
+            });
+
+            $('.section__action-text .kik').on('click', function () {
+                ga('send', 'event', 'Landing', 'Click', 'Kik');
+            });
+
+            $('.section__action-text .telegram').on('click', function () {
+                ga('send', 'event', 'Landing', 'Click', 'Telegram');
+            });
+        });
+</script>
 </body>
 </html>
