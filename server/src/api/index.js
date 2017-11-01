@@ -54,9 +54,9 @@ export default ({ config, db }) => {
 	api.get('/register', (req, res) => {
 		logger.log.debug('request to /register made', {request: req});
 		registration.registerUserFromLink(db, req).then(k => {
-			res.send({result: "Success", info: "Done"}); // Redirect to success web page (with next steps)
+			res.redirect('http://rewardy.co/steps.html');
 		}).catch(err => {
-			res.status(500).send({result: "Error", info: err}); // Redirect to "error occured" web page
+			res.status(500).send({result: "Error", info: err}); // TODO: Redirect to "error occured" web page
 		});
 	});
 
@@ -69,7 +69,7 @@ export default ({ config, db }) => {
 	*/
 	api.get('/sendReferalMail', (req,res) => {
 		logger.log.debug('request to /sendReferalMail made', {request: req});
-		registration.sendEmailToReferral(req).then(k=>{
+		registration.sendEmailToReferral(req).then(()=>{
 			res.send({result: "Success", info: "Done"});
 		}).catch(err => {
 			res.status(500).send({result: "Error", info: err});
@@ -86,9 +86,9 @@ export default ({ config, db }) => {
 	api.get('/confirm_voucher', (req, res) => {
 		logger.log.debug('request to /confirm_voucher made', {request: req});
 		voucher_redeem.confirm(db, req).then(() => {
-			res.send({result: "Success", info: "Done"}); // Redirect to success web page (with next steps)
+			res.redirect('http://rewardy.co/voucher-success.html');
 		}).catch(err => {
-			res.status(500).send({result: "Error", info: err}); // Redirect to "error occured" web page
+			res.status(500).send({result: "Error", info: err}); // TODO: Redirect to "error occured" web page
 		});
 	});
 
