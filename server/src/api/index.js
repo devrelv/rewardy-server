@@ -9,6 +9,7 @@ const voucher_redeem = require('./voucher-redeem');
 const daily_bonus = require('./daily-bonus');
 
 const logger = require('../logger');
+const serializeError = require('serialize-error');
 
 export default ({ config, db }) => {
 
@@ -58,7 +59,8 @@ export default ({ config, db }) => {
 		registration.registerUserFromLink(db, req).then(k => {
 			res.redirect('http://rewardy.co/steps.html');
 		}).catch(err => {
-			res.status(500).send({result: "Error", info: err}); // TODO: Redirect to "error occured" web page
+			logger.log.error('error in /register', {request: req, error: serializeError(err)});						
+			res.redirect('http://rewardy.co/wrong-invite.html');
 		});
 	});
 
@@ -92,7 +94,8 @@ export default ({ config, db }) => {
 		voucher_redeem.confirm(db, req).then(() => {
 			res.redirect('http://rewardy.co/voucher-success.html');
 		}).catch(err => {
-			res.status(500).send({result: "Error", info: err}); // TODO: Redirect to "error occured" web page
+			logger.log.error('error in /confirm_voucher', {request: req, error: serializeError(err)});		
+			res.redirect('http://rewardy.co/voucher-fail.html');
 		});
 	});
 
@@ -105,6 +108,7 @@ export default ({ config, db }) => {
 		daily_bonus.handleUser(db, req).then((result) => {
 			res.send(result);
 		}).catch(err => {
+			logger.log.error('error in /daily_bonus', {request: req, error: serializeError(err)});			
 			res.status(500).send({result: "Error", info: err});
 		});
 	});
