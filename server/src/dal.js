@@ -315,7 +315,7 @@ function saveFriendReferralNewBotUser(id, name, email, referrerUserId) {
                 email: email,
                 name: name,
                 points: consts.default_points,
-                source: {type: consts.friends_referral_code,
+                source: {type: consts.botUser_source_friendReferral,
                         id: referrerUserId}
                 });
             botUser.save(function(err) {
@@ -358,6 +358,38 @@ function getUserLastBonusDate(userId) {
     });
 }
 
+// TODO: Exists in BOT dal
+function getBotUserById(userId) {
+    return new Promise((resolve, reject)=>{
+        BotUser.findOne({
+            'user_id': userId
+        }, function(err, botUser) {
+            if (err) {
+                logger.log.error('dal: getBotUserById BotUser.findOne error occured', {error: serializeError(err), user_id: userId});
+                reject(err);
+            } else {
+                resolve(botUser);
+            } 
+        });
+    });    
+}
+
+function updateUserSourceAdditionInfo(userId, additional_data) {
+    return new Promise((resolve, reject) => {
+        // user.source.additional_data = additional_data;
+
+        // BotUser.update({user_id: userId}, {$set: {'source' : user.source }}, (err, res) => {
+        BotUser.update({user_id: userId}, {$set: {'source.additional_data' : additional_data }}, (err, res) => {
+            if (err) {
+                logger.log.error('dal: updateUserSourceAdditionInfo.update error', {error: serializeError(err), user_id: userId, additional_data: additional_data});
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
+    }); 
+}
+
 module.exports = {
     openConnection: openConnection,
     getAllMonetizationPartners: getAllMonetizationPartners,
@@ -366,7 +398,9 @@ module.exports = {
     addUserAction: addUserAction,
     saveFriendReferralNewBotUser : saveFriendReferralNewBotUser,
     increaseUserCredits: increaseUserCredits,
-    getUserLastBonusDate: getUserLastBonusDate
+    getUserLastBonusDate: getUserLastBonusDate,
+    getBotUserById: getBotUserById,
+    updateUserSourceAdditionInfo: updateUserSourceAdditionInfo
 }
 
 

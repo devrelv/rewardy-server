@@ -12,7 +12,8 @@ module.exports = {
     actionBodyGetCredits : 'GetCredits',
     actionBodyGetDailyBonus : 'GetDailyBonus',
     defaultUserLanguage : 'en',
-   
+    botUser_source_friendReferral: 'friend',
+    
     DEVICE_TYPE_ANDROID : 'Android',
     DEVICE_TYPE_APPLE : 'iOS',
     DEVICE_TYPE_DESKTOP : 'Desktop',
@@ -24,6 +25,7 @@ module.exports = {
     defaultStartPoints: 100,
     referralBonusPoints: 50,
     minimumCompletedOffersForReferalToCount: 2,
+    
 
     MAIL_TEMPLATE_WELCOME: 'welcome_mail',
     MAIL_TEMPLATE_REDEEM_REQUEST: 'redeem_request',
