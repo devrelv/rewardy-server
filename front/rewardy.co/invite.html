@@ -72,10 +72,70 @@
                 // Make sure the form is submitted to the destination defined
                 // in the "action" attribute of the form when valid
                 submitHandler: function (form) {
-                    form.submit();
+                    disableSubmit(form);
+                    $('#error_msg').hide();
+                    $.ajax({
+                        url: 'http://127.0.0.1:8080/api/sendReferalMail',
+                        type: 'GET',
+                        data: {
+                            firstName: form.elements["firstname"].value,
+                            lastName: form.elements["lastname"].value,
+                            refId: form.elements["refId"].value,
+                            email: form.elements["email"].value
+                        },
+                        success: function(msg) {
+                            enableSubmit(form);
+                            try {
+                                if (msg.result == "Success" && msg.info == "Done") {
+                                    $('.invite_explain').remove();
+                                    $('.invite_container')[0].innerHTML = "<div style='text-align: center;font-size: 26px;color: #4CAF50;'>Great! Email sent.<br/>Now check your inbox 📩</div>";
+                                } else {
+                                    errorSendingMail(form);
+                                }
+                            }
+                            catch(err) {
+                                errorSendingMail(form);
+                            }
+                            
+                        },
+                        error: function(XMLHttpRequest, textStatus, errorThrown) {
+                            errorSendingMail(form);
+                        }
+
+                    });
                 }
             });
+
+            var referrerId = getParameterByName('referrer');
+            $('#refId').val(referrerId);
+
+
+            function getParameterByName(name, url) {
+                if (!url) url = window.location.href;
+                name = name.replace(/[\[\]]/g, "\\$&");
+                var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                    results = regex.exec(url);
+                if (!results) return null;
+                if (!results[2]) return '';
+                return decodeURIComponent(results[2].replace(/\+/g, " "));
+            }
         });
+
+        function errorSendingMail(form) {
+            enableSubmit(form);
+            document.getElementById('error_msg').innerHTML = "Oh no.... something went wrong.<br/>Please try again or contact support";
+            $('#error_msg').fadeIn();
+        }
+        
+        function disableSubmit(form) {
+            $(form).find(':input[type=submit]').prop('disabled', true);
+            $(form).find(':input[type=submit]').text('Sending...');
+        }
+
+        function enableSubmit(form) {
+            $(form).find(':input[type=submit]').prop('disabled', false);
+            $(form).find(':input[type=submit]').text('Send the invite link to my mail');
+        }
     </script>
     
     <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -113,7 +173,7 @@
     </div>
     
     <div class="invite_container">
-        <form action="" name="registration">
+        <form name="registration">
 
             <label for="firstname">First Name</label>
             <input type="text" name="firstname" id="firstname" placeholder="John">
@@ -124,8 +184,11 @@
             <label for="email">Email</label>
             <input type="email" name="email" id="email" placeholder="Something like John@Nakatomi.com">
 
+            <input type="hidden" name="refId" id="refId" value="" />            
+
             <button type="submit">Send the invite link to my mail</button>
         </form>
+        <div id="error_msg" style="display: none; text-align: center; color: red; font-weight: 600;"></div>
     </div>
 </div>
 

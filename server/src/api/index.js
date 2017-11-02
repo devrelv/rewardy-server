@@ -29,7 +29,8 @@ export default ({ config, db }) => {
 		res.send("Done");
 	});
 
-	/* Query Params
+	/* 
+		Query Params
         id: the ID of this transaction, unique to this user event.
         uid: the ID of the user, that you passed us at the beginning of their session.
         oid: the numeric ID of the offer or payment method that they used.
@@ -44,6 +45,7 @@ export default ({ config, db }) => {
 	});
 
 	/*
+		Registration confirmation - the user will be here after clicking the confirm button on the validation email
 		Query arguments:
 		refId - reference user id
     	email - registered user email
@@ -61,6 +63,7 @@ export default ({ config, db }) => {
 	});
 
 	/*
+		Send mail to referal - the invite.html page call this function after filling user details
 		Query arguments:
 		refId - reference user id
     	email - registered user email
@@ -77,6 +80,7 @@ export default ({ config, db }) => {
 	});
 
 	/*
+		Confirming the voucher redeem request by the user - the user will get here from the "voucher verification" email
 		Query arguments:
 		vid - confirmed voucher id
     	uid - confirming user id

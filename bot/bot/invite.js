@@ -21,7 +21,7 @@ lib.dialog('/', [
             // TODO: Add the real amount of credits (instead of 50)
             session.say(session.gettext('invite.explanation', consts.referralBonusPoints, consts.minimumCompletedOffersForReferalToCount) + '\n\r' + session.gettext('invite.before_link'));
             // TODO: Change the URL from someUrl.com to the real one (when available)
-            session.say('http://rewardy.co?invite?referrer=' + session.userData.sender.user_id);
+            session.say('http://rewardy.co/invite.html?referrer=' + session.userData.sender.user_id);
             back_to_menu.sendBackToMainMenu(session, builder);            
         }).catch(err => {
             logger.log.debug('invite calling getInvitedFriendsByUserId error', {error: serializeError(err)});
