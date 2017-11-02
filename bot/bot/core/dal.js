@@ -228,11 +228,11 @@ function getBotUserByEmail(email) {
 function getInvitedFriendsByUserId(userId) {
     return new Promise((resolve, reject) => {
         BotUser.find({
-            'source.type': 'friend',
+            'source.type': consts.botUser_source_friendReferral,
             'source.id': userId
         }, function(err, data) {
             if (err) {
-                logger.log.error('dal: getInvitedFriendsByUserId BotUser.find error occured', {error: serializeError(err),  source_type: 'friend', source_id: userId});
+                logger.log.error('dal: getInvitedFriendsByUserId BotUser.find error occured', {error: serializeError(err),  source_type: consts.botUser_source_friendReferral, source_id: userId});
                 reject(err);
             } else {
                 resolve(data);
