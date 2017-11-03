@@ -27,8 +27,16 @@ lib.dialog('email', editOptionDialog(
     }));
 
 lib.dialog('userDetails', [
-    function (session) { // TODO: ask the user to confirm his email in case of typo
-        builder.Prompts.text(session, 'get_name');
+    function (session) {
+        builder.Prompts.confirm(session, session.gettext('confirm_mail_for_new_user', session.userData.sender.email));
+    },
+    function (session, args) {
+        if (args.response) {
+            builder.Prompts.text(session, 'get_name');            
+        } else {
+            delete session.userData.sender.email;
+            session.replaceDialog('/');            
+        }
     },
     function (session, result) {
         session.userData.sender.name = result.response;

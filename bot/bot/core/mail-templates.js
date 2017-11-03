@@ -20,7 +20,7 @@ try {
                 'This is the user as sent by the user at %DATE%: %USER_MESSAGE%    User Details:  %USER_DETAILS%');
     mailTemplates.push(helpTemplate);
 
-    var redeem_confirm_content = fs.readFileSync('./bot/email_templates/redeem_confirm.html', 'utf8');
+    var redeem_confirm_content = fs.readFileSync('./bot/email_templates/redeem-confirm.html', 'utf8');
 
     // %VOUCHER_TITLE%, %VOUCHER_STORE%, %VOUCHER_CTA%, %VOUCHER_IMAGE_URL%, %REDEEM_CONFIRMATION_URL%
     var redeem_confirm = new MailTemplate(Consts.MAIL_TEMPLATE_REDEEM_CONFIRMATION, 'Rewardy Voucher Confirmation', redeem_confirm_content,redeem_confirm_content);

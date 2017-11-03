@@ -56,7 +56,7 @@ function sendEmailToReferral(req) {
     
             var invitationCode = generateInvitationCode(firstName, lastName, email, referrerUserId);
     
-            var inviteHtmlContent = fs.readFileSync('./email_templates/invite.html', 'utf8');
+            var inviteHtmlContent = fs.readFileSync('./email_templates/email-verification.html', 'utf8');
             
             var verificationUrl = getVerificationUrl(referrerUserId, email, firstName, lastName, invitationCode);
             inviteHtmlContent = inviteHtmlContent.replace('%EMAIL_VERIFICATION_URL%', verificationUrl);
