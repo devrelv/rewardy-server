@@ -1,32 +1,42 @@
 var builder = require('botbuilder');
-var siteUrl = require('./site-url');
-var dal = require('./dal');
-var consts = require('./const');
+var siteUrl = require('./core/site-url');
+var dal = require('./core/dal');
+var consts = require('./core/const');
+var mailSender = require('./core/mail-sender.js');
+const logger = require('./core/logger');
+const serializeError = require('serialize-error');
+const chatbase = require('./core/chatbase');
+
+logger.log.info('Bot started');
 
 var connector = new builder.ChatConnector({
     appId: process.env.MICROSOFT_APP_ID,
     appPassword: process.env.MICROSOFT_APP_PASSWORD
 });
 
-var userId = '1234'; // TODO: get the real userId - Replace this variable with the user object (the id will be inside)
+// Mail sending tests
+// mailSender.sendCustomMail('yaari.tal@gmail.com', 'Test Mail', 'test mail', '<b>Test</b> Mail');
+// mailSender.sendTemplateMail(consts.MAIL_TEMPLATE_WELCOME, 'yaari.tal@gmail.com', [{key: '%NAME%', value: 'Tal'}]);
 
 // Welcome Dialog
 var MainOptions = {
     CheckCredit: 'keyboard.root.checkCredit',
     Redeem: 'keyboard.root.redeem',
     InviteFriends: 'keyboard.root.inviteFriends',
-    GetCredit: 'keyboard.root.getCredit'
+    GetCredit: 'keyboard.root.getCredit',
+    Help: 'keyboard.root.help'
 };
-
 function createRootButtons(session, builder) {
+    chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_BOT, session.userData.sender ? session.userData.sender.user_id : 'unknown', session.message.source, 'Main Menu Options', null, false, false);
+
     return [
         builder.CardAction.imBack(session, session.gettext(MainOptions.CheckCredit), MainOptions.CheckCredit),
         builder.CardAction.imBack(session, session.gettext(MainOptions.GetCredit), MainOptions.GetCredit),
         builder.CardAction.imBack(session, session.gettext(MainOptions.InviteFriends), MainOptions.InviteFriends),
-        builder.CardAction.imBack(session, session.gettext(MainOptions.Redeem), MainOptions.Redeem)
+        builder.CardAction.imBack(session, session.gettext(MainOptions.Redeem), MainOptions.Redeem),
+        builder.CardAction.imBack(session, session.gettext(MainOptions.Help), MainOptions.Help)
     ];
 }
-
 
 function sendRootMenu(session, builder) {
     var card = new builder.HeroCard()
@@ -47,126 +57,56 @@ var bot = new builder.UniversalBot(connector, [
         return session.beginDialog('login:/');
     },
     function (session, args, next) {
-        var welcomeCard = new builder.HeroCard(session)
-            .title('welcome_title')
-            .subtitle('welcome_subtitle')
-            .buttons(createRootButtons(session, builder));
-
-        session.send(new builder.Message(session)
-            .addAttachment(welcomeCard));
+        try {
+            if (localizedRegex(session, [MainOptions.Redeem]).test(session.message.text)) {
+                // chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_USER, session.userData.sender.user_id, session.message.source, session.message.text, 'Goto Redeem Flow', false, false);
+                chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_USER, session.userData.sender.user_id, session.message.source, session.message.text, 'Goto Redeem Flow', false, false);
+                // Redeem flow
+                return session.beginDialog('redeem:/');
+            } else if (localizedRegex(session, [MainOptions.CheckCredit]).test(session.message.text)) {
+                // Check Credits flow
+                chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_USER, session.userData.sender.user_id, session.message.source, session.message.text, 'Goto Check Credits Flow', false, false);
+                return session.beginDialog('check-credits:/');            
+            } else if (localizedRegex(session, [MainOptions.GetCredit]).test(session.message.text)) {
+                // Get Free Credits flow
+                chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_USER, session.userData.sender.user_id, session.message.source, session.message.text, 'Goto Get Free Credits Flow', false, false);
+                return session.beginDialog('get-free-credits:/');            
+            } else if (localizedRegex(session, [MainOptions.InviteFriends]).test(session.message.text)) {
+                // Invite Friends flow
+                chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_USER, session.userData.sender.user_id, session.message.source, session.message.text, 'Goto Invite Friends Flow', false, false);
+                return session.beginDialog('invite:/');            
+            } else if (localizedRegex(session, [MainOptions.Help]).test(session.message.text)) {
+                // Help flow
+                chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_USER, session.userData.sender.user_id, session.message.source, session.message.text, 'Goto Help Flow', false, false);
+                return session.beginDialog('help:/');            
+            } else if (session.message.text.length > 0) {
+                if (session.message.text != 'Get back to menu') {
+                    // User typed something that we can't understand
+                    chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_USER, session.userData.sender.user_id, session.message.source, session.message.text, null, true, false);
+                } else {
+                    chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_USER, session.userData.sender.user_id, session.message.source, session.message.text, 'Get Back To Menu', false, false);
+                    
+                }
+            }
+    
+            var welcomeCard = new builder.HeroCard(session)
+                .title('welcome_title')
+                .subtitle(session.gettext('welcome_subtitle', session.userData.sender.name))
+                .buttons(createRootButtons(session, builder));
+    
+            session.send(new builder.Message(session)
+                .addAttachment(welcomeCard));
+        }
+        catch (err) {
+            logger.log.error('index: builder.UniversalBot error occured', {error: serializeError(err)});
+            throw err;            
+        }
+        
     }
 
 ]);
 
-// TODO: CheckCredit - Remove the TriggerAction and attach it to the root dialog with URL as in the flowers example
-bot.dialog('CheckCredit', [
-        function (session) {
-            session.say(session.gettext('checkCredit.loading'));
 
-            // getting the credits
-            dal.getBotUserById(userId).then(botUser => {
-                messageText = '';
-                if (!botUser) {
-                    console.log('Could not find the bot user value in the database');
-                    dal.saveUserToDatabase(userId);
-                    messageText = 'error.couldNotFindUser';
-                } else {
-                    var numOfCredits = botUser.points;
-                    messageText = session.gettext('checkCredit.response {{points}}').replace('{{points}}', numOfCredits);
-                }
-
-                session.endDialog(messageText);
-                sendRootMenu(session, builder);
-        }).catch(err => {
-            console.log('error in getBotUserById');
-            console.log(err);
-
-            session.endDialog('error.couldNotFindUser');
-            sendRootMenu(session, builder);
-        })
-    }
-]).triggerAction({ matches: [
-    /Check your credit/i
- ]});
-
-// TODO: GetCredits - Remove the TriggerAction and attach it to the root dialog with URL as in the flowers example
-bot.dialog('GetCredits', [
-    function (session) {
-        session.say(session.gettext('getCredit.intro'));
-        dal.getDeviceByUserId(userId).then(userResult => {
-            if (!userResult) {
-                // That's the first time we encounter this user. Share the legal notice!
-                session.say(session.gettext('general.legalNotice'));
-
-                // User is missing. Fetch details and save to database
-                // TODO: Use the equivalent for bot.getUserDetails
-                // This is the source code:
-                    // bot.getUserDetails(session.userProfile)
-                    // .then(userDetails => {
-                    //     let deviceType = extractDeviceTypeFromUserDetails(userDetails.primary_device_os);
-                    //     dal.saveDeviceUserToDatabase(userId, deviceType);
-                    //     sendUserOfferWallUrl(session, deviceType, userId);
-                    // }).catch(function(e) {
-                    //     console.error('Failed to extract with error: ' + e); 
-                    //     let fallbackDeviceType = consts.DEVICE_TYPE_DESKTOP;
-                    //     dal.saveDeviceUserToDatabase(userId, fallbackDeviceType);
-                    //     sendUserOfferWallUrl(session, fallbackDeviceType, userId);
-                    // });
-
-                // Until we have the bot.getUserDetails function, we can use this:
-                console.log('error in getDeviceByUserId');
-                console.log('DeviceUser does not exist');
-                let fallbackDeviceType = consts.DEVICE_TYPE_DESKTOP;
-                dal.saveDeviceUserToDatabase(userId, fallbackDeviceType);
-                sendUserOfferWallUrl(session, fallbackDeviceType, userId);
-            } else {
-                sendUserOfferWallUrl(session, userResult.type, userId);                
-            }
-        }).catch(err => {
-            sendUserOfferWallUrl(session, consts.DEVICE_TYPE_DESKTOP, userId);
-            console.log('error in getDeviceByUserId');
-            console.log(err);            
-        });
-}
-]).triggerAction({ matches: [
-/Get free credit/i
-]});
-
-function sendUserOfferWallUrl(session, deviceType, userId) {
-    session.send(offerWallLinkForUser(deviceType, userId));
-}
-
-function extractDeviceTypeFromUserDetails(deviceTypeString) {
-    if (!deviceTypeString) {
-        return consts.DEVICE_TYPE_DESKTOP;
-    }
-
-    let parsedType = consts.DEVICE_TYPE_DESKTOP;
-    let compareModel = deviceTypeString.toLowerCase();
-    if (compareModel.includes('android')) {
-        parsedType = consts.DEVICE_TYPE_ANDROID;
-    }
-    else if (compareModel.includes('ios')) {
-        parsedType = consts.DEVICE_TYPE_APPLE;
-    }
-
-    return parsedType;
-}
-
-function offerWallLinkForUser(deviceType, userId) {
-    let appId;
-    if (deviceType === consts.DEVICE_TYPE_ANDROID) {
-        appId = consts.SPONSOR_PAY_APP_ID_ANDROID;
-    }
-    else if (deviceType === consts.DEVICE_TYPE_APPLE) {
-        appId = consts.SPONSOR_PAY_APP_ID_APPLE;
-    }
-    else { // Desktop or unknown
-        appId = consts.SPONSOR_PAY_APP_ID_DESKTOP;
-    }
-
-    return `http://iframe.sponsorpay.com/?appid=${appId}&uid=${userId}`;
-}
  
 
 // Enable Conversation Data persistence
@@ -179,21 +119,28 @@ bot.set('localizerSettings', {
 });
 
 // Sub-Dialogs
-bot.library(require('./dialogs/shop').createLibrary());
-bot.library(require('./dialogs/product-selection').createLibrary());
-bot.library(require('./dialogs/delivery').createLibrary());
-bot.library(require('./dialogs/details').createLibrary());
-bot.library(require('./dialogs/checkout').createLibrary());
-bot.library(require('./dialogs/settings').createLibrary());
-bot.library(require('./dialogs/help').createLibrary());
-bot.library(require('./dialogs/login').createLibrary());
+bot.library(require('./shop').createLibrary());
+bot.library(require('./product-selection').createLibrary());
+bot.library(require('./delivery').createLibrary());
+bot.library(require('./details').createLibrary());
+bot.library(require('./checkout').createLibrary());
+bot.library(require('./settings').createLibrary());
+bot.library(require('./help').createLibrary());
+bot.library(require('./login').createLibrary());
+bot.library(require('./redeem').createLibrary());
+bot.library(require('./check-credits').createLibrary());
+bot.library(require('./get-free-credits').createLibrary());
+bot.library(require('./invite').createLibrary());
+bot.library(require('./help').createLibrary());
 
 // Validators
-bot.library(require('./validators').createLibrary());
+bot.library(require('./core/validators').createLibrary());
 
 // Send welcome when conversation with bot is started, by initiating the root dialog
 bot.on('conversationUpdate', function (message) {
     if (message.membersAdded) {
+        logger.log.info('conversation started', {members: message.membersAdded});
+        
         message.membersAdded.forEach(function (identity) {
             if (identity.id === message.address.bot.id) {
                 bot.beginDialog(message.address, '/');
@@ -205,16 +152,23 @@ bot.on('conversationUpdate', function (message) {
 // Cache of localized regex to match selection from main options
 var LocalizedRegexCache = {};
 function localizedRegex(session, localeKeys) {
-    var locale = session.preferredLocale();
-    var cacheKey = locale + ":" + localeKeys.join('|');
-    if (LocalizedRegexCache.hasOwnProperty(cacheKey)) {
-        return LocalizedRegexCache[cacheKey];
+    try {
+        var locale = session.preferredLocale();
+        var cacheKey = locale + ":" + localeKeys.join('|');
+        if (LocalizedRegexCache.hasOwnProperty(cacheKey)) {
+            return LocalizedRegexCache[cacheKey];
+        }
+    
+        var localizedStrings = localeKeys.map(function (key) { return session.localizer.gettext(locale, key); });
+        var regex = new RegExp('^(' + localizedStrings.join('|') + ')', 'i');
+        LocalizedRegexCache[cacheKey] = regex;
+        return regex;
+    } 
+    catch (err) {
+        logger.log.error('index: localizedRegex error occured', {error: serializeError(err)});
+        throw err;        
     }
-
-    var localizedStrings = localeKeys.map(function (key) { return session.localizer.gettext(locale, key); });
-    var regex = new RegExp('^(' + localizedStrings.join('|') + ')', 'i');
-    LocalizedRegexCache[cacheKey] = regex;
-    return regex;
+    
 }
 
 // Connector listener wrapper to capture site url

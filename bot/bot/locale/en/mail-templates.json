@@ -1,0 +1,8 @@
+{
+    "redeem.mail.welcome_subject": "Welcome To RedeemBot",
+    "redeem.mail.welcome_html": "Hi %NAME%,<br/>Welcome to redeemBot, etc, etc, etc",
+    "redeem.mail.welcome_text": "Hi %NAME%, Welcome to redeemBot, etc, etc, etc",
+    "redeem.mail.help_subject": "User Question %USER_EMAIL%",
+    "redeem.mail.help_html": "This is the user as sent by the user at %DATE%:<br/><b>%USER_MESSAGE%</b><br/><br/>User Details:<br/>%USER_DETAILS%",
+    "redeem.mail.help_text": "This is the user as sent by the user at %DATE%: %USER_MESSAGE%    User Details:  %USER_DETAILS%"
+}
