@@ -1,8 +1,8 @@
 User-agent: *
-Allow: /$
-Allow: /apple-icon.png
-Allow: /i/fb-sharing.png
-Allow: /coach
-Allow: /privacy.html
-Allow: /terms.html
-Disallow: /*
+Allow: /index.html
+Disallow: /steps.html
+Disallow: /voucher-fail.html
+Disallow: /voucher-success.html
+Disallow: /wrong-invite.html
+Disallow: /offers.html
+Disallow: /invite.html

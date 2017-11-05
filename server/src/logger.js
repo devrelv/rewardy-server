@@ -1,11 +1,17 @@
 var winston = require('winston');
+var fs = require('fs');
 
 var curDate = formatDate(new Date());
+var dir = 'logs/';
+
+if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir);
+}
 var log = new (winston.Logger)({
     transports: [
       new (winston.transports.Console)(),
       new (winston.transports.File)(
-          { filename: 'logs/' + curDate + '_server.log',
+          { filename: dir + curDate + '_bot.log',
           handleExceptions: true,
           humanReadableUnhandledException: true})
     ]
