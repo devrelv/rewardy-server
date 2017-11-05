@@ -5,6 +5,7 @@ var Promise = require('bluebird');
 var dal = require('./core/dal');
 var consts = require('./core/const');
 const back_to_menu = require('./back-to-menu');
+const chatbase = require('./core/chatbase');
 
 const logger = require('./core/logger');
 const serializeError = require('serialize-error');
@@ -16,6 +17,8 @@ lib.dialog('/', [
             dal.getDeviceByUserId(session.userData.sender.user_id).then(userResult => {
                 if (!userResult) {
                     // That's the first time we encounter this user. Share the legal notice!
+                    chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_BOT, session.userData.sender ? session.userData.sender.user_id : 'unknown', session.message.source, session.gettext('getCredit.legalNotice'), null, false, false);            
+                    
                     session.say(session.gettext('getCredit.legalNotice'));
     
                     // User is missing. Fetch details and save to database
@@ -54,6 +57,7 @@ lib.dialog('/', [
 ]);
 
 function sendUserOfferWallUrl(session, deviceType, userId) {
+    chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_BOT, session.userData.sender ? session.userData.sender.user_id : 'unknown', session.message.source, session.gettext('getCredit.intro') + '\n\r' + offerWallLinkForUser(session, deviceType, userId), null, false, false);                
     session.send(session.gettext('getCredit.intro') + '\n\r' + offerWallLinkForUser(session, deviceType, userId));
 }
 

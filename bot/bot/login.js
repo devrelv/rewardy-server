@@ -6,14 +6,18 @@ var utils = require('./core/utils');
 var dal = require('./core/dal');
 var consts = require('./core/const');
 var uuid = require('uuid');
+const chatbase = require('./core/chatbase');
 
 
 lib.dialog('/', [
     function (session) {
+        chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_BOT, session.userData.sender ? session.userData.sender.user_id : 'unknown', session.message.source, session.gettext('welcome_message') + '\n\r' + session.gettext('type_email_or_return'), null, false, false);                                                            
         session.send(session.gettext('welcome_message') + '\n\r' + session.gettext('type_email_or_return'));
         return session.beginDialog('email');
     },
     function (session, args) {
+        chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_USER, session.userData.sender ? session.userData.sender.user_id : 'unknown', session.message.source, session.message.text, 'email identification', false, false);
+        
         return session.endDialog();
     }
 ]);
@@ -28,12 +32,18 @@ lib.dialog('email', editOptionDialog(
 
 lib.dialog('userDetails', [
     function (session) {
+        chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_BOT, session.userData.sender ? session.userData.sender.user_id : 'unknown', session.message.source, session.gettext('confirm_mail_for_new_user', session.userData.sender.email), null, false, false);                                                                    
         builder.Prompts.confirm(session, session.gettext('confirm_mail_for_new_user', session.userData.sender.email));
     },
     function (session, args) {
         if (args.response) {
+            chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_USER, session.userData.sender ? session.userData.sender.user_id : 'unknown', session.message.source, session.message.text, 'email confirmed', false, false);
+        
+            chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_BOT, session.userData.sender ? session.userData.sender.user_id : 'unknown', session.message.source, session.gettext('get_name'), null, false, false);                                                                            
             builder.Prompts.text(session, 'get_name');            
         } else {
+            chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_USER, session.userData.sender ? session.userData.sender.user_id : 'unknown', session.message.source, session.message.text, 'email not confirmed', false, false);
+            
             delete session.userData.sender.email;
             session.replaceDialog('/');            
         }
@@ -76,6 +86,7 @@ function editOptionDialog(validationFunc, invalidMessage, saveFunc) {
 
         if (!validationFunc(session.message.text)) {
             // invalid
+            chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_BOT, session.userData.sender ? session.userData.sender.user_id : 'unknown', session.message.source, invalidMessage, null, false, false);                                                                                        
             session.send(invalidMessage);
         } else {
             // save
@@ -88,6 +99,8 @@ function editOptionDialog(validationFunc, invalidMessage, saveFunc) {
                     session.beginDialog('userDetails');
                 } else {
                     session.userData.sender = userDataFromDB;
+                    chatbase.sendSingleMessage(chatbase.CHATBASE_TYPE_FROM_BOT, session.userData.sender ? session.userData.sender.user_id : 'unknown', session.message.source, session.gettext('welcome_back', session.userData.sender.name) , null, false, false);                                                                                        
+            
                     session.send(session.gettext('welcome_back', session.userData.sender.name));
                     session.endDialogWithResult({ updated: true });
                 }

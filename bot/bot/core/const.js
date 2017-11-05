@@ -32,5 +32,10 @@ module.exports = {
     MAIL_TEMPLATE_HELP_QUESTION: 'help_question',
     MAIL_TEMPLATE_REDEEM_CONFIRMATION: 'redeem_confirmation',
 
-    SERVER_API_URL: 'http://127.0.0.1:8080/api/' // TODO: Replace with real server ip    
+    SERVER_API_URL: 'http://127.0.0.1:8080/api/', // TODO: Replace with real server ip    
+
+    botFramework_Channels : {facebook: 'facebook', skype: 'skype', telegram: 'telegram', kik: 'kik', email: 'email',
+        slack: 'slack', groupme: 'groupme',sms: 'sms', emulator: 'emulator',directline: 'directline',console: 'console'}, // session.message.source
+    
+    BOT_VERSION: '1.0.0',
 };

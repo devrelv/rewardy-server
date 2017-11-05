@@ -10,5 +10,8 @@
     "redeem.not_enought_points" : "You have %s points\n\rYou need %s more points for this one.",
     "redeem.explanation" : "Ok, that's a cool voucher.\n\rJust a second, we are sending you an email for this redeem confirmation\n\rPlease wait...",
     "redeem.email_sent" : "The confirmation email has been sent to %s\n\rPlease check your inbox and confrim this voucher redeem",
-    "redeem.email_error" : "⚠ Something went wrong with that email\n\rIf this problem occure again please contact support at hello@rewardy.co"
+    "redeem.email_error" : "⚠ Something went wrong with that email\n\rIf this problem occure again please contact support at hello@rewardy.co",
+    "redeem.general_error" : "⚠ Error occured\n\rPlease try again or contact support at hello@rewardy.co",
+    "redeem.back_to_menu_user_text" : "Back To Menu",
+    "redeem.back_to_menu_displayed" : "Or get back to main menu"
 }
