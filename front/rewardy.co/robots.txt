@@ -1,8 +1,0 @@
-User-agent: *
-Allow: /index.html
-Disallow: /steps.html
-Disallow: /voucher-fail.html
-Disallow: /voucher-success.html
-Disallow: /wrong-invite.html
-Disallow: /offers.html
-Disallow: /invite.html

@@ -1,8 +1,0 @@
-{
-    "welcome_message": "Hello and welcome to Rewardy.co! Let's get started! 👻👻👻",
-    "type_email_or_return": "Please type your email address",
-    "invalid_email_address": "⚠ Something is wrong with that email address.\n\rPlease type your email address again.",
-    "get_name": "What is your name?",
-    "welcome_back": "Welcome back %s, I'm happy to see you again",
-    "confirm_mail_for_new_user": "This email address (%s) is new for me.\n\rAre you a new user? 👶🏼"
-}
