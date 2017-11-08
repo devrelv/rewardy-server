@@ -1,4 +1,4 @@
-var version = require('../../package.json');
+var version = require('../package.json');
 var Router = require('express');
 
 const request = require('request');

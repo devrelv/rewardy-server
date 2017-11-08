@@ -3,6 +3,7 @@ var hash = require('object-hash');
 var uuid = require('uuid');
 var consts = require('./consts.js');
 const nodemailer = require('nodemailer');
+var path = require('path');
 var fs = require('fs');
 const logger = require('../logger');
 const serializeError = require('serialize-error');
@@ -56,7 +57,7 @@ function sendEmailToReferral(req) {
     
             var invitationCode = generateInvitationCode(firstName, lastName, email, referrerUserId);
     
-            var inviteHtmlContent = fs.readFileSync('./email_templates/email-verification.html', 'utf8');
+            var inviteHtmlContent = fs.readFileSync(path.dirname(fs.realpathSync(__filename)) + '/../email_templates/email-verification.html', 'utf8');
             
             var verificationUrl = getVerificationUrl(referrerUserId, email, firstName, lastName, invitationCode);
             inviteHtmlContent = inviteHtmlContent.replace('%EMAIL_VERIFICATION_URL%', verificationUrl);

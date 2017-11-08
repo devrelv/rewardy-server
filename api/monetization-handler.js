@@ -6,6 +6,7 @@ var url = require('url');
 const logger = require('../logger');
 const serializeError = require('serialize-error');
 const lightMailSender = require('./core/light-mail-sender');
+var path = require('path');
 var fs = require('fs');
 var md5 = require('md5');
 
@@ -198,7 +199,7 @@ function checkAndGiveCreditsToReferFriend(db, userId) {
                         actionUser.source.additional_data.referralReceivedBonusDate = new Date();
                         db.updateUserSourceAdditionInfo(actionUser.user_id, actionUser.source.additional_data).then(()=> {
                             // send email
-                            var referralHtmlContent = fs.readFileSync('./email_templates/referral-bonus.html', 'utf8');                        
+                            var referralHtmlContent = fs.readFileSync(path.dirname(fs.realpathSync(__filename)) + '/../email_templates/referral-bonus.html', 'utf8');                        
                             referralHtmlContent = referralHtmlContent.replace('%REFERAL_BONUS_POINTS%', consts.referral_bonus_points);
                             referralHtmlContent = referralHtmlContent.replace('%FRIEND_NAME%', actionUser.name);
 
