@@ -155,9 +155,18 @@ function postback_superrewards(db, req, partnerName) {
             }
         
             db.addUserAction(partnerTransactionId, userId, offerId, offerCredits, totalCredits, partner, date, innerTransactionId).then(()=> {
-                db.increaseUserCredits(userId, offerCredits);
-                checkAndGiveCreditsToReferFriend(db, userId);
-                resolve();
+                db.increaseUserCredits(userId, offerCredits).then(()=> {
+                    checkAndGiveCreditsToReferFriend(db, userId).then(()=> {
+                        resolve();                        
+                    });
+                    
+                }).catch(err => {
+                    logger.log.error('postback_superrewards: db.increaseUserCredits error', {error: serializeError(err), goodFriend: goodFriend});                
+                    reject(err);
+                });
+            }).catch(err => {
+                logger.log.error('postback_superrewards: db.addUserAction error', {error: serializeError(err), goodFriend: goodFriend});                
+                reject(err);
             });
         } catch (err) {
             logger.log.error('postback_superrewards: error occured', {error: serializeError(err), request: req});
@@ -171,41 +180,47 @@ function getSigForSR(tranId, offerCredits, userId, secretKey) {
 }
 
 function checkAndGiveCreditsToReferFriend(db, userId) {
-    // getting the user
-    db.getBotUserById(userId).then(actionUser => {
-        // check if the referal didn't received already bonus for this user
-        if (actionUser.source && actionUser.source.type == consts.botUser_source_friendReferral && 
-            (!actionUser.source.additional_data || !actionUser.source.additional_data.referralReceivedBonusDate)) {
-            // get the user who referred this user
-            db.getBotUserById(actionUser.source.id).then(goodFriend => {
-                // give referral bonus
-                db.increaseUserCredits(goodFriend.user_id, consts.referral_bonus_points, false).then(()=> {
-                    //update the referred user that we gave the bonus
-                    actionUser.source.additional_data = actionUser.source.additional_data || {};
-                    actionUser.source.additional_data.referralReceivedBonusDate = new Date();
-                    db.updateUserSourceAdditionInfo(actionUser.user_id, actionUser.source.additional_data).then(()=> {
-                        // send email
-                        var referralHtmlContent = fs.readFileSync('./email_templates/referral-bonus.html', 'utf8');                        
-                        referralHtmlContent = referralHtmlContent.replace('%REFERAL_BONUS_POINTS%', consts.referral_bonus_points);
-                        referralHtmlContent = referralHtmlContent.replace('%FRIEND_NAME%', actionUser.name);
+    return new Promise((resolve, reject) => {        
+        // getting the user
+        db.getBotUserById(userId).then(actionUser => {
+            // check if the referal didn't received already bonus for this user
+            if (actionUser.source && actionUser.source.type == consts.botUser_source_friendReferral && 
+                (!actionUser.source.additional_data || !actionUser.source.additional_data.referralReceivedBonusDate)) {
+                // get the user who referred this user
+                db.getBotUserById(actionUser.source.id).then(goodFriend => {
+                    // give referral bonus
+                    db.increaseUserCredits(goodFriend.user_id, consts.referral_bonus_points, false).then(()=> {
+                        //update the referred user that we gave the bonus
+                        actionUser.source.additional_data = actionUser.source.additional_data || {};
+                        actionUser.source.additional_data.referralReceivedBonusDate = new Date();
+                        db.updateUserSourceAdditionInfo(actionUser.user_id, actionUser.source.additional_data).then(()=> {
+                            // send email
+                            var referralHtmlContent = fs.readFileSync('./email_templates/referral-bonus.html', 'utf8');                        
+                            referralHtmlContent = referralHtmlContent.replace('%REFERAL_BONUS_POINTS%', consts.referral_bonus_points);
+                            referralHtmlContent = referralHtmlContent.replace('%FRIEND_NAME%', actionUser.name);
 
-                        lightMailSender.sendCustomMail(goodFriend.email, 'Rewardy Friend Referral Bonus!', null, referralHtmlContent);
+                            lightMailSender.sendCustomMail(goodFriend.email, 'Rewardy Friend Referral Bonus!', null, referralHtmlContent).then(()=>{
+                                resolve();
+                            }).catch(err => {
+                                logger.log.error('checkAndGiveCreditsToReferal: lightMailSender.sendCustomMail error', {error: serializeError(err), goodFriend: goodFriend});                
+                                reject(err);
+                            }); 
+                        }).catch(err => {
+                            logger.log.error('checkAndGiveCreditsToReferal:db.updateUserSourceAdditionInfo error', {error: serializeError(err), goodFriend: goodFriend});                
+                            reject(err);
+                        });                   
                     }).catch(err => {
-                        logger.log.error('checkAndGiveCreditsToReferal:db.updateUserSourceAdditionInfo error', {error: serializeError(err), goodFriend: goodFriend});                
-                    });                   
-                }).catch(err => {
-                    logger.log.error('checkAndGiveCreditsToReferal: db.increaseUserCredits error', {error: serializeError(err), goodFriend: goodFriend});                
+                        logger.log.error('checkAndGiveCreditsToReferal: db.increaseUserCredits error', {error: serializeError(err), goodFriend: goodFriend});                
+                        reject(err);
+                    });
                 });
-            });
-        }
-        
-    }).catch (err => {
-        logger.log.error('checkAndGiveCreditsToReferal: getBotUserById error', {error: serializeError(err), userId: userId});        
+            }
+            
+        }).catch (err => {
+            logger.log.error('checkAndGiveCreditsToReferal: getBotUserById error', {error: serializeError(err), userId: userId});        
+            reject(err);
+        });
     });
-
-    // if referal exists and did not received the bonus for this user - give the bonus & send mail
-
-
 }
 
 module.exports = {
