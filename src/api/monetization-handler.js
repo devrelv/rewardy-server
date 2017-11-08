@@ -134,18 +134,18 @@ function postback_superrewards(db, req, partnerName) {
         }
     
         // Validating key
-        var key = req.query.sig
+        var key = req.body.sig
         if (key !== consts.SUPER_REWARDS_SECRET_KEY) {
             logger.log.error('postback_superrewards: Signature key is not valid, ignoring request. request key: ' + key, {request: req});
             return;
         }
     
        
-        var partnerTransactionId = req.query.id;
-        var userId = req.query.uid
-        var offerId = req.query.oid
-        var offerCredits = req.query.new
-        var totalCredits = req.query.total
+        var partnerTransactionId = req.body.id;
+        var userId = req.body.uid
+        var offerId = req.body.oid
+        var offerCredits = req.body.new
+        var totalCredits = req.body.total
         
         var partner = consts.PARTNER_SUPER_REWARDS;
         var date = new Date();
