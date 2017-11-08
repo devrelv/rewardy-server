@@ -5,7 +5,7 @@ module.exports = {
     PARTNER_FYBER : 'Fyber',
     PARTNER_DAILY_BONUS : 'Daily Bonus',
     PARTNER_STUB : 'Stub',
-    SUPER_REWARDS_SECRET_KEY : '30691850651147dabd9938e8d3ec995d',
+    SUPER_REWARDS_SECRET_KEY : '570a2fa9d55906d831b17f9bd7e0f37b',
     defaultUserLanguage: 'en',
     default_points: 50, // TODO: Put the correct number + Move to a common props file
     daily_bonus_points: 50, // TODO: Put the correct number + Move to a common props file
