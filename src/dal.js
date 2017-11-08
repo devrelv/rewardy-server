@@ -185,7 +185,7 @@ function openConnection() {
             setTimeout(() => {throw err;}); // The setTimeout is a trick to enable the throw err
         });
     } catch (err) {
-        logger.log.log('error','dal: openConnection error occured (' + ex.message + ')', {error: serializeError(err)});
+        logger.log.log('error','dal: openConnection error occured (' + err.message + ')', {error: serializeError(err)});
         throw err;
     }
     
