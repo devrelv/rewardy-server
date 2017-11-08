@@ -7,6 +7,7 @@ const logger = require('../logger');
 const serializeError = require('serialize-error');
 const lightMailSender = require('./core/light-mail-sender');
 var fs = require('fs');
+var md5 = require('md5');
 
 const Stub = require('./monetization_providers/stub');
 const Fyber = require('./monetization_providers/fyber');
@@ -135,15 +136,6 @@ function postback_superrewards(db, req, partnerName) {
                 return;
             }
         
-            // Validating key
-            var key = req.query.sig
-            if (key !== consts.SUPER_REWARDS_SECRET_KEY) {
-                logger.log.error('postback_superrewards: Signature key is not valid, ignoring request. request key: ' + key, {request: req});
-                reject('Signature key is not valid');
-                return;
-            }
-        
-        
             var partnerTransactionId = req.query.id;
             var userId = req.query.uid
             var offerId = req.query.oid
@@ -153,6 +145,14 @@ function postback_superrewards(db, req, partnerName) {
             var partner = consts.PARTNER_SUPER_REWARDS;
             var date = new Date();
             var innerTransactionId = uuid.v1();
+
+            // Validating key
+            var key = req.query.sig
+            if (key !== getSigForSR(partnerTransactionId, offerCredits, userId, consts.SUPER_REWARDS_SECRET_KEY)) {
+                logger.log.error('postback_superrewards: Signature key is not valid, ignoring request. request key: ' + key, {request: req});
+                reject('Signature key is not valid');
+                return;
+            }
         
             db.addUserAction(partnerTransactionId, userId, offerId, offerCredits, totalCredits, partner, date, innerTransactionId).then(()=> {
                 db.increaseUserCredits(userId, offerCredits);
@@ -164,6 +164,10 @@ function postback_superrewards(db, req, partnerName) {
             reject(err);
         }
     });
+}
+
+function getSigForSR(tranId, offerCredits, userId, secretKey) {
+    return md5(tranId + ':' + offerCredits + ':' + userId +  ':' + secretKey);
 }
 
 function checkAndGiveCreditsToReferFriend(db, userId) {
