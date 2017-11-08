@@ -284,19 +284,23 @@ function increaseUserCredits(userId, credits, isUpdateDailyBonusDate) {
                     logger.log.error('dal: increaseUserCredits BotUser.findOne error', {error: serializeError(err), user_id: userId});                        
                     reject(err);
                 } else {
-                    var currentPoints = Number(res.points) + Number(credits);
-                    var updateFields = {points: currentPoints};
-                    if (isUpdateDailyBonusDate) {
-                        updateFields.last_daily_bonus = new Date();
-                    }
-                    BotUser.update({user_id: userId}, {$set: updateFields}, (err, res) => {
-                        if (err) {
-                            logger.log.error('dal: increaseUserCredits.update error', {error: serializeError(err), user_id: userId, points: currentPoints});                        
-                            reject(err);
-                        } else {
-                            resolve();
+                    if (!res) {
+                        reject('user ' + userId + ' not exists in the database');
+                    } else {
+                        var currentPoints = Number(res.points) + Number(credits);
+                        var updateFields = {points: currentPoints};
+                        if (isUpdateDailyBonusDate) {
+                            updateFields.last_daily_bonus = new Date();
                         }
-                    });
+                        BotUser.update({user_id: userId}, {$set: updateFields}, (err, res) => {
+                            if (err) {
+                                logger.log.error('dal: increaseUserCredits.update error', {error: serializeError(err), user_id: userId, points: currentPoints});                        
+                                reject(err);
+                            } else {
+                                resolve();
+                            }
+                        });
+                    }                    
                 }
             });
         }

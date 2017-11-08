@@ -158,14 +158,17 @@ function postback_superrewards(db, req, partnerName) {
                 db.increaseUserCredits(userId, offerCredits).then(()=> {
                     checkAndGiveCreditsToReferFriend(db, userId).then(()=> {
                         resolve();                        
+                    }).catch(err => {
+                        logger.log.error('postback_superrewards:checkAndGiveCreditsToReferFriend error', {error: serializeError(err), userId: userId});                
+                        reject(err);
                     });
                     
                 }).catch(err => {
-                    logger.log.error('postback_superrewards: db.increaseUserCredits error', {error: serializeError(err), goodFriend: goodFriend});                
+                    logger.log.error('postback_superrewards: db.increaseUserCredits error', {error: serializeError(err), userId: userId, offerCredits: offerCredits});                
                     reject(err);
                 });
             }).catch(err => {
-                logger.log.error('postback_superrewards: db.addUserAction error', {error: serializeError(err), goodFriend: goodFriend});                
+                logger.log.error('postback_superrewards: db.addUserAction error', {error: serializeError(err)});                
                 reject(err);
             });
         } catch (err) {
@@ -206,7 +209,7 @@ function checkAndGiveCreditsToReferFriend(db, userId) {
                                 reject(err);
                             }); 
                         }).catch(err => {
-                            logger.log.error('checkAndGiveCreditsToReferal:db.updateUserSourceAdditionInfo error', {error: serializeError(err), goodFriend: goodFriend});                
+                            logger.log.error('checkAndGiveCreditsToReferal:db.updateUserSourceAdditionInfo error', {error: serializeError(err), actionUser: actionUser});                
                             reject(err);
                         });                   
                     }).catch(err => {
@@ -214,6 +217,8 @@ function checkAndGiveCreditsToReferFriend(db, userId) {
                         reject(err);
                     });
                 });
+            } else {
+                resolve();
             }
             
         }).catch (err => {
