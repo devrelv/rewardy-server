@@ -1,5 +1,5 @@
-import { version } from '../../package.json';
-import { Router } from 'express';
+var version = require('../../package.json');
+var Router = require('express');
 
 const request = require('request');
 const monetizationHandler = require('./monetization-handler');
@@ -11,7 +11,7 @@ const daily_bonus = require('./daily-bonus');
 const logger = require('../logger');
 const serializeError = require('serialize-error');
 
-export default ({ config, db }) => {
+module.exports = ({ config, db }) => {
 
 	let api = Router();
 
