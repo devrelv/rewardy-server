@@ -39,10 +39,16 @@ module.exports = ({ config, db }) => {
         total: total number of in-game currency that this user has earned on this app.
         sig: the security hash that proves that this postback comes from us.
     */
-	api.post('/postback/superrewards', (req, res) => {
+	api.get('/postback/superrewards', (req, res) => {
 		logger.log.info('request to /postback/superrewards made', {request: req});
-		monetizationHandler.postback_superrewards(db, req);
-		res.send("Done");
+		monetizationHandler.postback_superrewards(db, req).then(()=> 
+		{
+			res.send('1');
+		}).catch (err => 
+		{ 
+			res.send('0'); 
+		});
+		
 	});
 
 	/*
