@@ -126,9 +126,7 @@ let BotUserSchema = new Schema({
         unique: true
     },
     email: {
-        type: String,
-        required: true,
-        unique: true
+        type: String
     },
     name: {
         type: String,
@@ -311,6 +309,21 @@ function increaseUserCredits(userId, credits, isUpdateDailyBonusDate) {
     });    
 }
 
+function getBotUserByEmail(email) {
+    return new Promise((resolve, reject) => {
+        BotUser.findOne({
+            'email': email
+        }, function(err, botUser) {
+            if (err) {
+                logger.log.error('dal: getBotUserByEmail BotUser.findOne error occured', {error: serializeError(err), email: email});
+                reject(err);
+            } else {
+                resolve(botUser);
+            } 
+        });
+    });
+}
+
 function saveFriendReferralNewBotUser(id, name, email, referrerUserId) {
     return new Promise((resolve, reject) => {
         try {
@@ -404,7 +417,8 @@ module.exports = {
     increaseUserCredits: increaseUserCredits,
     getUserLastBonusDate: getUserLastBonusDate,
     getBotUserById: getBotUserById,
-    updateUserSourceAdditionInfo: updateUserSourceAdditionInfo
+    updateUserSourceAdditionInfo: updateUserSourceAdditionInfo,
+    getBotUserByEmail: getBotUserByEmail
 }
 
 
