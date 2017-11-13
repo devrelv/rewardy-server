@@ -165,6 +165,9 @@ let BotUserSchema = new Schema({
             type: Schema.Types.Mixed,
             required: false
         }
+    },
+    proactive_address: {
+        type: Schema.Types.Mixed
     }
 });
 
