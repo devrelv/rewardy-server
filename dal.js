@@ -126,9 +126,7 @@ let BotUserSchema = new Schema({
         unique: true
     },
     email: {
-        type: String,
-        required: true,
-        unique: true
+        type: String
     },
     name: {
         type: String,
@@ -167,6 +165,9 @@ let BotUserSchema = new Schema({
             type: Schema.Types.Mixed,
             required: false
         }
+    },
+    proactive_address: {
+        type: Schema.Types.Mixed
     }
 });
 
@@ -185,7 +186,7 @@ function openConnection() {
             setTimeout(() => {throw err;}); // The setTimeout is a trick to enable the throw err
         });
     } catch (err) {
-        logger.log.log('error','dal: openConnection error occured (' + ex.message + ')', {error: serializeError(err)});
+        logger.log.log('error','dal: openConnection error occured (' + err.message + ')', {error: serializeError(err)});
         throw err;
     }
     
@@ -284,19 +285,23 @@ function increaseUserCredits(userId, credits, isUpdateDailyBonusDate) {
                     logger.log.error('dal: increaseUserCredits BotUser.findOne error', {error: serializeError(err), user_id: userId});                        
                     reject(err);
                 } else {
-                    var currentPoints = Number(res.points) + Number(credits);
-                    var updateFields = {points: currentPoints};
-                    if (isUpdateDailyBonusDate) {
-                        updateFields.last_daily_bonus = new Date();
-                    }
-                    BotUser.update({user_id: userId}, {$set: updateFields}, (err, res) => {
-                        if (err) {
-                            logger.log.error('dal: increaseUserCredits.update error', {error: serializeError(err), user_id: userId, points: currentPoints});                        
-                            reject(err);
-                        } else {
-                            resolve();
+                    if (!res) {
+                        reject('user ' + userId + ' not exists in the database');
+                    } else {
+                        var currentPoints = Number(res.points) + Number(credits);
+                        var updateFields = {points: currentPoints};
+                        if (isUpdateDailyBonusDate) {
+                            updateFields.last_daily_bonus = new Date();
                         }
-                    });
+                        BotUser.update({user_id: userId}, {$set: updateFields}, (err, res) => {
+                            if (err) {
+                                logger.log.error('dal: increaseUserCredits.update error', {error: serializeError(err), user_id: userId, points: currentPoints});                        
+                                reject(err);
+                            } else {
+                                resolve();
+                            }
+                        });
+                    }                    
                 }
             });
         }
@@ -305,6 +310,21 @@ function increaseUserCredits(userId, credits, isUpdateDailyBonusDate) {
             reject(err);
         }
     });    
+}
+
+function getBotUserByEmail(email) {
+    return new Promise((resolve, reject) => {
+        BotUser.findOne({
+            'email': email
+        }, function(err, botUser) {
+            if (err) {
+                logger.log.error('dal: getBotUserByEmail BotUser.findOne error occured', {error: serializeError(err), email: email});
+                reject(err);
+            } else {
+                resolve(botUser);
+            } 
+        });
+    });
 }
 
 function saveFriendReferralNewBotUser(id, name, email, referrerUserId) {
@@ -400,7 +420,8 @@ module.exports = {
     increaseUserCredits: increaseUserCredits,
     getUserLastBonusDate: getUserLastBonusDate,
     getBotUserById: getBotUserById,
-    updateUserSourceAdditionInfo: updateUserSourceAdditionInfo
+    updateUserSourceAdditionInfo: updateUserSourceAdditionInfo,
+    getBotUserByEmail: getBotUserByEmail
 }
 
 

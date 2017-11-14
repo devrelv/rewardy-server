@@ -1,5 +1,5 @@
-import { version } from '../../package.json';
-import { Router } from 'express';
+var version = require('../package.json');
+var Router = require('express');
 
 const request = require('request');
 const monetizationHandler = require('./monetization-handler');
@@ -11,7 +11,7 @@ const daily_bonus = require('./daily-bonus');
 const logger = require('../logger');
 const serializeError = require('serialize-error');
 
-export default ({ config, db }) => {
+module.exports = ({ config, db }) => {
 
 	let api = Router();
 
@@ -40,9 +40,15 @@ export default ({ config, db }) => {
         sig: the security hash that proves that this postback comes from us.
     */
 	api.get('/postback/superrewards', (req, res) => {
-		logger.log.debug('request to /postback/superrewards made', {request: req});
-		monetizationHandler.postback_superrewards(db, req);
-		res.send("Done");
+		logger.log.info('request to /postback/superrewards made', {request: req});
+		monetizationHandler.postback_superrewards(db, req).then(()=> 
+		{
+			res.send('1');
+		}).catch (err => 
+		{ 
+			res.send('0'); 
+		});
+		
 	});
 
 	/*

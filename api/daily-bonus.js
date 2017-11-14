@@ -41,6 +41,7 @@ function handleUser (db, req) {
                             logger.log.debug('in db.increaseUserCredits.then');
                         
                             result.isRewarded = true;
+                            result.points = consts.daily_bonus_points;
                             resolve(result);
                         
                         }).catch (err => {

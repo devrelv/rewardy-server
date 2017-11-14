@@ -1,6 +1,6 @@
 const dal = require('./dal')
 
-export default callback => {
+module.exports = callback => {
     dal.openConnection();
 	callback(dal);
 }

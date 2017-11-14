@@ -1,6 +1,6 @@
-import { Router } from 'express';
+var Router = require('express');
 
-export default ({ config, db }) => {
+module.exports = ({ config, db }) => {
 	let routes = Router();
 	
 	routes.get('/', function (req, res) {

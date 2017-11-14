@@ -1,9 +1,12 @@
 var winston = require('winston');
 var fs = require('fs');
+var Raven = require('raven');
 
 var curDate = formatDate(new Date());
 var dir = 'logs/';
 
+// sentry config to SERVER project
+Raven.config('https://fa9c114593944f10a920531f04dc8d1f:17e02b8bb0db447db50aaf9cfd3dcfa2@sentry.io/244280').install();
 if (!fs.existsSync(dir)){
     fs.mkdirSync(dir);
 }
@@ -17,6 +20,32 @@ var log = new (winston.Logger)({
     ]
   });
   log.level = 'debug'; // Log Levels: error: 0, warn: 1, info: 2, verbose: 3, debug: 4, silly: 5
+
+  // Sending the error data to Raven (sentry.io)
+  let oldErrorFunc = log.error;  
+  log.error = function(errorString, params){
+    if (params && params.error) {
+        Raven.captureException(params.error);    
+    } else if (params && params.err) {
+        Raven.captureException(params.err);
+    } else {
+        Raven.captureException(params);
+    }
+    oldErrorFunc.apply(this, [errorString, params]);
+  }
+
+  // Sending the warning data to Raven (sentry.io)
+  let oldWarnFunc = log.warn;  
+  log.warn = function(errorString, params){
+    if (params && params.error) {
+        Raven.captureException(params.error);    
+    } else if (params && params.err) {
+        Raven.captureException(params.err);        
+    } else {
+        Raven.captureException(params);
+    }
+    oldWarnFunc.apply(this, [errorString, params]);
+  }
 
   function formatDate(date) {
     var d = new Date(date),

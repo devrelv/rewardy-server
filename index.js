@@ -1,12 +1,12 @@
-import http from 'http';
-import express from 'express';
-import cors from 'cors';
-import morgan from 'morgan';
-import bodyParser from 'body-parser';
-import initializeDb from './db';
-import middleware from './middleware';
-import api from './api';
-import config from './config.json';
+var http = require('http');
+var express = require('express');
+var cors = require('cors');
+var morgan = require('morgan');
+var bodyParser = require('body-parser');
+var initializeDb = require('./db');
+var middleware = require('./middleware');
+var api = require('./api');
+var config = require('./config.json');
 
 let app = express();
 app.server = http.createServer(app);
@@ -31,9 +31,9 @@ initializeDb( db => {
 	// api router
 	app.use('/api', api({ config, db }));
 
-	app.server.listen(process.env.PORT || config.port, () => {
+	app.server.listen(process.env.PORT || 8080, () => {
 		console.log(`Started on port ${app.server.address().port}`);
 	});
 });
 
-export default app;
+module.exports = app;
