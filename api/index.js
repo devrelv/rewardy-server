@@ -17,7 +17,7 @@ module.exports = ({ config, db }) => {
 
 	api.get('/', (req, res) => {
 		logger.log.debug('request to / made', {request: req});
-		res.json({ version });
+		res.send("Alive");
 	});
 	api.get('/updateAllCredits', (req, res) => {
 		logger.log.debug('request to /updateAllCredits made', {request: req});

@@ -199,16 +199,22 @@ function checkAndGiveCreditsToReferFriend(db, userId) {
                         actionUser.source.additional_data.referralReceivedBonusDate = new Date();
                         db.updateUserSourceAdditionInfo(actionUser.user_id, actionUser.source.additional_data).then(()=> {
                             // send email
-                            var referralHtmlContent = fs.readFileSync(path.dirname(fs.realpathSync(__filename)) + '/../email_templates/referral-bonus.html', 'utf8');                        
-                            referralHtmlContent = referralHtmlContent.replace('%REFERAL_BONUS_POINTS%', consts.referral_bonus_points);
-                            referralHtmlContent = referralHtmlContent.replace('%FRIEND_NAME%', actionUser.name);
-
-                            lightMailSender.sendCustomMail(goodFriend.email, 'Rewardy Friend Referral Bonus!', null, referralHtmlContent).then(()=>{
+                            if (goodFriend.email && goodFriend.email.length>0 && goodFriend.email.indexOf('@')>-1) {
+                                var referralHtmlContent = fs.readFileSync(path.dirname(fs.realpathSync(__filename)) + '/../email_templates/referral-bonus.html', 'utf8');                        
+                                referralHtmlContent = referralHtmlContent.replace('%REFERAL_BONUS_POINTS%', consts.referral_bonus_points);
+                                referralHtmlContent = referralHtmlContent.replace('%FRIEND_NAME%', actionUser.name);
+    
+                                lightMailSender.sendCustomMail(goodFriend.email, 'Rewardy Friend Referral Bonus!', null, referralHtmlContent).then(()=>{
+                                    resolve();
+                                }).catch(err => {
+                                    logger.log.error('checkAndGiveCreditsToReferal: lightMailSender.sendCustomMail error', {error: serializeError(err), goodFriend: goodFriend});                
+                                    reject(err);
+                                });
+                            } else {
                                 resolve();
-                            }).catch(err => {
-                                logger.log.error('checkAndGiveCreditsToReferal: lightMailSender.sendCustomMail error', {error: serializeError(err), goodFriend: goodFriend});                
-                                reject(err);
-                            }); 
+                            }
+                            
+
                         }).catch(err => {
                             logger.log.error('checkAndGiveCreditsToReferal:db.updateUserSourceAdditionInfo error', {error: serializeError(err), actionUser: actionUser});                
                             reject(err);
