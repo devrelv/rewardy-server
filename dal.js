@@ -4,8 +4,8 @@ const logger = require('./logger');
 const serializeError = require('serialize-error');
 
 
-// TODO: Move to .env
-const MONGO_CONNECTION_STRING = 'mongodb://prod:Pp123456@ds133964.mlab.com:33964/redeembot';
+// TODO: Move to .env 
+const MONGO_CONNECTION_STRING = 'mongodb://prod:Pp123456@ds113736.mlab.com:13736/rewardy';
 
 // const mongodbOptions = {
 //     server: {
