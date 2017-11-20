@@ -170,6 +170,29 @@ let BotUserSchema = new Schema({
 
 let BotUser = mongoose.model('BotUser', BotUserSchema);
 
+let InvitationSchema = new Schema({
+    inviting_user_id : {
+        type: String,
+        required: true,
+        unique: true
+    },
+    invited_email: {
+        type: String,
+        required: true
+    },
+    invitation_completed: {
+        type: Boolean,
+        default: 0,
+        required: true
+    },
+    created_at: {
+        type: Date,
+        required: true,
+        default: Date.now
+    }
+});
+let Invitation = mongoose.model('Invitation', InvitationSchema);
+
 function openConnection() {
     try {
         logger.log.info('dal: ####### connecting to the database #######');
@@ -351,6 +374,31 @@ function saveFriendReferralNewBotUser(id, name, email, referrerUserId) {
     });
 }
 
+function saveInvitation(invitingUserId, invitedEmail) {
+    return new Promise((resolve, reject) => {
+        try {
+            let invitation = new Invitation({
+                inviting_user_id : invitingUserId,
+                invited_email: invitedEmail
+            });
+
+            invitation.save(function(err) {
+                if (err) {
+                    logger.log.error('dal: saveInvitation error', {error: serializeError(err)});                        
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            })
+
+        }
+        catch (err) {
+            logger.log.error('dal: saveInvitation error', {error: serializeError(err)});                        
+            reject(err);
+        }
+    });
+}
+
 function getUserLastBonusDate(userId) {
     return new Promise((resolve, reject) => {
         try {
@@ -418,7 +466,8 @@ module.exports = {
     getUserLastBonusDate: getUserLastBonusDate,
     getBotUserById: getBotUserById,
     updateUserSourceAdditionInfo: updateUserSourceAdditionInfo,
-    getBotUserByEmail: getBotUserByEmail
+    getBotUserByEmail: getBotUserByEmail,
+    saveInvitation: saveInvitation
 }
 
 

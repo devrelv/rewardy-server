@@ -15,4 +15,9 @@ module.exports = {
     EMAIL_SENDER_NAME: 'Rewardy',
     EMAIL_VOUCHERS_GENERETOR: 'hello@rewardy.co', // The email to send the vouchers redeem requests
     botUser_source_friendReferral: 'friend',
+    PROACTIVE_MESSAGES_REFERRAL_BONUS: 0,
+    PROACTIVE_MESSAGES_REFERRAL_JOINED: 1,
+    PROACTIVE_MESSAGES_REFERRAL_OFFER_COMPLETED: 2,
+    PROACTIVE_MESSAGES_DAILY_BONUS: 3,
+    PROACTIVE_MESSAGES_INACTIVITY_7DAYS: 4
 }

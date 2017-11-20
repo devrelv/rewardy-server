@@ -198,6 +198,10 @@ function checkAndGiveCreditsToReferFriend(db, userId) {
                         actionUser.source.additional_data = actionUser.source.additional_data || {};
                         actionUser.source.additional_data.referralReceivedBonusDate = new Date();
                         db.updateUserSourceAdditionInfo(actionUser.user_id, actionUser.source.additional_data).then(()=> {
+                            if (goodFriend.proactive_address) {
+                                let friendProactiveData = {referralPoints: consts.referral_bonus_points, friendName: actionUser.name};
+                                sendProactiveMessage(goodFriend.proactive_address, consts.PROACTIVE_MESSAGES_REFERRAL_BONUS, friendProactiveData, goodFriend.userId);
+                            }
                             // send email
                             if (goodFriend.email && goodFriend.email.length>0 && goodFriend.email.indexOf('@')>-1) {
                                 var referralHtmlContent = fs.readFileSync(path.dirname(fs.realpathSync(__filename)) + '/../email_templates/referral-bonus.html', 'utf8');                        
@@ -233,6 +237,12 @@ function checkAndGiveCreditsToReferFriend(db, userId) {
             reject(err);
         });
     });
+}
+
+const https = require('https');
+function sendProactiveMessage(proactive_address, messageId, messageData, userId) {
+    let fullUrl = process.env.BOT_API_URL + 'proactive?message_address=' + encodeURIComponent(proactive_address) + '&message_id=' + messageId + '&message_data=' + encodeURIComponent(messageData) + '&user_id=' + userId;
+    https.get(fullUrl);
 }
 
 module.exports = {
