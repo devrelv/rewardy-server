@@ -1,3 +1,4 @@
+require('dotenv-extended').load();
 var http = require('http');
 var express = require('express');
 var cors = require('cors');

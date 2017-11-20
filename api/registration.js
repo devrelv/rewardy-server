@@ -88,7 +88,7 @@ function sendEmailToReferral(req) {
 }
 
 function getVerificationUrl(referrerUserId, email, firstName, lastName, invitationCode) {
-    return consts.SERVER_API_URL + 'register?refId=' + referrerUserId + 
+    return process.env.SERVER_API_URL + 'register?refId=' + referrerUserId + 
     '&email=' + email + '&firstName=' + firstName + '&lastName=' + lastName + '&invitationCode=' + invitationCode
 }
 

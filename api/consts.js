@@ -13,7 +13,6 @@ module.exports = {
     EMAIL_USERNAME: 'hello@rewardy.co', 
     EMAIL_PASSWORD: 'hg68tuyg',
     EMAIL_SENDER_NAME: 'Rewardy',
-    SERVER_API_URL: 'http://rewardy-server.azurewebsites.net/api/', // TODO: Move to a common props file / DB
     EMAIL_VOUCHERS_GENERETOR: 'hello@rewardy.co', // The email to send the vouchers redeem requests
     botUser_source_friendReferral: 'friend',
 }

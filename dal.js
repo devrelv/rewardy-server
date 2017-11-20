@@ -4,9 +4,6 @@ const logger = require('./logger');
 const serializeError = require('serialize-error');
 
 
-// TODO: Move to .env 
-const MONGO_CONNECTION_STRING = 'mongodb://prod:Pp123456@ds113736.mlab.com:13736/rewardy';
-
 // const mongodbOptions = {
 //     server: {
 //         socketOptions: {
@@ -177,7 +174,7 @@ function openConnection() {
     try {
         logger.log.info('dal: ####### connecting to the database #######');
         mongoose.Promise = require('bluebird');
-        mongoose.connect(MONGO_CONNECTION_STRING, {useMongoClient: true}).then(
+        mongoose.connect(process.env.MONGO_CONNECTION_STRING, {useMongoClient: true}).then(
             ()=>{
             logger.log.info('dal: connected to database');        
             }
