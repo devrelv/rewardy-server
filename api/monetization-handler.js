@@ -178,9 +178,9 @@ function postback_superrewards(db, req, partnerName) {
 function postback_offerwall(db, req, partnerName) {
     /* Query Params
         uid: the user id in rewardy's system
-        cy: number of points to add to the user
-        type=[TYPE]
-        ref=[REF]
+        currency: number of points to add to the user
+        type: type of postback (0 - Regular payment/offer completion ; 1 - Product/Virtual Currency is given by customer service ; 2 - Chargeback by customer service)
+        ref: Transaction reference ID, alphanumeric (max length: 11)
         sig: the security hash that proves that this postback comes from us.
     */
     return new Promise((resolve, reject) => {
@@ -203,7 +203,7 @@ function postback_offerwall(db, req, partnerName) {
             }
         
             var userId = req.query.uid;
-            var offerCredits = req.query.cy;
+            var offerCredits = req.query.currency;
             var offerType = req.query.type;
             var offerRef = req.query.ref;
 
@@ -220,12 +220,26 @@ function postback_offerwall(db, req, partnerName) {
             }
         
             db.addUserAction(innerTransactionId, partner, userId, offerCredits, date, {type: offerType, ref: offerRef}).then(()=> {
-                rewardUserWithCredits(db, userId, offerCredits, partner).then(()=> {
-                    resolve();
-                }).catch(err => {
-                    logger.log.error('postback_offerwall: rewardUserWithCredits error', {error: serializeError(err)});
-                    reject(err);
-                })
+                if (offerType == 2) {
+                    // Oh no.... Chargeback
+                    let chargebackHTML = 'We received a chargeback of ' + offerCredits + ' points for user ' + userId + '!<br/><br/>All Details(as saved to UserAction collection):<br/>';
+                    chargebackHTML += JSON.stringify({id: innerTransactionId, partner: partner, userId: userId, offerCredits: offerCredits, date: date, extended_data: {type: offerType, ref: offerRef}});
+                    lightMailSender.sendCustomMail('yaari.tal@gmail.com', 'Offerwall ' + offerCredits +' Points Chargeback For User ' + userId, null, chargebackHTML).then(()=>{
+                        resolve();
+                    }).catch(err => {
+                        logger.log.error('checkAndGiveCreditsToReferal: lightMailSender.sendCustomMail error', {error: serializeError(err), goodFriend: goodFriend});                
+                        resolve();
+                    });
+
+                } else {
+                    rewardUserWithCredits(db, userId, offerCredits, partner).then(()=> {
+                        resolve();
+                    }).catch(err => {
+                        logger.log.error('postback_offerwall: rewardUserWithCredits error', {error: serializeError(err)});
+                        reject(err);
+                    })
+                }
+                
             }).catch(err => {
                 logger.log.error('postback_offerwall: db.addUserAction error', {error: serializeError(err)});                
                 reject(err);
@@ -238,7 +252,8 @@ function postback_offerwall(db, req, partnerName) {
 }
 
 function getSigForOfferWall(userId, points, type, ref, secretKey) {
-    return md5('' + userId + points + type + ref + secretKey);
+    // uid=1currency=2type=0ref=33b5949e0c26b87767a4752a276de9570
+    return md5('uid=' + userId + 'currency=' + points + 'type=' + type + 'ref=' + ref + secretKey);
 }
 
 function getSigForSR(tranId, offerCredits, userId, secretKey) {

@@ -54,9 +54,9 @@ module.exports = ({ config, db }) => {
 		/* 
 		Query Params
         uid: the user id in rewardy's system
-        cy: number of points to add to the user
-        type=[TYPE]
-        ref=[REF]
+        currency: number of points to add to the user
+        type: type of postback (0 - Regular payment/offer completion ; 1 - Product/Virtual Currency is given by customer service ; 2 - Chargeback by customer service)
+        ref: Transaction reference ID, alphanumeric (max length: 11)
         sig: the security hash that proves that this postback comes from us.
     */
 	api.get('/postback/offerwall', (req, res) => {
