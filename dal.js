@@ -88,15 +88,7 @@ let UserActionSchema = new Schema({
         type: String,
         required: true
     },
-    partnerTransactionId: {
-        type: String,
-        required: true
-    },
     userId: {
-        type: String,
-        required: true
-    },
-    offerId: {
         type: String,
         required: true
     },
@@ -104,13 +96,14 @@ let UserActionSchema = new Schema({
         type: Number,
         required: true
     },
-    totalCredits: {
-        type: Number
-    },
     date: {
         type: Date,
         required: true,
         default: Date.now
+    },
+    partner_extended_data: {
+        type: Schema.Types.Mixed,
+        required: false
     }
 });
 let UserAction = mongoose.model('UserAction', UserActionSchema);
@@ -266,18 +259,16 @@ function saveOffers(offers) {
     
 }
 
-function addUserAction(partnerTransactionId, userId, offerId, offerCredits, totalCredits, partner, date, innerTransactionId) {
+function addUserAction(innerTransactionId, partner, userId, offerCredits, date, partner_extended_data) {
     return new Promise((resolve, reject) => {
         try {        
             let newUserAction = new UserAction({
             id: innerTransactionId,
             partner: partner,
-            partnerTransactionId: partnerTransactionId,
             userId: userId,
-            offerId: offerId,
             offerCredits: offerCredits,
-            totalCredits: totalCredits,
-            date: date
+            date: date,
+            partner_extended_data: partner_extended_data
             });
 
             newUserAction.save(function(err) {

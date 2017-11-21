@@ -51,6 +51,26 @@ module.exports = ({ config, db }) => {
 		
 	});
 
+		/* 
+		Query Params
+        uid: the user id in rewardy's system
+        cy: number of points to add to the user
+        type=[TYPE]
+        ref=[REF]
+        sig: the security hash that proves that this postback comes from us.
+    */
+	api.get('/postback/offerwall', (req, res) => {
+		logger.log.info('request to /postback/offerwall made', {request: req});
+		monetizationHandler.postback_offerwall(db, req).then(()=> 
+		{
+			res.send('OK');
+		}).catch (err => 
+		{ 
+			res.send('ERROR OCCURED'); 
+		});
+		
+	});
+
 	/*
 		Registration confirmation - the user will be here after clicking the confirm button on the validation email
 		Query arguments:

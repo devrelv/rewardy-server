@@ -127,8 +127,10 @@ function postback_superrewards(db, req, partnerName) {
             const clientIp = requestIp.getClientIp(req); // TODO: Validate the clientIp is correct
             //var clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress ||req.connection.socket.remoteAddress;
         
-            // Add this line for debug:
-            allowedIPs.push(clientIp);
+            if (process.env.DEVELOPMENT_MODE == '1') {
+                // Add this line for debug:
+                allowedIPs.push(clientIp);
+            }
         
             // Validating request IP
             if (allowedIPs.indexOf(clientIp) == -1) {
@@ -154,20 +156,14 @@ function postback_superrewards(db, req, partnerName) {
                 reject('Signature key is not valid');
                 return;
             }
-        
-            db.addUserAction(partnerTransactionId, userId, offerId, offerCredits, totalCredits, partner, date, innerTransactionId).then(()=> {
-                db.increaseUserCredits(userId, offerCredits).then(()=> {
-                    checkAndGiveCreditsToReferFriend(db, userId).then(()=> {
-                        resolve();                        
-                    }).catch(err => {
-                        logger.log.error('postback_superrewards:checkAndGiveCreditsToReferFriend error', {error: serializeError(err), userId: userId});                
-                        reject(err);
-                    });
-                    
+
+            db.addUserAction(innerTransactionId, partner, userId, offerCredits, date, {partnerTransactionId: partnerTransactionId, offerId: offerId, totalCredits: totalCredits}).then(()=> {
+                rewardUserWithCredits(db, userId, offerCredits, partner).then(()=> {
+                    resolve();
                 }).catch(err => {
-                    logger.log.error('postback_superrewards: db.increaseUserCredits error', {error: serializeError(err), userId: userId, offerCredits: offerCredits});                
+                    logger.log.error('postback_offerwall: rewardUserWithCredits error', {error: serializeError(err)});
                     reject(err);
-                });
+                })
             }).catch(err => {
                 logger.log.error('postback_superrewards: db.addUserAction error', {error: serializeError(err)});                
                 reject(err);
@@ -179,8 +175,91 @@ function postback_superrewards(db, req, partnerName) {
     });
 }
 
+function postback_offerwall(db, req, partnerName) {
+    /* Query Params
+        uid: the user id in rewardy's system
+        cy: number of points to add to the user
+        type=[TYPE]
+        ref=[REF]
+        sig: the security hash that proves that this postback comes from us.
+    */
+    return new Promise((resolve, reject) => {
+        try {
+            const allowedIPs = ['174.36.92.186', '174.36.92.187', '174.36.96.66', '174.37.14.28']; // allowed IPs as mentioned in http://www.offerwall.com/documentation
+            const clientIp = requestIp.getClientIp(req); // TODO: Validate the clientIp is correct
+            //var clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress ||req.connection.socket.remoteAddress;
+        
+            if (process.env.DEVELOPMENT_MODE == '1') {
+                // Add this line for debug:
+                allowedIPs.push(clientIp);
+            }
+            
+        
+            // Validating request IP
+            if (allowedIPs.indexOf(clientIp) == -1) {
+                logger.log.error('postback_offerwall: request IP is not valid, ignoring request. clientIp: ' + clientIp + ' allowed IPs: ' + allowedIPs.join(','), {request: req});
+                reject('request IP is not valid');
+                return;
+            }
+        
+            var userId = req.query.uid;
+            var offerCredits = req.query.cy;
+            var offerType = req.query.type;
+            var offerRef = req.query.ref;
+
+            var partner = consts.PARTNER_OFFERWALL;
+            var date = new Date();
+            var innerTransactionId = uuid.v1();
+
+            // Validating key
+            var key = req.query.sig
+            if (key !== getSigForOfferWall(userId, offerCredits, offerType, offerRef, consts.OFFERWALL_SECRET_KEY)) {
+                logger.log.error('postback_offerwall: Signature key is not valid, ignoring request. request key: ' + key, {request: req});
+                reject('Signature key is not valid');
+                return;
+            }
+        
+            db.addUserAction(innerTransactionId, partner, userId, offerCredits, date, {type: offerType, ref: offerRef}).then(()=> {
+                rewardUserWithCredits(db, userId, offerCredits, partner).then(()=> {
+                    resolve();
+                }).catch(err => {
+                    logger.log.error('postback_offerwall: rewardUserWithCredits error', {error: serializeError(err)});
+                    reject(err);
+                })
+            }).catch(err => {
+                logger.log.error('postback_offerwall: db.addUserAction error', {error: serializeError(err)});                
+                reject(err);
+            });
+        } catch (err) {
+            logger.log.error('postback_offerwall: error occured', {error: serializeError(err), request: req});
+            reject(err);
+        }
+    });
+}
+
+function getSigForOfferWall(userId, points, type, ref, secretKey) {
+    return md5('' + userId + points + type + ref + secretKey);
+}
+
 function getSigForSR(tranId, offerCredits, userId, secretKey) {
     return md5(tranId + ':' + offerCredits + ':' + userId +  ':' + secretKey);
+}
+
+function rewardUserWithCredits(db, userId, offerCredits, partner) {
+    return new Promise((resolve, reject) => {        
+        db.increaseUserCredits(userId, offerCredits).then(()=> {
+            checkAndGiveCreditsToReferFriend(db, userId).then(()=> {
+                resolve();                        
+            }).catch(err => {
+                logger.log.error('rewardUserWithCredits: checkAndGiveCreditsToReferFriend error', {error: serializeError(err), userId: userId, partner: partner});                
+                reject(err);
+            });
+            
+        }).catch(err => {
+            logger.log.error('rewardUserWithCredits: db.increaseUserCredits error', {error: serializeError(err), userId: userId, offerCredits: offerCredits, partner: partner});                
+            reject(err);
+        });
+    });
 }
 
 function checkAndGiveCreditsToReferFriend(db, userId) {
@@ -249,4 +328,5 @@ module.exports = {
     updateAllCredits: updateAllCredits,
     insertOffersToDB: insertOffersToDB,
     postback_superrewards: postback_superrewards,
+    postback_offerwall: postback_offerwall
 };

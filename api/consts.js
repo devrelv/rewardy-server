@@ -1,11 +1,14 @@
 var winston = require('winston');
 
 module.exports = {
+    PARTNER_OFFERWALL : 'OfferWall.com',
     PARTNER_SUPER_REWARDS : 'Super Rewards',
     PARTNER_FYBER : 'Fyber',
     PARTNER_DAILY_BONUS : 'Daily Bonus',
     PARTNER_STUB : 'Stub',
     SUPER_REWARDS_SECRET_KEY : '30691850651147dabd9938e8d3ec995d',
+    OFFERWALL_SECRET_KEY: '92a528dfb37c253ecb42f5974ca0c504', // REAL KEY
+    //OFFERWALL_SECRET_KEY: '3b5949e0c26b87767a4752a276de9570', // FOR DEBUGGING ONLY! REMOVE THIS!
     defaultUserLanguage: 'en',
     default_points: 10, // TODO: Move to a common props file
     daily_bonus_points: 10, // TODO: Move to a common props file
