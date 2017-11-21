@@ -173,8 +173,7 @@ let BotUser = mongoose.model('BotUser', BotUserSchema);
 let InvitationSchema = new Schema({
     inviting_user_id : {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     invited_email: {
         type: String,
