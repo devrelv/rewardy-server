@@ -4,9 +4,6 @@ const logger = require('./logger');
 const serializeError = require('serialize-error');
 
 
-// TODO: Move to .env 
-const MONGO_CONNECTION_STRING = 'mongodb://prod:Pp123456@ds113736.mlab.com:13736/rewardy';
-
 // const mongodbOptions = {
 //     server: {
 //         socketOptions: {
@@ -91,15 +88,7 @@ let UserActionSchema = new Schema({
         type: String,
         required: true
     },
-    partnerTransactionId: {
-        type: String,
-        required: true
-    },
     userId: {
-        type: String,
-        required: true
-    },
-    offerId: {
         type: String,
         required: true
     },
@@ -107,13 +96,14 @@ let UserActionSchema = new Schema({
         type: Number,
         required: true
     },
-    totalCredits: {
-        type: Number
-    },
     date: {
         type: Date,
         required: true,
         default: Date.now
+    },
+    partner_extended_data: {
+        type: Schema.Types.Mixed,
+        required: false
     }
 });
 let UserAction = mongoose.model('UserAction', UserActionSchema);
@@ -173,11 +163,33 @@ let BotUserSchema = new Schema({
 
 let BotUser = mongoose.model('BotUser', BotUserSchema);
 
+let InvitationSchema = new Schema({
+    inviting_user_id : {
+        type: String,
+        required: true
+    },
+    invited_email: {
+        type: String,
+        required: true
+    },
+    invitation_completed: {
+        type: Boolean,
+        default: 0,
+        required: true
+    },
+    created_at: {
+        type: Date,
+        required: true,
+        default: Date.now
+    }
+});
+let Invitation = mongoose.model('Invitation', InvitationSchema);
+
 function openConnection() {
     try {
         logger.log.info('dal: ####### connecting to the database #######');
         mongoose.Promise = require('bluebird');
-        mongoose.connect(MONGO_CONNECTION_STRING, {useMongoClient: true}).then(
+        mongoose.connect(process.env.MONGO_CONNECTION_STRING, {useMongoClient: true}).then(
             ()=>{
             logger.log.info('dal: connected to database');        
             }
@@ -247,18 +259,16 @@ function saveOffers(offers) {
     
 }
 
-function addUserAction(partnerTransactionId, userId, offerId, offerCredits, totalCredits, partner, date, innerTransactionId) {
+function addUserAction(innerTransactionId, partner, userId, offerCredits, date, partner_extended_data) {
     return new Promise((resolve, reject) => {
         try {        
             let newUserAction = new UserAction({
             id: innerTransactionId,
             partner: partner,
-            partnerTransactionId: partnerTransactionId,
             userId: userId,
-            offerId: offerId,
             offerCredits: offerCredits,
-            totalCredits: totalCredits,
-            date: date
+            date: date,
+            partner_extended_data: partner_extended_data
             });
 
             newUserAction.save(function(err) {
@@ -354,6 +364,31 @@ function saveFriendReferralNewBotUser(id, name, email, referrerUserId) {
     });
 }
 
+function saveInvitation(invitingUserId, invitedEmail) {
+    return new Promise((resolve, reject) => {
+        try {
+            let invitation = new Invitation({
+                inviting_user_id : invitingUserId,
+                invited_email: invitedEmail
+            });
+
+            invitation.save(function(err) {
+                if (err) {
+                    logger.log.error('dal: saveInvitation error', {error: serializeError(err)});                        
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            })
+
+        }
+        catch (err) {
+            logger.log.error('dal: saveInvitation error', {error: serializeError(err)});                        
+            reject(err);
+        }
+    });
+}
+
 function getUserLastBonusDate(userId) {
     return new Promise((resolve, reject) => {
         try {
@@ -421,7 +456,8 @@ module.exports = {
     getUserLastBonusDate: getUserLastBonusDate,
     getBotUserById: getBotUserById,
     updateUserSourceAdditionInfo: updateUserSourceAdditionInfo,
-    getBotUserByEmail: getBotUserByEmail
+    getBotUserByEmail: getBotUserByEmail,
+    saveInvitation: saveInvitation
 }
 
 

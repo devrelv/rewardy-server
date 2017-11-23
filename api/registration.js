@@ -25,19 +25,19 @@ function registerUserFromLink (db, req) {
             }
     
             var name = (firstName + ' ' + lastName).trim();
-            var id = uuid.v1();
             db.getBotUserByEmail(email).then(userFromDB => {
-                if (userFromDB) {
-                    logger.log.warning('registerUserFromLink: User with this email already exists', {email: email});
-                    reject('User with this email already exists');
-                } else {
-                    db.saveFriendReferralNewBotUser(id, name, email, referrerUserId).then(()=> {
-                        resolve();
-                    }).catch(err => {
-                        logger.log.error('registerUserFromLink: saveFriendReferralNewBotUser rejected', {error: serializeError(err), request: req});
-                        reject(err)
-                    });
-                }
+                // db.saveFriendReferralNewBotUser(id, name, email, referrerUserId).then(()=> {
+                //     resolve();
+                // }).catch(err => {
+                //     logger.log.error('registerUserFromLink: saveFriendReferralNewBotUser rejected', {error: serializeError(err), request: req});
+                //     reject(err)
+                // });
+                db.saveInvitation(referrerUserId, email).then(()=>{
+                    resolve();
+                }).catch(err => {
+                    logger.log.error('registerUserFromLink: saveInvitation rejected', {error: serializeError(err)});
+                    reject(err);
+                });
             }).catch(err => {
                 logger.log.error('registerUserFromLink: getBotUserByEmail rejected', {error: serializeError(err)});
                 reject(err)                
@@ -88,7 +88,7 @@ function sendEmailToReferral(req) {
 }
 
 function getVerificationUrl(referrerUserId, email, firstName, lastName, invitationCode) {
-    return consts.SERVER_API_URL + 'register?refId=' + referrerUserId + 
+    return process.env.SERVER_API_URL + 'register?refId=' + referrerUserId + 
     '&email=' + email + '&firstName=' + firstName + '&lastName=' + lastName + '&invitationCode=' + invitationCode
 }
 
