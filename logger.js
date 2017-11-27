@@ -24,10 +24,10 @@ var log = new (winston.Logger)({
   // Sending the error data to Raven (sentry.io)
   let oldErrorFunc = log.error;  
   log.error = function(errorString, params){
-    if (params && params.error) {
-        Raven.captureException(params.error);    
-    } else if (params && params.err) {
-        Raven.captureException(params.err);
+    if (params && params.error && params.error.message) {
+        Raven.captureException(params.error.message);    
+    } else if (params && params.err && params.err.message) {
+        Raven.captureException(params.err.message);
     } else {
         Raven.captureException(params);
     }
@@ -37,10 +37,10 @@ var log = new (winston.Logger)({
   // Sending the warning data to Raven (sentry.io)
   let oldWarnFunc = log.warn;  
   log.warn = function(errorString, params){
-    if (params && params.error) {
-        Raven.captureException(params.error);    
-    } else if (params && params.err) {
-        Raven.captureException(params.err);        
+    if (params && params.error && params.error.message) {
+        Raven.captureException(params.error.message);    
+    } else if (params && params.err && params.err.message) {
+        Raven.captureException(params.err.message);        
     } else {
         Raven.captureException(params);
     }

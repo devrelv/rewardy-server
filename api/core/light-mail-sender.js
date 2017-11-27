@@ -30,6 +30,9 @@ function sendCustomMail(toEmail, subject, text, html) {
                 auth: {
                     user: consts.EMAIL_USERNAME, // generated ethereal user
                     pass: consts.EMAIL_PASSWORD  // generated ethereal password
+                }, 
+                tls: {
+                    secureProtocol: "TLSv1_method"
                 }
             });
             transporter.sendMail(mailOptions, sendMailCallback);
