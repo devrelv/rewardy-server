@@ -21,30 +21,32 @@ var log = new (winston.Logger)({
   });
   log.level = 'debug'; // Log Levels: error: 0, warn: 1, info: 2, verbose: 3, debug: 4, silly: 5
 
-  // Sending the error data to Raven (sentry.io)
-  let oldErrorFunc = log.error;  
-  log.error = function(errorString, params){
+  if (process.env.DEVELOPMENT_MODE != '1') {
+    // Sending the error data to Raven (sentry.io)
+    let oldErrorFunc = log.error;  
+    log.error = function(errorString, params){
     if (params && params.error && params.error.message) {
-        Raven.captureException(params.error.message);    
-    } else if (params && params.err && params.err.message) {
-        Raven.captureException(params.err.message);
-    } else {
-        Raven.captureException(params);
-    }
-    oldErrorFunc.apply(this, [errorString, params]);
-  }
-
-  // Sending the warning data to Raven (sentry.io)
-  let oldWarnFunc = log.warn;  
-  log.warn = function(errorString, params){
-    if (params && params.error && params.error.message) {
-        Raven.captureException(params.error.message);    
+        Raven.captureException( params.error.message);    
     } else if (params && params.err && params.err.message) {
         Raven.captureException(params.err.message);        
     } else {
         Raven.captureException(params);
     }
-    oldWarnFunc.apply(this, [errorString, params]);
+    oldErrorFunc.apply(this, [errorString, params]);
+    }
+
+     // Sending the warning data to Raven (sentry.io)
+    let oldWarnFunc = log.warn;  
+    log.warn = function(errorString, params){
+        if (params && params.error && params.error.message) {
+            Raven.captureException(params.error.message);    
+        } else if (params && params.err && params.err.message) {
+            Raven.captureException(params.err.message);        
+        } else {
+            Raven.captureException(params);
+        }
+        oldWarnFunc.apply(this, [errorString, params]);
+    }
   }
 
   function formatDate(date) {
