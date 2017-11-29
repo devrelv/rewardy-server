@@ -161,7 +161,7 @@ function postback_superrewards(db, req, partnerName) {
                 rewardUserWithCredits(db, userId, offerCredits, partner).then(()=> {
                     resolve();
                 }).catch(err => {
-                    logger.log.error('postback_offerwall: rewardUserWithCredits error', {error: serializeError(err)});
+                    logger.log.error('postback_superrewards: rewardUserWithCredits error', {error: serializeError(err)});
                     reject(err);
                 })
             }).catch(err => {
@@ -261,19 +261,35 @@ function getSigForSR(tranId, offerCredits, userId, secretKey) {
 }
 
 function rewardUserWithCredits(db, userId, offerCredits, partner) {
-    return new Promise((resolve, reject) => {        
+    return new Promise((resolve, reject) => {
         db.increaseUserCredits(userId, offerCredits).then(()=> {
-            checkAndGiveCreditsToReferFriend(db, userId).then(()=> {
-                resolve();                        
-            }).catch(err => {
-                logger.log.error('rewardUserWithCredits: checkAndGiveCreditsToReferFriend error', {error: serializeError(err), userId: userId, partner: partner});                
-                reject(err);
+            Promise.all([checkAndGiveCreditsToReferFriend(db, userId), notifyRewardedUser(db, userId, offerCredits)]).then((first, second)=>{
+                resolve(); // user already received the points, we don't want to reject it
+            }).catch(err=>{
+                logger.log.error('rewardUserWithCredits: Promise.any error', {error: serializeError(err), userId: userId, offerCredits: offerCredits, partner: partner});                
+                resolve(); // user already received the points, we don't want to reject it
             });
-            
         }).catch(err => {
             logger.log.error('rewardUserWithCredits: db.increaseUserCredits error', {error: serializeError(err), userId: userId, offerCredits: offerCredits, partner: partner});                
             reject(err);
         });
+    });
+}
+
+function notifyRewardedUser(db, userId, points) {
+    return new Promise((resolve, reject) => {
+        db.getBotUserById(userId).then(botUser => {
+                let proactiveData = {points: points};
+                sendProactiveMessage(botUser.proactive_address, consts.PROACTIVE_MESSAGES_OFFER_COMPLETED, proactiveData, botUser.userId).then(()=>{
+                    resolve();
+                }).catch(err => {
+                    logger.log.error('notifyRewardedUser: sendProactiveMessage error', {error: serializeError(err), userId: userId});                
+                    reject(err);
+                })
+        }).catch(err =>{
+            logger.log.error('notifyRewardedUser: db.getBotUserById error', {error: serializeError(err), userId: userId});                
+            reject(err);
+        })
     });
 }
 
@@ -292,30 +308,41 @@ function checkAndGiveCreditsToReferFriend(db, userId) {
                         actionUser.source.additional_data = actionUser.source.additional_data || {};
                         actionUser.source.additional_data.referralReceivedBonusDate = new Date();
                         db.updateUserSourceAdditionInfo(actionUser.user_id, actionUser.source.additional_data).then(()=> {
+                            if (!actionUser.name || actionUser.name.length == 0) {
+                                actionUser.name = 'your friend';
+                            }
+                            // TODO: Refactoring: use Promise.any
                             if (goodFriend.proactive_address) {
                                 let friendProactiveData = {referralPoints: consts.referral_bonus_points, friendName: actionUser.name};
-                                sendProactiveMessage(goodFriend.proactive_address, consts.PROACTIVE_MESSAGES_REFERRAL_BONUS, friendProactiveData, goodFriend.userId);
-                            }
-                            // send email
-                            if (goodFriend.email && goodFriend.email.length>0 && goodFriend.email.indexOf('@')>-1) {
-                                var referralHtmlContent = fs.readFileSync(path.dirname(fs.realpathSync(__filename)) + '/../email_templates/referral-bonus.html', 'utf8');                        
-                                referralHtmlContent = referralHtmlContent.replace('%REFERAL_BONUS_POINTS%', consts.referral_bonus_points);
-                                referralHtmlContent = referralHtmlContent.replace('%FRIEND_NAME%', actionUser.name);
-    
-                                lightMailSender.sendCustomMail(goodFriend.email, 'Rewardy Friend Referral Bonus!', null, referralHtmlContent).then(()=>{
-                                    resolve();
-                                }).catch(err => {
-                                    logger.log.error('checkAndGiveCreditsToReferal: lightMailSender.sendCustomMail error', {error: serializeError(err), goodFriend: goodFriend});                
-                                    reject(err);
+                                sendProactiveMessage(goodFriend.proactive_address, consts.PROACTIVE_MESSAGES_REFERRAL_BONUS, friendProactiveData, goodFriend.userId).then(()=>{
+                                    // send email
+                                    sendEmailForReferrerFriend(goodFriend.email, actionUser.name).then(() => {
+                                        resolve();
+                                    }).catch((err)=> {
+                                        logger.log.error('sendEmailForReferrerFriend error', {error: serializeError(err), actionUser: actionUser});                                                                                            
+                                        reject(); // We don't want to reject because the user already received the credits!                            
+                                    })
+                                }).catch(()=>{
+                                    // send email
+                                    sendEmailForReferrerFriend(goodFriend.email, actionUser.name).then(() => {
+                                        resolve();
+                                    }).catch((err)=> {
+                                        logger.log.error('sendEmailForReferrerFriend error', {error: serializeError(err), actionUser: actionUser});                                                    
+                                        reject(); // We don't want to reject because the user already received the credits!                            
+                                    })
                                 });
                             } else {
-                                resolve();
+                                // send email
+                                sendEmailForReferrerFriend(goodFriend.email, actionUser.name).then(() => {
+                                    resolve();
+                                }).catch((err)=> {
+                                    logger.log.error('sendEmailForReferrerFriend error', {error: serializeError(err), actionUser: actionUser});                
+                                    reject(); // We don't want to reject because the user already received the credits!                            
+                                })
                             }
-                            
-
                         }).catch(err => {
                             logger.log.error('checkAndGiveCreditsToReferal:db.updateUserSourceAdditionInfo error', {error: serializeError(err), actionUser: actionUser});                
-                            reject(err);
+                            reject(); // We don't want to reject because the user already received the credits!
                         });                   
                     }).catch(err => {
                         logger.log.error('checkAndGiveCreditsToReferal: db.increaseUserCredits error', {error: serializeError(err), goodFriend: goodFriend});                
@@ -333,10 +360,39 @@ function checkAndGiveCreditsToReferFriend(db, userId) {
     });
 }
 
-const https = require('https');
+function sendEmailForReferrerFriend(email, friendName) {
+    return new Promise((resolve, reject) => {
+        if (email && email.length>0 && email.indexOf('@')>-1) {
+            var referralHtmlContent = fs.readFileSync(path.dirname(fs.realpathSync(__filename)) + '/../email_templates/referral-bonus.html', 'utf8');                        
+            referralHtmlContent = referralHtmlContent.replace('%REFERAL_BONUS_POINTS%', consts.referral_bonus_points);
+            referralHtmlContent = referralHtmlContent.replace('%FRIEND_NAME%', friendName);
+
+            lightMailSender.sendCustomMail(email, 'Rewardy Friend Referral Bonus!', null, referralHtmlContent).then(()=>{
+                resolve();
+            }).catch(err => {
+                logger.log.error('checkAndGiveCreditsToReferal: lightMailSender.sendCustomMail error', {error: serializeError(err), goodFriendEmail: email});                
+                reject(err);
+            });
+        } else {
+            resolve();
+        }
+    });
+}
+
+var rp = require('request-promise');
 function sendProactiveMessage(proactive_address, messageId, messageData, userId) {
-    let fullUrl = process.env.BOT_API_URL + 'proactive?message_address=' + encodeURIComponent(proactive_address) + '&message_id=' + messageId + '&message_data=' + encodeURIComponent(messageData) + '&user_id=' + userId;
-    https.get(fullUrl);
+    return new Promise((resolve, reject) => {
+        let fullUrl = process.env.BOT_API_URL + 'proactive?message_address=' + encodeURIComponent(JSON.stringify(proactive_address)) + '&message_id=' + messageId + '&message_data=' + encodeURIComponent(JSON.stringify(messageData)) + '&user_id=' + userId;
+        rp(fullUrl)
+        .then(function (htmlString) {
+            // No need to process the html result...
+            resolve(htmlString);
+        })
+        .catch(function (err) {
+            logger.log.error('sendProactiveMessage: unable to send proactive message error', {error: serializeError(err), userId: userId});
+            reject(err);
+        });
+    });    
 }
 
 module.exports = {
