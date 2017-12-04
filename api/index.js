@@ -7,6 +7,7 @@ const consts = require('./consts');
 const registration = require('./registration');
 const voucher_redeem = require('./voucher-redeem');
 const daily_bonus = require('./daily-bonus');
+const backup_service = require('./backup-service');
 
 const logger = require('../logger');
 const serializeError = require('serialize-error');
@@ -138,6 +139,16 @@ module.exports = ({ config, db }) => {
 			res.status(500).send({result: "Error", info: err});
 		});
 	});
+
+	api.get('/backup_db', (req, res) => {
+		logger.log.debug('request to /backup_db made', {request: req});
+		backup_service.backupDb(db, req).then(() => {
+			res.send('DONE');
+		}).catch(err => {
+			logger.log.error('error in /daily_bonus', {request: req, error: serializeError(err)});			
+			res.send("Error Occured: " + JSON.stringify(err));
+		});
+	})
 
 	return api;
 }
