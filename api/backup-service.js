@@ -1,8 +1,6 @@
 'use strict';
 var consts = require('./consts.js');
-var path = require('path');
 var fs = require('fs');
-var firebase = require("firebase");
 const logger = require('../logger');
 const serializeError = require('serialize-error');
 const lightMailSender = require('./core/light-mail-sender');
