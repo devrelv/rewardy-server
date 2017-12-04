@@ -30,6 +30,8 @@
     "express": "^4.13.3",
     "http": "0.0.0",
     "md5": "^2.2.1",
+    "moment": "^2.19.3",
+    "mongodb-backup": "^1.6.9",
     "mongoose": "^4.12.3",
     "morgan": "^1.8.0",
     "nodemailer": "^4.3.0",
@@ -38,7 +40,9 @@
     "request": "^2.83.0",
     "request-ip": "^2.0.2",
     "request-promise": "^4.2.2",
+    "rimraf": "^2.6.2",
     "serialize-error": "^2.1.0",
+    "shelljs": "^0.7.8",
     "uuid": "^3.1.0",
     "winston": "^2.4.0"
   },

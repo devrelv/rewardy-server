@@ -215,3 +215,6 @@ $RECYCLE.BIN/
 
 #Server logs
 #/server/logs/*.log
+
+#Temp Backups
+db_backups/
