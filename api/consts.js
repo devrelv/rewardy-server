@@ -14,7 +14,7 @@ module.exports = {
     daily_bonus_points: 10, // TODO: Move to a common props file
     referral_bonus_points: 20, // TODO: Move to a common props file
     EMAIL_USERNAME: 'hello@rewardy.co', 
-    EMAIL_PASSWORD: 'hg68tuyg',
+    EMAIL_PASSWORD: 'S4fe34DS#$ds',
     EMAIL_SENDER_NAME: 'Rewardy',
     EMAIL_VOUCHERS_GENERETOR: 'hello@rewardy.co', // The email to send the vouchers redeem requests
     botUser_source_friendReferral: 'friend',
