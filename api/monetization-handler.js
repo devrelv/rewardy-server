@@ -213,7 +213,7 @@ function postback_offerwall(db, req, partnerName) {
 
             // Validating key
             var key = req.query.sig
-            if (key !== getSigForOfferWall(userId, offerCredits, offerType, offerRef, consts.OFFERWALL_SECRET_KEY)) {
+            if (key !== getSigForOfferWall_v2(req.query, consts.OFFERWALL_SECRET_KEY)) {
                 logger.log.error('postback_offerwall: Signature key is not valid, ignoring request. request key: ' + key, {request: req});
                 reject('Signature key is not valid');
                 return;
@@ -251,7 +251,26 @@ function postback_offerwall(db, req, partnerName) {
     });
 }
 
-function getSigForOfferWall(userId, points, type, ref, secretKey) {
+// generating sig for offerwall with pingback version 2
+function getSigForOfferWall_v2(query, secretKey) {
+    let queryString = '';
+    let keys = [];
+    for (let key in query) {
+        if (query.hasOwnProperty(key) && key != 'sig') {
+            keys.push(key);
+        }
+    }
+    keys.sort();
+    for (let i=0; i<keys.length; i++) {
+        queryString += keys[i] + '=' + query[keys[i]];
+    }
+
+    let calculatedSig = md5(queryString+secretKey);
+    return calculatedSig;
+}
+
+// generating sig for offerwall with pingback version 1 (deprecated)
+function getSigForOfferWall_v1(userId, points, type, ref, secretKey) {
     // uid=1currency=2type=0ref=33b5949e0c26b87767a4752a276de9570
     return md5('uid=' + userId + 'currency=' + points + 'type=' + type + 'ref=' + ref + secretKey);
 }
@@ -263,7 +282,7 @@ function getSigForSR(tranId, offerCredits, userId, secretKey) {
 function rewardUserWithCredits(db, userId, offerCredits, partner) {
     return new Promise((resolve, reject) => {
         db.increaseUserCredits(userId, offerCredits).then(()=> {
-            Promise.all([checkAndGiveCreditsToReferFriend(db, userId).catch(e=>e), notifyRewardedUser(db, userId, offerCredits)].catch(e=>e)).then((first, second)=>{
+            Promise.all([checkAndGiveCreditsToReferFriend(db, userId).catch(e=>e), notifyRewardedUser(db, userId, offerCredits).catch(e=>e)]).then((first, second)=>{
                 resolve(); // user already received the points, we don't want to reject it
             }).catch(err=>{
                 logger.log.error('rewardUserWithCredits: Promise.any error', {error: serializeError(err), userId: userId, offerCredits: offerCredits, partner: partner});                
