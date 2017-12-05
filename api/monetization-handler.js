@@ -282,7 +282,7 @@ function getSigForSR(tranId, offerCredits, userId, secretKey) {
 function rewardUserWithCredits(db, userId, offerCredits, partner) {
     return new Promise((resolve, reject) => {
         db.increaseUserCredits(userId, offerCredits).then(()=> {
-            Promise.all([checkAndGiveCreditsToReferFriend(db, userId).catch(e=>e), notifyRewardedUser(db, userId, offerCredits)].catch(e=>e)).then((first, second)=>{
+            Promise.all([checkAndGiveCreditsToReferFriend(db, userId).catch(e=>e), notifyRewardedUser(db, userId, offerCredits).catch(e=>e)]).then((first, second)=>{
                 resolve(); // user already received the points, we don't want to reject it
             }).catch(err=>{
                 logger.log.error('rewardUserWithCredits: Promise.any error', {error: serializeError(err), userId: userId, offerCredits: offerCredits, partner: partner});                
