@@ -2,6 +2,7 @@
 const logger = require('../logger');
 const consts = require('./consts');
 const serializeError = require('serialize-error');
+const dal = require('../dal');
 
 /*
     Query arguments:
@@ -14,9 +15,9 @@ function handleUser (db, req) {
             let result = {result: "Success", isRewarded: false, message: ""};
             var userId = req.query.uid;
             var dailyBonusQualified = false;            
-            db.getUserLastBonusDate(userId).then(lastBonusDate => 
+            dal.getUserLastBonusDate(userId).then(lastBonusDate => 
                 {
-                    logger.log.debug('in db.getUserLastBonusDate.then');
+                    logger.log.debug('in dal.getUserLastBonusDate.then');
                     
                     if (!lastBonusDate) {
                         dailyBonusQualified = true;
@@ -36,9 +37,9 @@ function handleUser (db, req) {
                         logger.log.debug('in if (dailyBonusQualified)');
                     
                         // give the daily bonus & update last_daily_bonus
-                        db.increaseUserCredits(userId, consts.daily_bonus_points, true).then(()=>
+                        dal.increaseUserCredits(userId, consts.daily_bonus_points, true).then(()=>
                         {
-                            logger.log.debug('in db.increaseUserCredits.then');
+                            logger.log.debug('in dal.increaseUserCredits.then');
                         
                             result.isRewarded = true;
                             result.points = consts.daily_bonus_points;
@@ -55,7 +56,7 @@ function handleUser (db, req) {
                     }
                     
                 }). catch (err => {
-                    logger.log.error('daily-bonus db.getUserLastBonusDate: error occured', {error: serializeError(err), request: req});                    
+                    logger.log.error('daily-bonus dal.getUserLastBonusDate: error occured', {error: serializeError(err), request: req});                    
                     reject(err);
                 });
             

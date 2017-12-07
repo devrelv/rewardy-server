@@ -4,6 +4,7 @@ const serializeError = require('serialize-error');
 const logger = require('../logger');
 const lightMailSender = require('./core/light-mail-sender');
 const consts = require('./consts');
+const dal = require('../dal');
 
 /*
     Query arguments:

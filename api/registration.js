@@ -8,6 +8,7 @@ var fs = require('fs');
 const logger = require('../logger');
 const serializeError = require('serialize-error');
 const lightMailSender = require('./core/light-mail-sender');
+const dal = require('../dal');
 
 function registerUserFromLink (db, req) {
     return new Promise((resolve, reject) => {        
@@ -25,14 +26,14 @@ function registerUserFromLink (db, req) {
             }
     
             var name = (firstName + ' ' + lastName).trim();
-            db.getBotUserByEmail(email).then(userFromDB => {
-                // db.saveFriendReferralNewBotUser(id, name, email, referrerUserId).then(()=> {
+            dal.getBotUserByEmail(email).then(userFromDB => {
+                // dal.saveFriendReferralNewBotUser(id, name, email, referrerUserId).then(()=> {
                 //     resolve();
                 // }).catch(err => {
                 //     logger.log.error('registerUserFromLink: saveFriendReferralNewBotUser rejected', {error: serializeError(err), request: req});
                 //     reject(err)
                 // });
-                db.saveInvitation(referrerUserId, email).then(()=>{
+                dal.saveInvitation(referrerUserId, email).then(()=>{
                     resolve();
                 }).catch(err => {
                     logger.log.error('registerUserFromLink: saveInvitation rejected', {error: serializeError(err)});

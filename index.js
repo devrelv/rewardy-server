@@ -4,7 +4,6 @@ var express = require('express');
 var cors = require('cors');
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
-var initializeDb = require('./db');
 var middleware = require('./middleware');
 var api = require('./api');
 var config = require('./config.json');
@@ -25,16 +24,15 @@ app.use(bodyParser.json({
 }));
 
 // connect to db
-initializeDb( db => {
-	// internal middleware
-	app.use(middleware({ config, db }));
+let db=null;
+// internal middleware
+app.use(middleware({ config, db }));
 
-	// api router
-	app.use('/api', api({ config, db }));
+// api router
+app.use('/api', api({ config, db }));
 
-	app.server.listen(process.env.PORT || 8080, () => {
-		console.log(`Started on port ${app.server.address().port}`);
-	});
+app.server.listen(process.env.PORT || 8080, () => {
+	console.log(`Started on port ${app.server.address().port}`);
 });
 
 module.exports = app;

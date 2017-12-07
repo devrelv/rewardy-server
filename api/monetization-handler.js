@@ -9,6 +9,7 @@ const lightMailSender = require('./core/light-mail-sender');
 var path = require('path');
 var fs = require('fs');
 var md5 = require('md5');
+const dal = require('../dal');
 
 const Stub = require('./monetization_providers/stub');
 const Fyber = require('./monetization_providers/fyber');
@@ -20,7 +21,7 @@ function updateAllCredits(db) {
     return new Promise((resolve, reject) => {
         try {
             // Get all the partners
-            db.getAllMonetizationPartners().then(monetizationPartners => {
+            dal.getAllMonetizationPartners().then(monetizationPartners => {
                 logger.log.debug('in handler with: ', monetizationPartners);
                 // For each partner get the actions in the last 24 hours
                 for (var i=0; i<monetizationPartners.length; i++) {
@@ -63,7 +64,7 @@ function insertOffersToDB(db) {
     try {
         // TODO: Finish implementation
         // Get monetization partners with offers
-        db.getAllMonetizationPartnersWithOffers().then(monetizationPartners => {
+        dal.getAllMonetizationPartnersWithOffers().then(monetizationPartners => {
             let fetchDate = new Date().toJSON().split('T')[0]; // YYYY-MM-DD
             
             // For each partner get the offers (use MonetizationProviders class)
@@ -100,7 +101,7 @@ function insertOffersToDB(db) {
                     }
                     logger.log.debug('in getAvailableOffers for ' + currentPartner.name, {offers: offers});
                     // Save all offers to DB
-                    db.saveOffers(offers);
+                    dal.saveOffers(offers);
                 });
             }
 
@@ -157,7 +158,7 @@ function postback_superrewards(db, req, partnerName) {
                 return;
             }
 
-            db.addUserAction(innerTransactionId, partner, userId, offerCredits, date, {partnerTransactionId: partnerTransactionId, offerId: offerId, totalCredits: totalCredits}).then(()=> {
+            dal.addUserAction(innerTransactionId, partner, userId, offerCredits, date, {partnerTransactionId: partnerTransactionId, offerId: offerId, totalCredits: totalCredits}).then(()=> {
                 rewardUserWithCredits(db, userId, offerCredits, partner).then(()=> {
                     resolve();
                 }).catch(err => {
@@ -165,7 +166,7 @@ function postback_superrewards(db, req, partnerName) {
                     reject(err);
                 })
             }).catch(err => {
-                logger.log.error('postback_superrewards: db.addUserAction error', {error: serializeError(err)});                
+                logger.log.error('postback_superrewards: dal.addUserAction error', {error: serializeError(err)});                
                 reject(err);
             });
         } catch (err) {
@@ -219,7 +220,7 @@ function postback_offerwall(db, req, partnerName) {
                 return;
             }
         
-            db.addUserAction(innerTransactionId, partner, userId, offerCredits, date, {type: offerType, ref: offerRef}).then(()=> {
+            dal.addUserAction(innerTransactionId, partner, userId, offerCredits, date, {type: offerType, ref: offerRef}).then(()=> {
                 if (offerType == 2) {
                     // Oh no.... Chargeback
                     let chargebackHTML = 'We received a chargeback of ' + offerCredits + ' points for user ' + userId + '!<br/><br/>All Details(as saved to UserAction collection):<br/>';
@@ -241,7 +242,7 @@ function postback_offerwall(db, req, partnerName) {
                 }
                 
             }).catch(err => {
-                logger.log.error('postback_offerwall: db.addUserAction error', {error: serializeError(err)});                
+                logger.log.error('postback_offerwall: dal.addUserAction error', {error: serializeError(err)});                
                 reject(err);
             });
         } catch (err) {
@@ -281,7 +282,7 @@ function getSigForSR(tranId, offerCredits, userId, secretKey) {
 
 function rewardUserWithCredits(db, userId, offerCredits, partner) {
     return new Promise((resolve, reject) => {
-        db.increaseUserCredits(userId, offerCredits).then(()=> {
+        dal.increaseUserCredits(userId, offerCredits).then(()=> {
             Promise.all([checkAndGiveCreditsToReferFriend(db, userId).catch(e=>e), notifyRewardedUser(db, userId, offerCredits).catch(e=>e)]).then((first, second)=>{
                 resolve(); // user already received the points, we don't want to reject it
             }).catch(err=>{
@@ -289,7 +290,7 @@ function rewardUserWithCredits(db, userId, offerCredits, partner) {
                 resolve(); // user already received the points, we don't want to reject it
             });
         }).catch(err => {
-            logger.log.error('rewardUserWithCredits: db.increaseUserCredits error', {error: serializeError(err), userId: userId, offerCredits: offerCredits, partner: partner});                
+            logger.log.error('rewardUserWithCredits: dal.increaseUserCredits error', {error: serializeError(err), userId: userId, offerCredits: offerCredits, partner: partner});                
             reject(err);
         });
     });
@@ -297,7 +298,7 @@ function rewardUserWithCredits(db, userId, offerCredits, partner) {
 
 function notifyRewardedUser(db, userId, points) {
     return new Promise((resolve, reject) => {
-        db.getBotUserById(userId).then(botUser => {
+        dal.getBotUserById(userId).then(botUser => {
                 let proactiveData = {points: points};
                 sendProactiveMessage(botUser.proactive_address, consts.PROACTIVE_MESSAGES_OFFER_COMPLETED, proactiveData, botUser.userId).then(()=>{
                     resolve();
@@ -306,7 +307,7 @@ function notifyRewardedUser(db, userId, points) {
                     reject(err);
                 })
         }).catch(err =>{
-            logger.log.error('notifyRewardedUser: db.getBotUserById error', {error: serializeError(err), userId: userId});                
+            logger.log.error('notifyRewardedUser: dal.getBotUserById error', {error: serializeError(err), userId: userId});                
             reject(err);
         })
     });
@@ -315,18 +316,18 @@ function notifyRewardedUser(db, userId, points) {
 function checkAndGiveCreditsToReferFriend(db, userId) {
     return new Promise((resolve, reject) => {        
         // getting the user
-        db.getBotUserById(userId).then(actionUser => {
+        dal.getBotUserById(userId).then(actionUser => {
             // check if the referal didn't received already bonus for this user
             if (actionUser.source && actionUser.source.type == consts.botUser_source_friendReferral && 
                 (!actionUser.source.additional_data || !actionUser.source.additional_data.referralReceivedBonusDate)) {
                 // get the user who referred this user
-                db.getBotUserById(actionUser.source.id).then(goodFriend => {
+                dal.getBotUserById(actionUser.source.id).then(goodFriend => {
                     // give referral bonus
-                    db.increaseUserCredits(goodFriend.user_id, consts.referral_bonus_points, false).then(()=> {
+                    dal.increaseUserCredits(goodFriend.user_id, consts.referral_bonus_points, false).then(()=> {
                         //update the referred user that we gave the bonus
                         actionUser.source.additional_data = actionUser.source.additional_data || {};
                         actionUser.source.additional_data.referralReceivedBonusDate = new Date();
-                        db.updateUserSourceAdditionInfo(actionUser.user_id, actionUser.source.additional_data).then(()=> {
+                        dal.updateUserSourceAdditionInfo(actionUser.user_id, actionUser.source.additional_data).then(()=> {
                             if (!actionUser.name || actionUser.name.length == 0) {
                                 actionUser.name = 'your friend';
                             }
@@ -360,11 +361,11 @@ function checkAndGiveCreditsToReferFriend(db, userId) {
                                 })
                             }
                         }).catch(err => {
-                            logger.log.error('checkAndGiveCreditsToReferal:db.updateUserSourceAdditionInfo error', {error: serializeError(err), actionUser: actionUser});                
+                            logger.log.error('checkAndGiveCreditsToReferal:dal.updateUserSourceAdditionInfo error', {error: serializeError(err), actionUser: actionUser});                
                             reject(); // We don't want to reject because the user already received the credits!
                         });                   
                     }).catch(err => {
-                        logger.log.error('checkAndGiveCreditsToReferal: db.increaseUserCredits error', {error: serializeError(err), goodFriend: goodFriend});                
+                        logger.log.error('checkAndGiveCreditsToReferal: dal.increaseUserCredits error', {error: serializeError(err), goodFriend: goodFriend});                
                         reject(err);
                     });
                 });

@@ -1,24 +1,13 @@
-var mongoose = require('mongoose');
+var clone = require('clone');
+var mongoose = clone(require('mongoose'));
 var consts = require('./api/consts')
 const logger = require('./logger');
 const serializeError = require('serialize-error');
 
+logger.log.info('dal: ####### connecting to the database #######');
+let conn = mongoose.connect(process.env.MONGO_CONNECTION_STRING, {useMongoClient: true});
 
-// const mongodbOptions = {
-//     server: {
-//         socketOptions: {
-//             keepAlive: 300000,
-//             connectTimeoutMS: 30000
-//         }
-//     },
-//     replset: {
-//         socketOptions: {
-//             keepAlive: 300000,
-//             connectTimeoutMS: 30000
-//         }
-//     }
-// };
-
+mongoose.Promise = require('bluebird');
 let Schema = mongoose.Schema;
 
 let MonetizationPartnerSchema = new Schema({
@@ -42,7 +31,7 @@ let MonetizationPartnerSchema = new Schema({
         default: 0
     }
 });
-let MonetizationPartner = mongoose.model('MonetizationPartner', MonetizationPartnerSchema);
+let MonetizationPartner = conn.model('MonetizationPartner', MonetizationPartnerSchema);
 
 let OfferSchema = new Schema({
     id: {
@@ -76,7 +65,7 @@ let OfferSchema = new Schema({
         default: 0
     },
 });
-let Offer = mongoose.model('Offer', OfferSchema);
+let Offer = conn.model('Offer', OfferSchema);
 
 let UserActionSchema = new Schema({
     id: { /* ourTransactionId */
@@ -106,7 +95,7 @@ let UserActionSchema = new Schema({
         required: false
     }
 });
-let UserAction = mongoose.model('UserAction', UserActionSchema);
+let UserAction = conn.model('UserAction', UserActionSchema);
 
 // TODO: Add "Common Objects" module
 let BotUserSchema = new Schema({
@@ -161,7 +150,7 @@ let BotUserSchema = new Schema({
     }
 });
 
-let BotUser = mongoose.model('BotUser', BotUserSchema);
+let BotUser = conn.model('BotUser', BotUserSchema);
 
 let InvitationSchema = new Schema({
     inviting_user_id : {
@@ -183,27 +172,8 @@ let InvitationSchema = new Schema({
         default: Date.now
     }
 });
-let Invitation = mongoose.model('Invitation', InvitationSchema);
+let Invitation = conn.model('Invitation', InvitationSchema);
 
-function openConnection() {
-    try {
-        logger.log.info('dal: ####### connecting to the database #######');
-        mongoose.Promise = require('bluebird');
-        mongoose.connect(process.env.MONGO_CONNECTION_STRING, {useMongoClient: true}).then(
-            ()=>{
-            logger.log.info('dal: connected to database');        
-            }
-        ).catch(err => {
-            logger.log.error('dal: openConnection mongoose.connect error occured', {error: serializeError(err)});
-            setTimeout(() => {throw err;}); // The setTimeout is a trick to enable the throw err
-        });
-    } catch (err) {
-        logger.log.log('error','dal: openConnection error occured (' + err.message + ')', {error: serializeError(err)});
-        throw err;
-    }
-    
-    
-}
 function getAllMonetizationPartners() {
 	return new Promise((resolve, reject) => {
         MonetizationPartner.find({}, function(err, data) {
@@ -445,110 +415,7 @@ function updateUserSourceAdditionInfo(userId, additional_data) {
     }); 
 }
 
-var backup = require('mongodb-backup');
-function backupDb(backupDir) {
-    return new Promise((resolve, reject) => {
-       backup({
-         uri: process.env.MONGO_CONNECTION_STRING, // mongodb://<dbuser>:<dbpassword>@<dbdomain>.mongolab.com:<dbport>/<dbdatabase> 
-         root: backupDir,
-         callback: backupDone
-       });
-
-       function backupDone(err) {
-           if (err) {
-                logger.log.error('dal: backupDb error', {error: serializeError(err)});            
-               reject(err);
-           } else {
-               resolve();
-           }
-       }
-    }); 
-}
-
-var restore = require('mongodb-restore');
-function restoreDb(importDbConnectionString, dirLocation, isWriteToBackupDB, backupDate) {
-    return new Promise((resolve, reject) => {
-        restore({
-         uri: importDbConnectionString, // mongodb://<dbuser>:<dbpassword>@<dbdomain>.mongolab.com:<dbport>/<dbdatabase> 
-         root: dirLocation,
-         callback: restoreDone,
-         drop: true
-       });
-
-       function restoreDone(err) {
-           if (err) {
-                logger.log.error('dal: restoreDb.restoreDone error', {error: serializeError(err)});                        
-               reject(err);
-           } else {
-               if (isWriteToBackupDB) {
-                   updateLastBackupDate(importDbConnectionString, backupDate).then(()=>{
-                       resolve();
-                   }).catch(err => {
-                        logger.log.error('dal: restoreDb.updateLastBackupDate error', {error: serializeError(err)});
-                        resolve();
-                   })
-               } else {
-                resolve();                
-               }
-           }
-       }
-    }); 
-}
-
-var mongooseForRestore = require('mongoose');
-let Backup = mongooseForRestore.model('Backup', new Schema({
-    connection_string: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    interval_in_hours: {
-        type: Number,
-        required: true
-    },
-    last_backup: {
-        type: Date,
-        default: Date.now
-    }
-}));
-
-function updateLastBackupDate(dbConnectionString, backupDate){
-    return new Promise((resolve, reject) => {
-        Backup.update({'connection_string': dbConnectionString}, {'last_backup': backupDate}, 
-        err => {
-            if (err) {
-                logger.log.error('dal: updateLastBackupDate error', {error: serializeError(err)});                                        
-                reject(err);
-            } else {
-                resolve();
-            }
-        })
-    });        
-}
-
-function getAllBackups() {
-    return new Promise((resolve, reject) => {
-        mongooseForRestore.Promise = require('bluebird');
-        mongooseForRestore.connect(process.env.BACKUP_DB_CONNECTION_STRING, {useMongoClient: true}).then(
-            ()=>{
-                Backup.find({},function(err, data) {
-                    if (err) {
-                        logger.log.error('dal: getAllBackups error', {error: serializeError(err)});                        
-                        reject(err);
-                    } else {
-                        resolve(data);
-                    }
-                })
-            }
-        ).catch(err => {
-            logger.log.error('dal: getAllBackups mongooseForRestore.connect error', {error: serializeError(err)});                        
-            reject(err);
-        });
-    });
-}
-
 module.exports = {
-    openConnection: openConnection,
     getAllMonetizationPartners: getAllMonetizationPartners,
     getAllMonetizationPartnersWithOffers: getAllMonetizationPartnersWithOffers,
     saveOffers: saveOffers,
@@ -559,10 +426,7 @@ module.exports = {
     getBotUserById: getBotUserById,
     updateUserSourceAdditionInfo: updateUserSourceAdditionInfo,
     getBotUserByEmail: getBotUserByEmail,
-    saveInvitation: saveInvitation,
-    backupDb: backupDb,
-    restoreDb: restoreDb,
-    getAllBackups: getAllBackups
+    saveInvitation: saveInvitation
 }
 
 
