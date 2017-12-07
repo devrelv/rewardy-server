@@ -142,7 +142,7 @@ module.exports = ({ config, db }) => {
 
 	api.get('/backup_db', (req, res) => {
 		logger.log.debug('request to /backup_db made', {request: req});
-		backup_service.backupDb(db, req).then(() => {
+		backup_service.backupDb(req).then(() => {
 			res.send('DONE');
 		}).catch(err => {
 			logger.log.error('error in /daily_bonus', {request: req, error: serializeError(err)});			

@@ -1,8 +1,8 @@
-const dal = require('./dal')
+// const dal = require('./dal')
 
 module.exports = callback => {
-    dal.openConnection();
-	callback(dal);
+    // dal.openConnection();
+	// callback(dal);
 }
 
 // export function getAllMonetizationPartners() {

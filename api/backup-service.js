@@ -7,7 +7,9 @@ const lightMailSender = require('./core/light-mail-sender');
 var moment = require('moment')
 var rimraf = require('rimraf');
 
-function backupDb (db, req) {
+var backup_dal = require('../backup_dal');
+
+function backupDb (req) {
     return new Promise((resolve, reject) => {        
         try {
             let now = new Date();
@@ -17,8 +19,8 @@ function backupDb (db, req) {
                 shell.mkdir('-p', backupDir);
             }
             logger.log.info('backing up database to ' + backupDir);            
-            db.backupDb(backupDir).then(()=>{
-                db.getAllBackups().then(backupSources => {
+            backup_dal.backupDb(backupDir).then(()=>{
+                backup_dal.getAllBackups().then(backupSources => {
                     let restoreProcesses = [];
                     for (let i=0;i<backupSources.length;i++) {
                         let currentBackupSource = backupSources[i];
@@ -38,7 +40,7 @@ function backupDb (db, req) {
                             logger.log.info('restoring database into ' + currentBackupSource.connection_string);
                             // Restore to this db: currentBackupSource
                             let backedupDbName = getDbNameFromConnectionString(process.env.MONGO_CONNECTION_STRING);
-                            restoreProcesses.push(db.restoreDb(currentBackupSource.connection_string, backupDir + '/' + backedupDbName, true, now).catch(e => e));
+                            restoreProcesses.push(backup_dal.restoreDb(currentBackupSource.connection_string, backupDir + '/' + backedupDbName, true, now).catch(e => e));
                         }
                     }
                     if (restoreProcesses.length == 0) {
@@ -55,11 +57,11 @@ function backupDb (db, req) {
                         });
                     }
                 }).catch(err => {
-                    logger.log.error('backupDb: db.getAllBackups error occured', {error: serializeError(err), request: req});            
+                    logger.log.error('backupDb: backup_dal.getAllBackups error occured', {error: serializeError(err), request: req});            
                     reject(err);
                 });
             }).catch(err => {
-                logger.log.error('backupDb: db.backupDb error occured', {error: serializeError(err), request: req});            
+                logger.log.error('backupDb: backup_dal.backupDb error occured', {error: serializeError(err), request: req});            
                 reject(err);
             });
             
