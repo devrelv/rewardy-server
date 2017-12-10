@@ -150,5 +150,14 @@ module.exports = ({ config, db }) => {
 		});
 	})
 
+	api.get('/remove_all_backup_files', (req, res) => {
+		logger.log.debug('request to /remove_all_backup_files made', {request: req});
+		backup_service.removeAllBackupFiles(req).then(() => {
+			res.send('DONE');
+		}).catch(err => {
+			res.send(JSON.stringify(err));
+		});
+	})
+
 	return api;
 }
