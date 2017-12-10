@@ -35,4 +35,7 @@ app.server.listen(process.env.PORT || 8080, () => {
 	console.log(`Started on port ${app.server.address().port}`);
 });
 
+// increasing the timeout for the backup
+app.server.timeout = 300000;
+
 module.exports = app;
