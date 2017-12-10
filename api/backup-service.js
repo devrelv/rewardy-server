@@ -136,7 +136,20 @@ function formatDate(date) {
     return [year, month, day].join('-') + '_' + [hour,minute, second].join('-');
 }
 
+function removeAllBackupFiles() {
+    return new Promise((resolve, reject) => {
+        try {
+            let backupsDir = __dirname + '/../db_backups/*';
+            rimraf(backupsDir, function () { 
+                resolve();
+                });
+        } catch (err) {
+            reject(err);
+        }
+    });
+}
 
 module.exports = {
-    backupDb: backupDb
+    backupDb: backupDb,
+    removeAllBackupFiles: removeAllBackupFiles
 }
