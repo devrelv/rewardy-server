@@ -14,18 +14,25 @@ function registerUserFromLink (db, req) {
     return new Promise((resolve, reject) => {        
         try {
             var referrerUserId = req.query.refId;
-            var firstName = req.query.firstName;
-            var lastName = req.query.lastName;
+            
             var invitationId = req.query.invitationCode;
             var email = req.query.email;
+            var name = req.query.name;
+
+            if (!name) {
+                var firstName = req.query.firstName;
+                var lastName = req.query.lastName;
+                name = firstName + ' ' + lastName;
+            }
+
+
             // Verifying the invitationId
-            var generatedInvitationId = generateInvitationCode(firstName, lastName, email, referrerUserId);
+            var generatedInvitationId = generateInvitationCode(name, email, referrerUserId);
             if (invitationId != generatedInvitationId) {
                 logger.log.error('registerUserFromLink: incorrect invitation code', {data: {invitationId: invitationId, generatedInvitationId: generatedInvitationId}, request: req});
                 reject("incorrect invitation code");
             }
-    
-            var name = (firstName + ' ' + lastName).trim();
+            
             dal.getBotUserByEmail(email).then(userFromDB => {
                 // dal.saveFriendReferralNewBotUser(id, name, email, referrerUserId).then(()=> {
                 //     resolve();
@@ -54,8 +61,8 @@ function registerUserFromLink (db, req) {
 
 }
 
-function generateInvitationCode(firstName, lastName, email, referrerUserId) {
-    return hash({firstName: firstName, lastName: lastName, email: email, referrerUserId: referrerUserId});
+function generateInvitationCode(name, email, referrerUserId) {
+    return hash({name: name, email: email, referrerUserId: referrerUserId});
 }
 
 // TODO: Send the email with the invitation code
@@ -63,15 +70,21 @@ function sendEmailToReferral(req) {
     return new Promise((resolve, reject) => {
         try {
             var referrerUserId = req.query.refId;
-            var firstName = req.query.firstName;
-            var lastName = req.query.lastName;
+            
+            var name = req.query.lastName;
             var email = req.query.email;
+
+            if (!name) {
+                var firstName = req.query.firstName;
+                var lastName = req.query.lastName;
+                name = firstName + ' ' + lastName;
+            }
     
-            var invitationCode = generateInvitationCode(firstName, lastName, email, referrerUserId);
+            var invitationCode = generateInvitationCode(name, email, referrerUserId);
     
             var inviteHtmlContent = fs.readFileSync(path.dirname(fs.realpathSync(__filename)) + '/../email_templates/email-verification.html', 'utf8');
             
-            var verificationUrl = getVerificationUrl(referrerUserId, email, firstName, lastName, invitationCode);
+            var verificationUrl = getVerificationUrl(referrerUserId, email, name, invitationCode);
             inviteHtmlContent = inviteHtmlContent.replace('%EMAIL_VERIFICATION_URL%', verificationUrl);
     
             lightMailSender.sendCustomMail(email, 'Rewardy - Email Verification', null, inviteHtmlContent).then(k=>{
@@ -88,9 +101,9 @@ function sendEmailToReferral(req) {
     });
 }
 
-function getVerificationUrl(referrerUserId, email, firstName, lastName, invitationCode) {
+function getVerificationUrl(referrerUserId, email, name, invitationCode) {
     return process.env.SERVER_API_URL + 'register?refId=' + referrerUserId + 
-    '&email=' + email + '&firstName=' + firstName + '&lastName=' + lastName + '&invitationCode=' + invitationCode
+    '&email=' + email + '&name=' + name + '&invitationCode=' + invitationCode
 }
 
 module.exports = {
