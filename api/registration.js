@@ -32,7 +32,7 @@ function registerUserFromLink (db, req) {
                 logger.log.error('registerUserFromLink: incorrect invitation code', {data: {invitationId: invitationId, generatedInvitationId: generatedInvitationId}, request: req});
                 reject("incorrect invitation code");
             }
-            
+
             dal.getBotUserByEmail(email).then(userFromDB => {
                 // dal.saveFriendReferralNewBotUser(id, name, email, referrerUserId).then(()=> {
                 //     resolve();
@@ -71,7 +71,7 @@ function sendEmailToReferral(req) {
         try {
             var referrerUserId = req.query.refId;
             
-            var name = req.query.lastName;
+            var name = req.query.name;
             var email = req.query.email;
 
             if (!name) {
