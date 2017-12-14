@@ -3,6 +3,7 @@ const nodemailer = require('nodemailer');
 const logger = require('../../logger');
 const serializeError = require('serialize-error');
 const consts = require('../consts');
+const emailRegex = new RegExp(/^[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/);
 
 function sendCustomMail(toEmail, subject, text, html) {
     return new Promise((resolve, reject) => {
@@ -10,7 +11,15 @@ function sendCustomMail(toEmail, subject, text, html) {
             var toEmailAsString;
             if (Array.isArray(toEmail)) {
                 toEmailAsString = toEmail.join(',');
+                for (let i=0;i<toEmail.length;i++) {                    
+                    if (!emailRegex.test(toEmail[i])) {
+                        reject('invalid email address: ' + toEmail[i]);
+                    }
+                }
             } else {
+                if (!emailRegex.test(toEmail)) {
+                    reject('invalid email address: ' + toEmail);
+                }
                 toEmailAsString = toEmail;
             }
             // setup email data with unicode symbols
