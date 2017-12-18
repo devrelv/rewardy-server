@@ -36,6 +36,6 @@ app.server.listen(process.env.PORT || 8080, () => {
 });
 
 // increasing the timeout for the backup
-app.server.timeout = 300000;
+app.server.timeout = 0;
 
 module.exports = app;
