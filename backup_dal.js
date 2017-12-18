@@ -1,6 +1,8 @@
 var backup = require('mongodb-backup');
 var restore = require('mongodb-restore');
 var clone = require('clone');
+const serializeError = require('serialize-error');
+const logger = require('./logger');
 
 var mongooseForRestore = clone(require('mongoose'));
 
