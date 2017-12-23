@@ -415,9 +415,29 @@ function sendProactiveMessage(proactive_address, messageId, messageData, userId)
     });    
 }
 
+function getBotUserById(req) {
+    return new Promise((resolve, reject) => {
+        try {
+            let userId = req.query.userId;
+            dal.getBotUserById(userId).then(user => {
+                resolve(user);
+            }).catch (err => {
+                logger.log.error('getBotUserById: error on dal.getBotUserById', {error: serializeError(err), userId: userId});
+                reject(err);
+            })
+        }
+        catch (err) {
+            logger.log.error('getBotUserById: error occured', {error: serializeError(err)});
+            reject(err);            
+        }
+        
+    });
+}
+
 module.exports = {
     updateAllCredits: updateAllCredits,
     insertOffersToDB: insertOffersToDB,
     postback_superrewards: postback_superrewards,
-    postback_offerwall: postback_offerwall
+    postback_offerwall: postback_offerwall,
+    getBotUserById: getBotUserById
 };

@@ -159,5 +159,14 @@ module.exports = ({ config, db }) => {
 		});
 	})
 
+	api.get('/get_user_by_id', (req, res) => {
+		monetizationHandler.getBotUserById(req).then(user => {
+			res.json(user);
+		}).catch(err => {
+			logger.log.error('error in /get_user_by_id', {request: req, error: serializeError(err)});			
+			res.send("Error Occured: " + JSON.stringify(err));
+		})
+	})
+
 	return api;
 }
