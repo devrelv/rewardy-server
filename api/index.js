@@ -168,5 +168,14 @@ module.exports = ({ config, db }) => {
 		})
 	})
 
+	api.get('/update_user_email', (req, res) => {
+		monetizationHandler.updateUserEmail(req).then(() => {
+			res.json({result: 'Success'});
+		}).catch(err => {
+			logger.log.error('error in /update_user_email', {request: req, error: serializeError(err)});			
+			res.json({result: 'Error', error: "Error Occured: " + JSON.stringify(err)});
+		})
+	})
+
 	return api;
 }

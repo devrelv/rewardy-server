@@ -434,10 +434,36 @@ function getBotUserById(req) {
     });
 }
 
+function updateUserEmail(req) {
+    return new Promise((resolve, reject) => {
+        try {
+            let userId = req.query.userId;
+            let email = req.query.email;
+
+            if (!consts.EMAIL_REGEX.test(email)) {
+                reject('invalid email address');
+            } else {
+                dal.updateUserEmail(userId, email).then(user => {
+                    resolve(user);
+                }).catch (err => {
+                    logger.log.error('getBotUserById: error on dal.getBotUserById', {error: serializeError(err), userId: userId});
+                    reject(err);
+                })
+            }
+        }
+        catch (err) {
+            logger.log.error('getBotUserById: error occured', {error: serializeError(err)});
+            reject(err);            
+        }
+        
+    });
+}
+
 module.exports = {
     updateAllCredits: updateAllCredits,
     insertOffersToDB: insertOffersToDB,
     postback_superrewards: postback_superrewards,
     postback_offerwall: postback_offerwall,
-    getBotUserById: getBotUserById
+    getBotUserById: getBotUserById,
+    updateUserEmail: updateUserEmail
 };
