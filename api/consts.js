@@ -23,6 +23,7 @@ module.exports = {
     PROACTIVE_MESSAGES_OFFER_COMPLETED: 2,
     PROACTIVE_MESSAGES_DAILY_BONUS: 3,
     PROACTIVE_MESSAGES_INACTIVITY_7DAYS: 4,
-    PROACTIVE_MESSAGES_CUSTOM: 5
+    PROACTIVE_MESSAGES_CUSTOM: 5,
+    EMAIL_REGEX: new RegExp(/^[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/)
 
 }

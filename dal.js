@@ -415,6 +415,20 @@ function updateUserSourceAdditionInfo(userId, additional_data) {
     }); 
 }
 
+function updateUserEmail(userId, email) {
+    return new Promise((resolve, reject) => {
+        BotUser.update({user_id: userId}, {$set: {'email' : email }}
+        , err => {
+            if (err) {
+                logger.log.error('dal: updateUserEmail.update error', {error: serializeError(err), user_id: userId});
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
+    }); 
+}
+
 module.exports = {
     getAllMonetizationPartners: getAllMonetizationPartners,
     getAllMonetizationPartnersWithOffers: getAllMonetizationPartnersWithOffers,
@@ -426,7 +440,8 @@ module.exports = {
     getBotUserById: getBotUserById,
     updateUserSourceAdditionInfo: updateUserSourceAdditionInfo,
     getBotUserByEmail: getBotUserByEmail,
-    saveInvitation: saveInvitation
+    saveInvitation: saveInvitation,
+    updateUserEmail: updateUserEmail
 }
 
 
