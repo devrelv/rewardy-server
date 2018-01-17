@@ -177,5 +177,15 @@ module.exports = ({ config, db }) => {
 		})
 	})
 
+	api.get('/get_offers', (req, res) => {
+		logger.log.debug('request to /get_offers made', {request: req});
+		monetizationHandler.getAvailableOffers(req).then((result) => {
+			res.json(result);
+		}).catch(err => {
+			logger.log.error('error in /get_offers', {request: req, error: serializeError(err)});			
+			res.status(500).send({result: "Error", info: err});
+		});
+	});
+
 	return api;
 }

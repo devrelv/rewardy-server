@@ -459,11 +459,79 @@ function updateUserEmail(req) {
     });
 }
 
+function getAvailableOffers(req) {
+    return new Promise((resolve, reject) => {
+        try {
+            let platform = req.query.platform;
+            let userAgent = req.query.user_agent;
+            // get device and countries from user_agent
+
+            let offers = stubForApplift();
+            resolve(offers);
+            
+        }
+        catch (err) {
+            logger.log.error('getAvailableOffers: error occured', {error: serializeError(err)});
+            reject(err);            
+        }
+        
+    });
+
+
+    
+}
+
+function stubForApplift() {
+    return ([
+        {
+            id: '595cc525-dc5a-4771-a850-5a931ed85d14',
+            click_url: 'http://google.com',
+            points: 50,
+            cpa_text: 'install', 
+            icon_url: 'http://is2.mzstatic.com/image/thumb/Purple128/v4/7f/5a/26/7f5a268a-dba3-6bee-caee-d98798e85ff6/source/512x512bb.jpg',
+            title: 'Boltt Health: Get Fit & Healthynow',
+            store_rating: 4.5,
+            action: 'Achieve Level 5'
+        },
+        {
+            id: '125cc525-dc5a-4771-a850-5a931ed85d34',
+            click_url: 'http://scouter.club/',
+            points: 10,
+            cpa_text: 'download this crazy app!', 
+            icon_url: 'http://scouter.club/img/logo.png',
+            title: 'Scouter App',
+            store_rating: 4.8,
+            action: 'Install App'
+        },
+        {
+            id: '345cc525-dc5a-4771-a850-5a931ed85d56',
+            click_url: 'https://www.facebook.com/itamar.mula',
+            points: 20,
+            cpa_text: 'view', 
+            icon_url: 'http://graph.facebook.com/598408272/picture',
+            title: 'Xoxo for Mula',
+            store_rating: 2.4,
+            action: 'Registration'
+        },
+        {
+            id: '565cc525-dc5a-4771-a850-5a931ed85d78',
+            click_url: 'https://www.gmail.com',
+            points: 15,
+            cpa_text: 'download', 
+            icon_url: 'https://lh6.ggpht.com/8-N_qLXgV-eNDQINqTR-Pzu5Y8DuH0Xjz53zoWq_IcBNpcxDL_gK4uS_MvXH00yN6nd4=w300',
+            // title: null,
+            // store_rating: null,
+            action: 'Download'
+        },
+    ]);
+}
+
 module.exports = {
     updateAllCredits: updateAllCredits,
     insertOffersToDB: insertOffersToDB,
     postback_superrewards: postback_superrewards,
     postback_offerwall: postback_offerwall,
     getBotUserById: getBotUserById,
-    updateUserEmail: updateUserEmail
+    updateUserEmail: updateUserEmail,
+    getAvailableOffers: getAvailableOffers
 };
