@@ -474,21 +474,19 @@ function getAvailableOffers(req) {
             let countryCode = req.query.country_code;
             let platform = req.query.platform;
             let device = req.query.device;
-            // get device and countries from user_agent
-            let offersResult = []
 
             if (STUB) {
                 offersResult = stubForApplift();
                 resolve(offersResult);
             } else {
-                let fullUrl = 'http://virtserver.swaggerhub.com/gaiar/pull/1.0.0/ads?token=' + process.env.APPLIFT_TOKEN;
+                let fullUrl = 'https://virtserver.swaggerhub.com/gaiar/pull/1.0.0/ads?token=' + process.env.APPLIFT_TOKEN;
                 rp(fullUrl)
                 .then(function (offersText) {
                     let offersJson = JSON.parse(offersText);
                     for (let i=0; i<offersJson.length; i++) {
                         let offer = new Offer();
                         offer.parseResponse(offersJson[i]);
-                        if (offer.countries.includes1(countryCode) && 
+                        if (offer.countries.includes(countryCode) && 
                             (offer.devices == 'all' || offer.devices.includes(device)) &&
                             offer.platform == platform) {
                                 offersResult.push(offer);
@@ -556,6 +554,38 @@ function stubForApplift() {
     ]);
 }
 
+/*
+    Query arguments:
+    partner - partner Id (i.e. Applift)
+    uid - clicking User Id
+    offer - cliced offer Id
+    points - num of points when clicked
+*/
+function offerClick(req) {
+    return new Promise((resolve, reject) => {
+        try {
+            let partner = req.query.partner; // For future use
+            let userId = req.query.uid;
+            let offerId = req.query.offer;
+            let points = req.query.points;
+           
+           dal.saveOfferClick(userId, offerId, points)
+            .then(() => {
+                resolve();
+            })
+            .catch(function (err) {
+                logger.log.error('offerClick: error saving to database', {error: serializeError(err), userId: userId, offerId: offerId, points: points});
+                reject(err);
+            });
+        }
+        catch (err) {
+            logger.log.error('offerClick: error occured', {error: serializeError(err)});
+            reject(err);            
+        }
+        
+    });    
+}
+
 module.exports = {
     updateAllCredits: updateAllCredits,
     insertOffersToDB: insertOffersToDB,
@@ -563,5 +593,6 @@ module.exports = {
     postback_offerwall: postback_offerwall,
     getBotUserById: getBotUserById,
     updateUserEmail: updateUserEmail,
-    getAvailableOffers: getAvailableOffers
+    getAvailableOffers: getAvailableOffers,
+    offerClick: offerClick
 };

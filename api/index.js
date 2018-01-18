@@ -194,5 +194,22 @@ module.exports = ({ config, db }) => {
 		});
 	});
 
+	/*
+		Query arguments:
+		partner - partner Id (i.e Applift)
+		uid - clicking User Id
+    	offer - cliced offer Id
+    	points - num of points when clicked
+	*/
+	api.get('/offer_click', (req, res) => {
+		logger.log.debug('request to /offer_click made', {request: req});
+		monetizationHandler.offerClick(req).then((result) => {
+			res.json({result: 'Success'});
+		}).catch(err => {
+			logger.log.error('error in /offer_click', {request: req, error: serializeError(err)});			
+			res.status(500).send({result: "Error", info: serializeError(err)});
+		});
+	});
+
 	return api;
 }
