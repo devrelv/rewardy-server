@@ -10,11 +10,12 @@ var path = require('path');
 var fs = require('fs');
 var md5 = require('md5');
 const dal = require('../dal');
+const rp = require('request-promise');
 
 const Stub = require('./monetization_providers/stub');
 const Fyber = require('./monetization_providers/fyber');
 const DailyBonus = require('./monetization_providers/daily-bonus');
-
+const Offer = require('./core/models/offer');
 
 
 function updateAllCredits(db) {
@@ -399,7 +400,6 @@ function sendEmailForReferrerFriend(email, friendName) {
     });
 }
 
-var rp = require('request-promise');
 function sendProactiveMessage(proactive_address, messageId, messageData, userId) {
     return new Promise((resolve, reject) => {
         let fullUrl = process.env.BOT_API_URL + 'proactive?message_address=' + encodeURIComponent(JSON.stringify(proactive_address)) + '&message_id=' + messageId + '&message_data=' + encodeURIComponent(JSON.stringify(messageData)) + '&user_id=' + userId;
@@ -459,26 +459,56 @@ function updateUserEmail(req) {
     });
 }
 
+/*
+    Query arguments:
+    partner - partner Id (i.e Applift)
+    country_code - user's country code (i.e IL, US)
+    platform - android / ios
+    device - phone / tablet / all
+*/
 function getAvailableOffers(req) {
     return new Promise((resolve, reject) => {
         try {
+            let STUB = true;
+            let partner = req.query.partner;
+            let countryCode = req.query.country_code;
             let platform = req.query.platform;
-            let userAgent = req.query.user_agent;
+            let device = req.query.device;
             // get device and countries from user_agent
+            let offersResult = []
 
-            let offers = stubForApplift();
-            resolve(offers);
-            
+            if (STUB) {
+                offersResult = stubForApplift();
+                resolve(offersResult);
+            } else {
+                let fullUrl = 'http://virtserver.swaggerhub.com/gaiar/pull/1.0.0/ads?token=' + process.env.APPLIFT_TOKEN;
+                rp(fullUrl)
+                .then(function (offersText) {
+                    let offersJson = JSON.parse(offersText);
+                    for (let i=0; i<offersJson.length; i++) {
+                        let offer = new Offer();
+                        offer.parseResponse(offersJson[i]);
+                        if (offer.countries.includes1(countryCode) && 
+                            (offer.devices == 'all' || offer.devices.includes(device)) &&
+                            offer.platform == platform) {
+                                offersResult.push(offer);
+                            }
+                    }
+
+                    resolve(offersResult);                    
+                })
+                .catch(function (err) {
+                    logger.log.error('getAvailableOffers: unable to call applift url: ' + fullUrl, {error: serializeError(err)});
+                    reject(err);
+                });
+            }
         }
         catch (err) {
             logger.log.error('getAvailableOffers: error occured', {error: serializeError(err)});
             reject(err);            
         }
         
-    });
-
-
-    
+    });    
 }
 
 function stubForApplift() {
@@ -487,7 +517,7 @@ function stubForApplift() {
             id: '595cc525-dc5a-4771-a850-5a931ed85d14',
             click_url: 'http://google.com',
             points: 50,
-            cpa_text: 'install', 
+            cta_text: 'install', 
             icon_url: 'http://is2.mzstatic.com/image/thumb/Purple128/v4/7f/5a/26/7f5a268a-dba3-6bee-caee-d98798e85ff6/source/512x512bb.jpg',
             title: 'Boltt Health: Get Fit & Healthynow',
             store_rating: 4.5,
@@ -497,7 +527,7 @@ function stubForApplift() {
             id: '125cc525-dc5a-4771-a850-5a931ed85d34',
             click_url: 'http://scouter.club/',
             points: 10,
-            cpa_text: 'download this crazy app!', 
+            cta_text: 'download this crazy app!', 
             icon_url: 'http://scouter.club/img/logo.png',
             title: 'Scouter App',
             store_rating: 4.8,
@@ -507,7 +537,7 @@ function stubForApplift() {
             id: '345cc525-dc5a-4771-a850-5a931ed85d56',
             click_url: 'https://www.facebook.com/itamar.mula',
             points: 20,
-            cpa_text: 'view', 
+            cta_text: 'view', 
             icon_url: 'http://graph.facebook.com/598408272/picture',
             title: 'Xoxo for Mula',
             store_rating: 2.4,
@@ -517,7 +547,7 @@ function stubForApplift() {
             id: '565cc525-dc5a-4771-a850-5a931ed85d78',
             click_url: 'https://www.gmail.com',
             points: 15,
-            cpa_text: 'download', 
+            cta_text: 'download', 
             icon_url: 'https://lh6.ggpht.com/8-N_qLXgV-eNDQINqTR-Pzu5Y8DuH0Xjz53zoWq_IcBNpcxDL_gK4uS_MvXH00yN6nd4=w300',
             // title: null,
             // store_rating: null,

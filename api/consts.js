@@ -24,6 +24,7 @@ module.exports = {
     PROACTIVE_MESSAGES_DAILY_BONUS: 3,
     PROACTIVE_MESSAGES_INACTIVITY_7DAYS: 4,
     PROACTIVE_MESSAGES_CUSTOM: 5,
-    EMAIL_REGEX: new RegExp(/^[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/)
+    EMAIL_REGEX: new RegExp(/^[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/),
+    APPLIFT_USD_TO_POINTS_RATIO: 100 // 1 USD = 170 Points on Redeem => If the ratio is 60:40, then 60%*170 = 100+-
 
 }
