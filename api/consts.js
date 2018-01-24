@@ -6,9 +6,10 @@ module.exports = {
     PARTNER_FYBER : 'Fyber',
     PARTNER_DAILY_BONUS : 'Daily Bonus',
     PARTNER_STUB : 'Stub',
+    PARTNER_APPLIFT : 'Stub',
     SUPER_REWARDS_SECRET_KEY : '30691850651147dabd9938e8d3ec995d',
     OFFERWALL_SECRET_KEY: '92a528dfb37c253ecb42f5974ca0c504', // REAL KEY
-    //OFFERWALL_SECRET_KEY: '3b5949e0c26b87767a4752a276de9570', // FOR DEBUGGING ONLY! REMOVE THIS!
+    VOLUUM_APPLIFT_SECRET_KEY: 'dfa06729-0f36-4570-9c06-7e64e6883c2b', 
     defaultUserLanguage: 'en',
     default_points: 10, // TODO: Move to a common props file
     daily_bonus_points: 10, // TODO: Move to a common props file
@@ -25,6 +26,7 @@ module.exports = {
     PROACTIVE_MESSAGES_INACTIVITY_7DAYS: 4,
     PROACTIVE_MESSAGES_CUSTOM: 5,
     EMAIL_REGEX: new RegExp(/^[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/),
-    APPLIFT_USD_TO_POINTS_RATIO: 100 // 1 USD = 170 Points on Redeem => If the ratio is 60:40, then 60%*170 = 100+-
+    APPLIFT_USD_TO_POINTS_RATIO: 100, // 1 USD = 170 Points on Redeem => If the ratio is 60:40, then 60%*170 = 100+-
+    VOLUUM_URL: 'http://vumhd.voluumtrk3.com/'
 
 }

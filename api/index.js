@@ -52,7 +52,7 @@ module.exports = ({ config, db }) => {
 		
 	});
 
-		/* 
+	/* 
 		Query Params
         uid: the user id in rewardy's system
         currency: number of points to add to the user
@@ -68,6 +68,25 @@ module.exports = ({ config, db }) => {
 		}).catch (err => 
 		{ 
 			res.send('ERROR OCCURED'); 
+		});
+		
+	});
+
+	/* 
+		Query Params
+        uid: the user id in rewardy's system
+        points: number of points to add to the user
+        oid: Id of the offer that was completed
+        sig: the security hash that proves that this postback comes from us.
+    */
+	api.get('/postback/applift', (req, res) => {
+		logger.log.info('request to /postback/applift made', {request: req});
+		monetizationHandler.postback_applift(req).then(()=> 
+		{
+			res.send('OK');
+		}).catch (err => 
+		{ 
+			res.status(500).send({result: "Error", info: err});
 		});
 		
 	});
@@ -183,6 +202,7 @@ module.exports = ({ config, db }) => {
 		country_code - user's country code (i.e IL, US)
 		platform - android / ios
 		device - phone / tablet / all
+		stub - use stub data (0 default OR 1)
 	*/
 	api.get('/get_offers', (req, res) => {
 		logger.log.debug('request to /get_offers made', {request: req});
@@ -196,15 +216,19 @@ module.exports = ({ config, db }) => {
 
 	/*
 		Query arguments:
-		partner - partner Id (i.e Applift)
+		partner - partner Id (i.e. Applift)
 		uid - clicking User Id
-    	offer - cliced offer Id
-    	points - num of points when clicked
+		offer - cliced offer Id
+		country_code - user's country code (i.e IL, US)
+		platform - android / ios
+		device - phone / tablet / all
 	*/
 	api.get('/offer_click', (req, res) => {
 		logger.log.debug('request to /offer_click made', {request: req});
-		monetizationHandler.offerClick(req).then((result) => {
-			res.json({result: 'Success'});
+		monetizationHandler.offerClick(req).then((redirectParams) => {
+			// on success - redirect to VOLUUM
+			res.redirect(redirectParams.redirectUrl);
+			//res.json({result: 'Success'});
 		}).catch(err => {
 			logger.log.error('error in /offer_click', {request: req, error: serializeError(err)});			
 			res.status(500).send({result: "Error", info: serializeError(err)});
