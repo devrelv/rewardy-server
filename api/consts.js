@@ -27,6 +27,6 @@ module.exports = {
     PROACTIVE_MESSAGES_CUSTOM: 5,
     EMAIL_REGEX: new RegExp(/^[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/),
     APPLIFT_USD_TO_POINTS_RATIO: 100, // 1 USD = 170 Points on Redeem => If the ratio is 60:40, then 60%*170 = 100+-
-    VOLUUM_URL: 'http://vumhd.voluumtrk3.com/'
+    VOLUUM_URL: 'http://stribeled-hortletin.com/363acfd1-3dc9-4350-9321-2dd6715f1989'
 
 }

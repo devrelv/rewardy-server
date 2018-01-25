@@ -685,6 +685,7 @@ function postback_applift(req) {
         uid: the user id in rewardy's system
         points: number of points to add to the user
         oid: Id of the offer that was completed
+        payout: payout amount from applify
         sig: the security hash that proves that this postback comes from us.
     */
     return new Promise((resolve, reject) => {
@@ -692,19 +693,21 @@ function postback_applift(req) {
             var userId = req.query.uid;
             var offerCredits = req.query.points;
             var offerId = req.query.oid;
+            let payout =  req.query.payout;
 
             var partner = consts.PARTNER_APPLIFT;
             var date = new Date();
             var innerTransactionId = uuid.v1();
 
-            var key = req.query.sig
-            if (key !== getSigForAppliftPostBack(offerId, userId, offerCredits , consts.VOLUUM_APPLIFT_SECRET_KEY)) {
-                logger.log.error('postback_applift: Signature key is not valid, ignoring request. request key: ' + key, {request: req});
-                reject('Signature key is not valid');
-                return;
-            }
+            // No need to check the sig yet
+            // var key = req.query.sig
+            // if (key !== getSigForAppliftPostBack(offerId, userId, offerCredits , consts.VOLUUM_APPLIFT_SECRET_KEY)) {
+            //     logger.log.error('postback_applift: Signature key is not valid, ignoring request. request key: ' + key, {request: req});
+            //     reject('Signature key is not valid');
+            //     return;
+            // }
         
-            dal.addUserAction(innerTransactionId, partner, userId, offerCredits, date, {offerId: offerId}).then(()=> {
+            dal.addUserAction(innerTransactionId, partner, userId, offerCredits, date, {offerId: offerId, payout: payout}).then(()=> {
                 rewardUserWithCredits(null, userId, offerCredits, partner).then(()=> {
                     resolve();
                 }).catch(err => {
