@@ -462,9 +462,6 @@ function updateUserEmail(req) {
 /*
     Query arguments:
     partner - partner Id (i.e Applift)
-    country_code - user's country code (i.e IL, US)
-    platform - android / ios
-    device - phone / tablet / all
     stub - use stub data (0 default OR 1)
 */
 function getAvailableOffers(req) {
@@ -472,9 +469,11 @@ function getAvailableOffers(req) {
         try {
             let stub = req.query.stub || 0;
             let partner = req.query.partner;
-            let countryCode = req.query.country_code;
-            let platform = req.query.platform;
-            let device = req.query.device;
+            
+            let countryCode = getCounteryCode(req);
+            let deviceData = getPlatformAndDeviceFromUA(req.headers['user-agent']);
+            let platform = deviceData.osType;
+            let device = deviceData.device;
 
             if (stub != 0) {
                 let offersResult = stubForApplift();
@@ -496,32 +495,83 @@ function getAvailableOffers(req) {
     });    
 }
 
+const geoip = require('geoip-lite');
+function getCounteryCode(req) {
+    const clientIp = requestIp.getClientIp(req);
+    let geo = geoip.lookup(clientIp);
+    if (!geo) {
+        logger.log.error('getCounteryCode: geo is null - returning US', {clientIp: clientIp});        
+        return 'US';
+    }
+    return geo.country;
+}
+
+const MobileDetect = require('mobile-detect');
+function getPlatformAndDeviceFromUA(userAgent) {
+    let md = new MobileDetect(userAgent);
+    let osType = null;
+    switch (md.os()) {
+        case 'AndroidOS':
+            osType = 'android';
+            break;
+        case 'iOS':        
+            osType = 'ios';
+            break;
+        case 'BlackBerryOS':
+        case 'PalmOS':
+        case 'SymbianOS':
+        case 'WindowsMobileOS':
+        case 'WindowsPhoneOS':
+        case 'MeeGoOS':
+        case 'MaemoOS':
+        case 'JavaOS':
+        case 'webOS':
+        case 'badaOS':
+        case 'BREWOS':
+        default:
+            osType = null;
+    }
+
+    let device = null;
+    if (md.tablet() != null) {
+        device = 'tablet';
+    } else if (md.mobile() != null) {
+        device = 'mobile';
+    }
+    
+    return ({osType, device});
+    
+}
+
 function getAvailableOffersWithParams(partner, countryCode, platform, device) {
     return new Promise((resolve, reject) => {
         try {
-            let offersResult = [];
-            // let fullUrl = 'https://virtserver.swaggerhub.com/gaiar/pull/1.0.0/ads?token=' + process.env.APPLIFT_TOKEN;
-            let fullUrl = 'https://pull.applift.com/ads/' + process.env.APPLIFT_TOKEN;
-            rp(fullUrl)
-            .then(function (offersText) {
-                let offersJson = JSON.parse(offersText);
-                for (let i=0; i<offersJson.length; i++) {
-                    let offer = new Offer();
-                    offer.parseResponse(offersJson[i]);
-                    if (offer.countries.includes(countryCode) && 
-                        (offer.devices == 'all' || offer.devices.includes(device)) &&
-                        offer.platform == platform) {
-                            offersResult.push(offer);
-                        }
-                }
+            if (device == null || platform == null) {
+                resolve([]);
+            } else {
+                let offersResult = [];
+                // let fullUrl = 'https://virtserver.swaggerhub.com/gaiar/pull/1.0.0/ads?token=' + process.env.APPLIFT_TOKEN;
+                let fullUrl = 'https://pull.applift.com/ads/' + process.env.APPLIFT_TOKEN;
+                rp(fullUrl)
+                .then(function (offersText) {
+                    let offersJson = JSON.parse(offersText);
+                    for (let i=0; i<offersJson.length; i++) {
+                        let offer = new Offer();
+                        offer.parseResponse(offersJson[i]);
+                        if (offer.countries.includes(countryCode) && 
+                            (offer.devices == 'all' || offer.devices.includes(device)) &&
+                            offer.platform == platform) {
+                                offersResult.push(offer);
+                            }
+                    }
 
-                resolve(offersResult);                    
-            })
-            .catch(function (err) {
-                logger.log.error('getAvailableOffers: unable to call applift url: ' + fullUrl, {error: serializeError(err)});
-                reject(err);
-            });
-            
+                    resolve(offersResult);                    
+                })
+                .catch(function (err) {
+                    logger.log.error('getAvailableOffers: unable to call applift url: ' + fullUrl, {error: serializeError(err)});
+                    reject(err);
+                });
+            }            
         }
         catch (err) {
             logger.log.error('getAvailableOffers: error occured', {error: serializeError(err)});
@@ -581,9 +631,6 @@ function stubForApplift() {
     partner - partner Id (i.e. Applift)
     uid - clicking User Id
     offer - cliced offer Id
-    country_code - user's country code (i.e IL, US)
-    platform - android / ios
-    device - phone / tablet / all
 */
 function offerClick(req) {
     return new Promise((resolve, reject) => {
@@ -591,9 +638,10 @@ function offerClick(req) {
             let partner = req.query.partner; // For future use
             let userId = req.query.uid;
             let offerId = req.query.offer;
-            let countryCode = req.query.country_code;
-            let platform = req.query.platform;
-            let device = req.query.device;
+            let countryCode = getCounteryCode(req);
+            let deviceData = getPlatformAndDeviceFromUA(req.headers['user-agent']);
+            let platform = deviceData.osType;
+            let device = deviceData.device;
 
             getAvailableOffersWithParams(partner, countryCode, platform, device).then(offers => {
                 let selectedOffer;

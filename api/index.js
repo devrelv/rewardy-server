@@ -199,9 +199,6 @@ module.exports = ({ config, db }) => {
 	/*
 		Query arguments:
 		partner - partner Id (i.e Applift)
-		country_code - user's country code (i.e IL, US)
-		platform - android / ios
-		device - phone / tablet / all
 		stub - use stub data (0 default OR 1)
 	*/
 	api.get('/get_offers', (req, res) => {
@@ -219,9 +216,6 @@ module.exports = ({ config, db }) => {
 		partner - partner Id (i.e. Applift)
 		uid - clicking User Id
 		offer - cliced offer Id
-		country_code - user's country code (i.e IL, US)
-		platform - android / ios
-		device - phone / tablet / all
 	*/
 	api.get('/offer_click', (req, res) => {
 		logger.log.debug('request to /offer_click made', {request: req});
