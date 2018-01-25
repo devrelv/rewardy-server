@@ -199,7 +199,8 @@ module.exports = ({ config, db }) => {
 	/*
 		Query arguments:
 		partner - partner Id (i.e Applift)
-		stub - use stub data (0 default OR 1)
+		uid - Rewardy user Id
+		[ OPTIONAL: stub - use stub data (0 default OR 1)]
 	*/
 	api.get('/get_offers', (req, res) => {
 		logger.log.debug('request to /get_offers made', {request: req});

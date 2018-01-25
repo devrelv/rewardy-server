@@ -462,6 +462,7 @@ function updateUserEmail(req) {
 /*
     Query arguments:
     partner - partner Id (i.e Applift)
+    uid - Rewardy user Id
     stub - use stub data (0 default OR 1)
 */
 function getAvailableOffers(req) {
@@ -469,6 +470,7 @@ function getAvailableOffers(req) {
         try {
             let stub = req.query.stub || 0;
             let partner = req.query.partner;
+            let userId = req.query.uid;
             
             let countryCode = getCounteryCode(req);
             let deviceData = getPlatformAndDeviceFromUA(req.headers['user-agent']);
@@ -479,7 +481,7 @@ function getAvailableOffers(req) {
                 let offersResult = stubForApplift();
                 resolve(offersResult);
             } else {
-                getAvailableOffersWithParams(partner, countryCode, platform, device).then(offers => {
+                getAvailableOffersWithParams(partner, userId, countryCode, platform, device).then(offers => {
                     resolve(offers);
                 }).catch(err => {
                     logger.log.error('getAvailableOffers: error occured on calling to getAvailableOffersWithParams', {error: serializeError(err)});
@@ -543,7 +545,7 @@ function getPlatformAndDeviceFromUA(userAgent) {
     
 }
 
-function getAvailableOffersWithParams(partner, countryCode, platform, device) {
+function getAvailableOffersWithParams(partner, userId, countryCode, platform, device) {
     return new Promise((resolve, reject) => {
         try {
             if (device == null || platform == null) {
@@ -557,7 +559,7 @@ function getAvailableOffersWithParams(partner, countryCode, platform, device) {
                     let offersJson = JSON.parse(offersText);
                     for (let i=0; i<offersJson.length; i++) {
                         let offer = new Offer();
-                        offer.parseResponse(offersJson[i]);
+                        offer.parseResponse(offersJson[i], userId, countryCode, device, platform);
                         if (offer.countries.includes(countryCode) && 
                             (offer.devices == 'all' || offer.devices.includes(device)) &&
                             offer.platform == platform) {
@@ -643,7 +645,7 @@ function offerClick(req) {
             let platform = deviceData.osType;
             let device = deviceData.device;
 
-            getAvailableOffersWithParams(partner, countryCode, platform, device).then(offers => {
+            getAvailableOffersWithParams(partner, userId, countryCode, platform, device).then(offers => {
                 let selectedOffer;
                 for (let i=0; i<offers.length; i++) {
                     if (offers[i].id == offerId) {
