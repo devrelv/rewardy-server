@@ -217,7 +217,7 @@ module.exports = ({ config, db }) => {
 		Query arguments:
 		partner - partner Id (i.e. Applift)
 		uid - clicking User Id
-		offer - cliced offer Id
+		offer - clicked offer Id
 	*/
 	api.get('/offer_click', (req, res) => {
 		logger.log.debug('request to /offer_click made', {request: req});

@@ -20,7 +20,8 @@ function Offer (id, click_url, applift_click_url, points, cta_text, icon_url, ti
 Offer.prototype.parseResponse = function(responseObject, userId, userCountryCode, userDevice, userPlatform) {
     this.id = responseObject.campaigns[0].id;
     this.applift_click_url = responseObject.campaigns[0].click_url;
-    this.click_url = process.env.SERVER_API_URL + 'offer_click?partner=1&uid=' + userId + '&offer=' + this.id + '&countryCode='+ userCountryCode + '&device=' + userDevice + '&platform=' + userPlatform;
+    let applift_click_url_parameters = parseQueryString(this.applift_click_url);
+    this.click_url = process.env.SERVER_API_URL + 'offer_click?partner=1&uid=' + userId + '&offer=' + this.id + '&countryCode='+ userCountryCode + '&device=' + userDevice + '&platform=' + userPlatform + '&token=' + applift_click_url_parameters.token;
     this.countries = responseObject.campaigns[0].countries;
     this.devices = responseObject.campaigns[0].devices;
     this.points = Math.floor(Number(responseObject.campaigns[0].payout) * consts.APPLIFT_USD_TO_POINTS_RATIO); // round 1234.5678 to 1230
@@ -50,6 +51,18 @@ Offer.prototype.parseResponse = function(responseObject, userId, userCountryCode
     this.platform = responseObject.app_details.platform;
 
 }
+
+var parseQueryString = function(url) {
+    var urlParams = {};
+    url.replace(
+      new RegExp("([^?=&]+)(=([^&]*))?", "g"),
+      function($0, $1, $2, $3) {
+        urlParams[$1] = $3;
+      }
+    );
+    
+    return urlParams;
+  }
 
 
 module.exports = Offer;

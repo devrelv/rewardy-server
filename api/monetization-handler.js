@@ -651,8 +651,8 @@ function offerClick(req) {
                 }
                 if (selectedOffer) {
                     let sig = getSigForAppliftToVoluum(selectedOffer.id, userId, selectedOffer.points, consts.VOLUUM_APPLIFT_SECRET_KEY);
-                    let fullVoluumUrl = consts.VOLUUM_URL + '?oid=' + selectedOffer.id + '&uid=' + userId + '&points=' + selectedOffer.points + '&sig=' + sig;
-                    resolve({offerId: selectedOffer.id, points: selectedOffer.points, userId: userId, sig: sig, redirectUrl: fullVoluumUrl});
+                    let fullVoluumUrl = consts.VOLUUM_URL + '?oid=' + selectedOffer.id + '&uid=' + userId + '&points=' + selectedOffer.points + '&sig=' + sig + '&token=' + selectedOffer.token;
+                    resolve({offerId: selectedOffer.id, points: selectedOffer.points, userId: userId, sig: sig, token: selectedOffer.token, redirectUrl: fullVoluumUrl});
                 } else {
                 logger.log.error("offerClick: offerId " + offerId + " not found");
                 reject("offerId " + offerId + " not found on offerClick");
