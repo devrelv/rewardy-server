@@ -548,32 +548,28 @@ function getPlatformAndDeviceFromUA(userAgent) {
 function getAvailableOffersWithParams(partner, userId, countryCode, platform, device) {
     return new Promise((resolve, reject) => {
         try {
-            if (device == null || platform == null) {
-                resolve([]);
-            } else {
-                let offersResult = [];
-                // let fullUrl = 'https://virtserver.swaggerhub.com/gaiar/pull/1.0.0/ads?token=' + process.env.APPLIFT_TOKEN;
-                let fullUrl = 'https://pull.applift.com/ads/' + process.env.APPLIFT_TOKEN;
-                rp(fullUrl)
-                .then(function (offersText) {
-                    let offersJson = JSON.parse(offersText);
-                    for (let i=0; i<offersJson.length; i++) {
-                        let offer = new Offer();
-                        offer.parseResponse(offersJson[i], userId, countryCode, device, platform);
-                        if (offer.countries.includes(countryCode) && 
-                            (offer.devices == 'all' || offer.devices.includes(device)) &&
-                            offer.platform == platform) {
-                                offersResult.push(offer);
-                            }
-                    }
+            let offersResult = [];
+            // let fullUrl = 'https://virtserver.swaggerhub.com/gaiar/pull/1.0.0/ads?token=' + process.env.APPLIFT_TOKEN;
+            let fullUrl = 'https://pull.applift.com/ads/' + process.env.APPLIFT_TOKEN;
+            rp(fullUrl)
+            .then(function (offersText) {
+                let offersJson = JSON.parse(offersText);
+                for (let i=0; i<offersJson.length; i++) {
+                    let offer = new Offer();
+                    offer.parseResponse(offersJson[i], userId, countryCode, device, platform);
+                    if (offer.countries.includes(countryCode) && 
+                        (device == null || offer.devices == 'all' || offer.devices.includes(device)) &&
+                        (platform == null || offer.platform == platform)) {
+                            offersResult.push(offer);
+                        }
+                }
 
-                    resolve(offersResult);                    
-                })
-                .catch(function (err) {
-                    logger.log.error('getAvailableOffers: unable to call applift url: ' + fullUrl, {error: serializeError(err)});
-                    reject(err);
-                });
-            }            
+                resolve(offersResult);                    
+            })
+            .catch(function (err) {
+                logger.log.error('getAvailableOffers: unable to call applift url: ' + fullUrl, {error: serializeError(err)});
+                reject(err);
+            });
         }
         catch (err) {
             logger.log.error('getAvailableOffers: error occured', {error: serializeError(err)});
