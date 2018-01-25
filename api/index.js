@@ -77,7 +77,8 @@ module.exports = ({ config, db }) => {
         uid: the user id in rewardy's system
         points: number of points to add to the user
         oid: Id of the offer that was completed
-        sig: the security hash that proves that this postback comes from us.
+		sig: the security hash that proves that this postback comes from us.
+		payout: payout amount from applify
     */
 	api.get('/postback/applift', (req, res) => {
 		logger.log.info('request to /postback/applift made', {request: req});
