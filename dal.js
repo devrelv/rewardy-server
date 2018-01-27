@@ -174,6 +174,28 @@ let InvitationSchema = new Schema({
 });
 let Invitation = conn.model('Invitation', InvitationSchema);
 
+let OfferClickSchema = new Schema({
+    user_id : {
+        type: String,
+        required: true
+    },
+    offer_id: {
+        type: String,
+        required: true
+    },
+    points: {
+        type: Number,
+        default: 0,
+        required: true
+    },
+    created_at: {
+        type: Date,
+        required: true,
+        default: Date.now
+    }
+});
+let  OfferClick = conn.model(' OfferClick',  OfferClickSchema);
+
 function getAllMonetizationPartners() {
 	return new Promise((resolve, reject) => {
         MonetizationPartner.find({}, function(err, data) {
@@ -429,6 +451,32 @@ function updateUserEmail(userId, email) {
     }); 
 }
 
+function saveOfferClick(userId, offerId, points) {
+    return new Promise((resolve, reject) => {
+        try {
+            let offerClick = new OfferClick({
+                user_id : userId,
+                offer_id: offerId,
+                points: points
+            });
+
+            offerClick.save(function(err) {
+                if (err) {
+                    logger.log.error('dal: saveOfferClick error', {error: serializeError(err)});                        
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            })
+
+        }
+        catch (err) {
+            logger.log.error('dal: saveOfferClick error', {error: serializeError(err)});                        
+            reject(err);
+        }
+    });
+}
+
 module.exports = {
     getAllMonetizationPartners: getAllMonetizationPartners,
     getAllMonetizationPartnersWithOffers: getAllMonetizationPartnersWithOffers,
@@ -441,7 +489,8 @@ module.exports = {
     updateUserSourceAdditionInfo: updateUserSourceAdditionInfo,
     getBotUserByEmail: getBotUserByEmail,
     saveInvitation: saveInvitation,
-    updateUserEmail: updateUserEmail
+    updateUserEmail: updateUserEmail,
+    saveOfferClick: saveOfferClick
 }
 
 

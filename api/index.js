@@ -52,7 +52,7 @@ module.exports = ({ config, db }) => {
 		
 	});
 
-		/* 
+	/* 
 		Query Params
         uid: the user id in rewardy's system
         currency: number of points to add to the user
@@ -68,6 +68,26 @@ module.exports = ({ config, db }) => {
 		}).catch (err => 
 		{ 
 			res.send('ERROR OCCURED'); 
+		});
+		
+	});
+
+	/* 
+		Query Params
+        uid: the user id in rewardy's system
+        points: number of points to add to the user
+        oid: Id of the offer that was completed
+		sig: the security hash that proves that this postback comes from us.
+		payout: payout amount from applify
+    */
+	api.get('/postback/applift', (req, res) => {
+		logger.log.info('request to /postback/applift made', {request: req});
+		monetizationHandler.postback_applift(req).then(()=> 
+		{
+			res.send('OK');
+		}).catch (err => 
+		{ 
+			res.status(500).send({result: "Error", info: err});
 		});
 		
 	});
@@ -176,6 +196,51 @@ module.exports = ({ config, db }) => {
 			res.json({result: 'Error', error: "Error Occured: " + JSON.stringify(err)});
 		})
 	})
+
+	/*
+		Query arguments:
+		partner - partner Id (i.e Applift)
+		uid - Rewardy user Id
+		[ OPTIONAL: stub - use stub data (0 default OR 1)]
+	*/
+	api.get('/get_offers', (req, res) => {
+		logger.log.debug('request to /get_offers made', {request: req});
+		monetizationHandler.getAvailableOffers(req).then((result) => {
+			res.json(result);
+		}).catch(err => {
+			logger.log.error('error in /get_offers', {request: req, error: serializeError(err)});			
+			res.status(500).send({result: "Error", info: serializeError(err)});
+		});
+	});
+
+	api.get('/user_agent', (req, res) => {
+		// logger.log.debug('request to /user_agent made', {request: req});
+		monetizationHandler.getUserAgentDetails(req).then((result) => {
+			res.json(result);
+		}).catch(err => {
+			logger.log.error('error in /user_agent', {request: req, error: serializeError(err)});			
+			res.status(500).send({result: "Error", info: serializeError(err)});
+		});
+	});
+
+	/*
+		Query arguments:
+		partner - partner Id (i.e. Applift)
+		uid - clicking User Id
+		offer - clicked offer Id
+		token - offer's token
+	*/
+	api.get('/offer_click', (req, res) => {
+		logger.log.debug('request to /offer_click made', {request: req});
+		monetizationHandler.offerClick(req).then((redirectParams) => {
+			// on success - redirect to VOLUUM
+			res.redirect(redirectParams.redirectUrl);
+			//res.json({result: 'Success'});
+		}).catch(err => {
+			logger.log.error('error in /offer_click', {request: req, error: serializeError(err)});			
+			res.status(500).send({result: "Error", info: serializeError(err)});
+		});
+	});
 
 	return api;
 }

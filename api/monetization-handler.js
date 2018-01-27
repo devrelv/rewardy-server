@@ -10,11 +10,12 @@ var path = require('path');
 var fs = require('fs');
 var md5 = require('md5');
 const dal = require('../dal');
+const rp = require('request-promise');
 
 const Stub = require('./monetization_providers/stub');
 const Fyber = require('./monetization_providers/fyber');
 const DailyBonus = require('./monetization_providers/daily-bonus');
-
+const Offer = require('./core/models/offer');
 
 
 function updateAllCredits(db) {
@@ -399,7 +400,6 @@ function sendEmailForReferrerFriend(email, friendName) {
     });
 }
 
-var rp = require('request-promise');
 function sendProactiveMessage(proactive_address, messageId, messageData, userId) {
     return new Promise((resolve, reject) => {
         let fullUrl = process.env.BOT_API_URL + 'proactive?message_address=' + encodeURIComponent(JSON.stringify(proactive_address)) + '&message_id=' + messageId + '&message_data=' + encodeURIComponent(JSON.stringify(messageData)) + '&user_id=' + userId;
@@ -459,11 +459,315 @@ function updateUserEmail(req) {
     });
 }
 
+function getUserAgentDetails(req) {
+    return new Promise((resolve, reject) => {
+        try {            
+            let countryCode = getCounteryCode(req);
+            let deviceData = getPlatformAndDeviceFromUA(req.headers['user-agent']);
+            let platform = deviceData.osType;
+            let device = deviceData.device;
+
+           resolve({countryCode, platform, device})
+        }
+        catch (err) {
+            logger.log.error('getUserAgentDetails: error occured', {error: serializeError(err)});
+            reject(err);            
+        }
+        
+    });    
+}
+
+/*
+    Query arguments:
+    partner - partner Id (i.e Applift)
+    uid - Rewardy user Id
+    stub - use stub data (0 default OR 1)
+*/
+function getAvailableOffers(req) {
+    return new Promise((resolve, reject) => {
+        try {
+            let stub = req.query.stub || 0;
+            let partner = req.query.partner;
+            let userId = req.query.uid;
+            
+            let countryCode = getCounteryCode(req);
+            let deviceData = getPlatformAndDeviceFromUA(req.headers['user-agent']);
+            let platform = deviceData.osType;
+            let device = deviceData.device;
+
+            if (stub != 0) {
+                let offersResult = stubForApplift();
+                resolve(offersResult);
+            } else {
+                getAvailableOffersWithParams(partner, userId, countryCode, platform, device).then(offers => {
+                    resolve(offers);
+                }).catch(err => {
+                    logger.log.error('getAvailableOffers: error occured on calling to getAvailableOffersWithParams', {error: serializeError(err)});
+                    reject(err);     
+                })
+            }
+        }
+        catch (err) {
+            logger.log.error('getAvailableOffers: error occured', {error: serializeError(err)});
+            reject(err);            
+        }
+        
+    });    
+}
+
+const geoip = require('geoip-lite');
+function getCounteryCode(req) {
+    const clientIp = requestIp.getClientIp(req);
+    let geo = geoip.lookup(clientIp);
+    if (!geo) {
+        logger.log.error('getCounteryCode: geo is null - returning US', {clientIp: clientIp});        
+        return 'US';
+    }
+    return geo.country;
+}
+
+const MobileDetect = require('mobile-detect');
+function getPlatformAndDeviceFromUA(userAgent) {
+    let md = new MobileDetect(userAgent);
+    let osType = null;
+    switch (md.os()) {
+        case 'AndroidOS':
+            osType = 'android';
+            break;
+        case 'iOS':        
+            osType = 'ios';
+            break;
+        case 'BlackBerryOS':
+        case 'PalmOS':
+        case 'SymbianOS':
+        case 'WindowsMobileOS':
+        case 'WindowsPhoneOS':
+        case 'MeeGoOS':
+        case 'MaemoOS':
+        case 'JavaOS':
+        case 'webOS':
+        case 'badaOS':
+        case 'BREWOS':
+        default:
+            osType = null;
+    }
+
+    let device = null;
+    if (md.tablet() != null) {
+        device = 'tablet';
+    } else if (md.mobile() != null) {
+        device = 'phone';
+    }
+    
+    return ({osType, device});
+    
+}
+
+function getAvailableOffersWithParams(partner, userId, countryCode, platform, device) {
+    return new Promise((resolve, reject) => {
+        try {
+            let offersResult = [];
+            // let fullUrl = 'https://virtserver.swaggerhub.com/gaiar/pull/1.0.0/ads?token=' + process.env.APPLIFT_TOKEN;
+            let fullUrl = 'https://pull.applift.com/ads/' + process.env.APPLIFT_TOKEN;
+            rp(fullUrl)
+            .then(function (offersText) {
+                let offersJson = JSON.parse(offersText);
+                for (let i=0; i<offersJson.length; i++) {
+                    let offer = new Offer();
+                    offer.parseResponse(offersJson[i], userId, countryCode, device, platform);
+                    if (offer.countries.includes(countryCode) && 
+                        (device == null || offer.devices == 'all' || offer.devices.includes(device)) &&
+                        (platform == null || offer.platform == platform)) {
+                            offersResult.push(offer);
+                        }
+                }
+
+                resolve(offersResult);                    
+            })
+            .catch(function (err) {
+                logger.log.error('getAvailableOffers: unable to call applift url: ' + fullUrl, {error: serializeError(err)});
+                reject(err);
+            });
+        }
+        catch (err) {
+            logger.log.error('getAvailableOffers: error occured', {error: serializeError(err)});
+            reject(err);            
+        }
+        
+    });    
+}
+
+function stubForApplift() {
+    return ([
+        {
+            id: '595cc525-dc5a-4771-a850-5a931ed85d14',
+            click_url: 'http://google.com',
+            points: 50,
+            cta_text: 'install', 
+            icon_url: 'http://is2.mzstatic.com/image/thumb/Purple128/v4/7f/5a/26/7f5a268a-dba3-6bee-caee-d98798e85ff6/source/512x512bb.jpg',
+            title: 'Boltt Health: Get Fit & Healthynow',
+            store_rating: 4.5,
+            action: 'Achieve Level 5'
+        },
+        {
+            id: '125cc525-dc5a-4771-a850-5a931ed85d34',
+            click_url: 'http://scouter.club/',
+            points: 10,
+            cta_text: 'download this crazy app!', 
+            icon_url: 'http://scouter.club/img/logo.png',
+            title: 'Scouter App',
+            store_rating: 4.8,
+            action: 'Install App'
+        },
+        {
+            id: '345cc525-dc5a-4771-a850-5a931ed85d56',
+            click_url: 'https://www.facebook.com/itamar.mula',
+            points: 20,
+            cta_text: 'view', 
+            icon_url: 'http://graph.facebook.com/598408272/picture',
+            title: 'Xoxo for Mula',
+            store_rating: 2.4,
+            action: 'Registration'
+        },
+        {
+            id: '565cc525-dc5a-4771-a850-5a931ed85d78',
+            click_url: 'https://www.gmail.com',
+            points: 15,
+            cta_text: 'download', 
+            icon_url: 'https://lh6.ggpht.com/8-N_qLXgV-eNDQINqTR-Pzu5Y8DuH0Xjz53zoWq_IcBNpcxDL_gK4uS_MvXH00yN6nd4=w300',
+            // title: null,
+            // store_rating: null,
+            action: 'Download'
+        },
+    ]);
+}
+
+/*
+    Query arguments:
+    partner - partner Id (i.e. Applift)
+    uid - clicking User Id
+    offer - cliced offer Id
+    token - offer's token
+*/
+function offerClick(req) {
+    return new Promise((resolve, reject) => {
+        try {
+            let partner = req.query.partner; // For future use
+            let userId = req.query.uid;
+            let offerId = req.query.offer;
+            let token = req.query.token;
+            let countryCode = getCounteryCode(req);
+            let deviceData = getPlatformAndDeviceFromUA(req.headers['user-agent']);
+            let platform = deviceData.osType;
+            let device = deviceData.device;
+
+            getAvailableOffersWithParams(partner, userId, countryCode, platform, device).then(offers => {
+                let selectedOffer;
+                for (let i=0; i<offers.length; i++) {
+                    if (offers[i].id == offerId) {
+                        selectedOffer = offers[i];
+                        break;
+                    }
+                }
+                if (selectedOffer) {
+                    let sig = getSigForAppliftToVoluum(selectedOffer.id, userId, selectedOffer.points, consts.VOLUUM_APPLIFT_SECRET_KEY);
+                    // let fullVoluumUrl = consts.VOLUUM_URL + '?oid=' + selectedOffer.id + '&uid=' + userId + '&points=' + selectedOffer.points + '&sig=' + sig + '&token=' + selectedOffer.token;
+                    let fullVoluumUrl = consts.VOLUUM_URL + '?uid=' + userId + '&points=' + selectedOffer.points + '&sig=' + sig + '&token=' + token;
+                    resolve({offerId: selectedOffer.id, points: selectedOffer.points, userId: userId, sig: sig, token: selectedOffer.token, redirectUrl: fullVoluumUrl});
+                } else {
+                logger.log.error("offerClick: can't load points - offerId " + offerId + " not found");
+                reject("can't load points - offerId " + offerId + " not found");
+                }
+            }).catch(err => {
+                logger.log.error('getAvailableOffers: error occured calling to getAvailableOffersWithParams', {error: serializeError(err)});
+                reject(err);       
+            })
+
+            /*           
+           dal.saveOfferClick(userId, offerId, points)
+            .then(() => {
+                resolve();
+            })
+            .catch(function (err) {
+                logger.log.error('offerClick: error saving to database', {error: serializeError(err), userId: userId, offerId: offerId, points: points});
+                reject(err);
+            });*/
+        }
+        catch (err) {
+            logger.log.error('offerClick: error occured', {error: serializeError(err)});
+            reject(err);            
+        }
+        
+    });
+}
+
+function postback_applift(req) {
+    /* Query Params
+        uid: the user id in rewardy's system
+        points: number of points to add to the user
+        oid: Id of the offer that was completed
+        payout: payout amount from applify
+        sig: the security hash that proves that this postback comes from us.
+    */
+    return new Promise((resolve, reject) => {
+        try {
+            var userId = req.query.uid;
+            var offerId = req.query.oid;
+            let payout =  req.query.payout;
+            var offerCredits = payout*consts.APPLIFT_USD_TO_POINTS_RATIO; // Calculating the points from the pauout instead of using the points from the request!!!
+            var offerInitialPoints = req.query.points;
+
+            var partner = consts.PARTNER_APPLIFT;
+            var date = new Date();
+            var innerTransactionId = uuid.v1();
+
+            // No need to check the sig yet
+            // var key = req.query.sig
+            // if (key !== getSigForAppliftPostBack(offerId, userId, offerCredits , consts.VOLUUM_APPLIFT_SECRET_KEY)) {
+            //     logger.log.error('postback_applift: Signature key is not valid, ignoring request. request key: ' + key, {request: req});
+            //     reject('Signature key is not valid');
+            //     return;
+            // }
+        
+            dal.addUserAction(innerTransactionId, partner, userId, offerCredits, date, {offerId: offerId, payout: payout, offerInitialPoints: offerInitialPoints}).then(()=> {
+                rewardUserWithCredits(null, userId, offerCredits, partner).then(()=> {
+                    resolve();
+                }).catch(err => {
+                    logger.log.error('postback_applift: rewardUserWithCredits error', {error: serializeError(err)});
+                    reject(err);
+                })
+                
+                
+            }).catch(err => {
+                logger.log.error('postback_applift: dal.addUserAction error', {error: serializeError(err)});                
+                reject(err);
+            });
+        } catch (err) {
+            logger.log.error('postback_applift: error occured', {error: serializeError(err), request: req});
+            reject(err);
+        }
+    });
+}
+
+function getSigForAppliftPostBack(offerId, userId, offerCredits, secretKey) {
+    let calculatedSig = md5(userId + offerId + offerCredits +secretKey);
+    return calculatedSig;
+}
+
+function getSigForAppliftToVoluum(offerId, userId, offerCredits, secretKey) {
+    let calculatedSig = md5(offerId + userId + offerCredits +secretKey);
+    return calculatedSig;
+}
+
 module.exports = {
     updateAllCredits: updateAllCredits,
     insertOffersToDB: insertOffersToDB,
     postback_superrewards: postback_superrewards,
     postback_offerwall: postback_offerwall,
+    postback_applift: postback_applift,
     getBotUserById: getBotUserById,
-    updateUserEmail: updateUserEmail
+    updateUserEmail: updateUserEmail,
+    getAvailableOffers: getAvailableOffers,
+    offerClick: offerClick,
+    getUserAgentDetails: getUserAgentDetails
 };
