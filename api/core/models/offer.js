@@ -25,7 +25,7 @@ Offer.prototype.parseResponse = function(responseObject, userId, userCountryCode
     this.countries = responseObject.campaigns[0].countries;
     this.devices = responseObject.campaigns[0].devices;
     this.points = Math.floor(Number(responseObject.campaigns[0].payout) * consts.APPLIFT_USD_TO_POINTS_RATIO); // round 1234.5678 to 1230
-    if (responseObject.action) {
+    if (responseObject.campaigns[0].action) {
         switch (responseObject.campaigns[0].action.event) {
             case 'registration':
                 this.action = 'Complete Registration';
@@ -38,6 +38,12 @@ Offer.prototype.parseResponse = function(responseObject, userId, userCountryCode
                 if (responseObject.campaigns[0].action.level) {
                     this.action += ' ' + responseObject.campaigns[0].action.level;
                 }
+                break;
+            case 'custom':
+                this.action = responseObject.campaigns[0].action.text;
+                break;
+            default:
+                this.action = responseObject.campaigns[0].action.text || 'Install';
                 break;
         }
     } else {

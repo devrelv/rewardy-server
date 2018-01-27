@@ -692,9 +692,10 @@ function postback_applift(req) {
     return new Promise((resolve, reject) => {
         try {
             var userId = req.query.uid;
-            var offerCredits = req.query.points;
             var offerId = req.query.oid;
             let payout =  req.query.payout;
+            var offerCredits = payout*consts.APPLIFT_USD_TO_POINTS_RATIO; // Calculating the points from the pauout instead of using the points from the request!!!
+            var offerInitialPoints = req.query.points;
 
             var partner = consts.PARTNER_APPLIFT;
             var date = new Date();
@@ -708,7 +709,7 @@ function postback_applift(req) {
             //     return;
             // }
         
-            dal.addUserAction(innerTransactionId, partner, userId, offerCredits, date, {offerId: offerId, payout: payout}).then(()=> {
+            dal.addUserAction(innerTransactionId, partner, userId, offerCredits, date, {offerId: offerId, payout: payout, offerInitialPoints: offerInitialPoints}).then(()=> {
                 rewardUserWithCredits(null, userId, offerCredits, partner).then(()=> {
                     resolve();
                 }).catch(err => {
