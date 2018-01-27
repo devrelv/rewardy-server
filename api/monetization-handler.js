@@ -556,7 +556,7 @@ function getPlatformAndDeviceFromUA(userAgent) {
     if (md.tablet() != null) {
         device = 'tablet';
     } else if (md.mobile() != null) {
-        device = 'mobile';
+        device = 'phone';
     }
     
     return ({osType, device});
