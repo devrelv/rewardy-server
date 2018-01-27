@@ -647,6 +647,7 @@ function stubForApplift() {
     partner - partner Id (i.e. Applift)
     uid - clicking User Id
     offer - cliced offer Id
+    token - offer's token
 */
 function offerClick(req) {
     return new Promise((resolve, reject) => {
@@ -654,6 +655,7 @@ function offerClick(req) {
             let partner = req.query.partner; // For future use
             let userId = req.query.uid;
             let offerId = req.query.offer;
+            let token = req.query.token;
             let countryCode = getCounteryCode(req);
             let deviceData = getPlatformAndDeviceFromUA(req.headers['user-agent']);
             let platform = deviceData.osType;
@@ -670,11 +672,11 @@ function offerClick(req) {
                 if (selectedOffer) {
                     let sig = getSigForAppliftToVoluum(selectedOffer.id, userId, selectedOffer.points, consts.VOLUUM_APPLIFT_SECRET_KEY);
                     // let fullVoluumUrl = consts.VOLUUM_URL + '?oid=' + selectedOffer.id + '&uid=' + userId + '&points=' + selectedOffer.points + '&sig=' + sig + '&token=' + selectedOffer.token;
-                    let fullVoluumUrl = consts.VOLUUM_URL + '?uid=' + userId + '&points=' + selectedOffer.points + '&sig=' + sig + '&token=' + selectedOffer.token;
+                    let fullVoluumUrl = consts.VOLUUM_URL + '?uid=' + userId + '&points=' + selectedOffer.points + '&sig=' + sig + '&token=' + token;
                     resolve({offerId: selectedOffer.id, points: selectedOffer.points, userId: userId, sig: sig, token: selectedOffer.token, redirectUrl: fullVoluumUrl});
                 } else {
-                logger.log.error("offerClick: offerId " + offerId + " not found");
-                reject("offerId " + offerId + " not found on offerClick");
+                logger.log.error("offerClick: can't load points - offerId " + offerId + " not found");
+                reject("can't load points - offerId " + offerId + " not found");
                 }
             }).catch(err => {
                 logger.log.error('getAvailableOffers: error occured calling to getAvailableOffersWithParams', {error: serializeError(err)});

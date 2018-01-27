@@ -228,6 +228,7 @@ module.exports = ({ config, db }) => {
 		partner - partner Id (i.e. Applift)
 		uid - clicking User Id
 		offer - clicked offer Id
+		token - offer's token
 	*/
 	api.get('/offer_click', (req, res) => {
 		logger.log.debug('request to /offer_click made', {request: req});
