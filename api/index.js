@@ -213,6 +213,16 @@ module.exports = ({ config, db }) => {
 		});
 	});
 
+	api.get('/user_agent', (req, res) => {
+		// logger.log.debug('request to /user_agent made', {request: req});
+		monetizationHandler.getUserAgentDetails(req).then((result) => {
+			res.json(result);
+		}).catch(err => {
+			logger.log.error('error in /user_agent', {request: req, error: serializeError(err)});			
+			res.status(500).send({result: "Error", info: serializeError(err)});
+		});
+	});
+
 	/*
 		Query arguments:
 		partner - partner Id (i.e. Applift)

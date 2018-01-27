@@ -459,6 +459,24 @@ function updateUserEmail(req) {
     });
 }
 
+function getUserAgentDetails(req) {
+    return new Promise((resolve, reject) => {
+        try {            
+            let countryCode = getCounteryCode(req);
+            let deviceData = getPlatformAndDeviceFromUA(req.headers['user-agent']);
+            let platform = deviceData.osType;
+            let device = deviceData.device;
+
+           resolve({countryCode, platform, device})
+        }
+        catch (err) {
+            logger.log.error('getUserAgentDetails: error occured', {error: serializeError(err)});
+            reject(err);            
+        }
+        
+    });    
+}
+
 /*
     Query arguments:
     partner - partner Id (i.e Applift)
@@ -748,5 +766,6 @@ module.exports = {
     getBotUserById: getBotUserById,
     updateUserEmail: updateUserEmail,
     getAvailableOffers: getAvailableOffers,
-    offerClick: offerClick
+    offerClick: offerClick,
+    getUserAgentDetails: getUserAgentDetails
 };
