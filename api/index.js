@@ -72,26 +72,6 @@ module.exports = ({ config, db }) => {
 		
 	});
 
-	/* 
-		Query Params
-        uid: the user id in rewardy's system
-        points: number of points to add to the user
-        oid: Id of the offer that was completed
-		sig: the security hash that proves that this postback comes from us.
-		payout: payout amount from applify
-    */
-	api.get('/postback/applift', (req, res) => {
-		logger.log.info('request to /postback/applift made', {request: req});
-		monetizationHandler.postback_applift(req).then(()=> 
-		{
-			res.send('OK');
-		}).catch (err => 
-		{ 
-			res.status(500).send({result: "Error", info: err});
-		});
-		
-	});
-
 	/*
 		Registration confirmation - the user will be here after clicking the confirm button on the validation email
 		Query arguments:
@@ -197,6 +177,50 @@ module.exports = ({ config, db }) => {
 		})
 	})
 
+	/* 
+		Query Params
+        uid: the user id in rewardy's system
+        points: number of points to add to the user
+        oid: Id of the offer that was completed
+		sig: the security hash that proves that this postback comes from us.
+		payout: payout amount from applify
+    */
+	api.get('/postback/applift', (req, res) => { // TODO: Delete in mid Feb
+		logger.log.info('request to /postback/applift made', {request: req});
+		monetizationHandler.postback_applift(req).then(()=> 
+		{
+			res.send('OK');
+		}).catch (err => 
+		{ 
+			res.status(500).send({result: "Error", info: err});
+		});
+		
+	});
+
+	/* 
+		Query Params
+		partner_id: monitization partner id (applift / cpalead)
+		token: offer id in applift
+		user_id: the user id in rewardy's system
+        offer_id: Id of the offer that was completed
+		sig: the security hash that proves that this postback comes from us.
+		payout: payout amount from applify
+		original_payout: original payout when the user clicked
+		payout_type: CPI/CPA
+		source_name: user chat platform (viber, facebook, kik etc.)
+    */
+	api.get('/postback/mobilitr', (req, res) => {
+		logger.log.info('request to /postback/mobilitr made', {request: req});
+		monetizationHandler.postback_mobilitr(req).then(()=> 
+		{
+			res.send('OK');
+		}).catch (err => 
+		{ 
+			res.status(500).send({result: "Error", info: err});
+		});
+		
+	});
+
 	/*
 		Query arguments:
 		partner - partner Id (i.e Applift)
@@ -227,8 +251,11 @@ module.exports = ({ config, db }) => {
 		Query arguments:
 		partner - partner Id (i.e. Applift)
 		uid - clicking User Id
-		offer - clicked offer Id
+		offer - cliced offer Id
 		token - offer's token
+		original_payout - original payout value
+		payout_type - CPI/CPA
+		source_name - chat platform (viber, facebook, kik etc)
 	*/
 	api.get('/offer_click', (req, res) => {
 		logger.log.debug('request to /offer_click made', {request: req});

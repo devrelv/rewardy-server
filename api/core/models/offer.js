@@ -18,15 +18,25 @@ function Offer (id, click_url, original_click_url, points, cta_text, icon_url, t
     this.platform = platform;
 }
 
-Offer.prototype.parseAppliftResponse = function(responseObject, userId, userCountryCode, userDevice, userPlatform) {
+Offer.prototype.parseAppliftResponse = function(responseObject, userId) {
     this.id = responseObject.campaigns[0].id;
     this.original_click_url = responseObject.campaigns[0].click_url;
-    let applift_click_url_parameters = parseQueryString(this.original_click_url);
-    this.click_url = process.env.SERVER_API_URL + 'offer_click?partner=1&uid=' + userId + '&offer=' + this.id + '&countryCode='+ userCountryCode + '&device=' + userDevice + '&platform=' + userPlatform + '&token=' + applift_click_url_parameters.token;
+    /*
+        partner - partner Id (i.e. Applift)
+        uid - clicking User Id
+        offer - cliced offer Id
+        token - offer's token
+        op - original payout value
+        payout_type - CPI/CPA
+        source_name - chat platform (viber, facebook, kik etc)
+    */
     this.countries = responseObject.campaigns[0].countries;
     this.devices = responseObject.campaigns[0].devices;
-    this.points = Math.floor(Number(responseObject.campaigns[0].payout) * consts.APPLIFT_USD_TO_POINTS_RATIO); // round 1234.5678 to 1230
+    let payout = Number(responseObject.campaigns[0].payout);
+    this.points = Math.floor(payout * consts.APPLIFT_USD_TO_POINTS_RATIO); // round 1234.5678 to 1230
+    let payoutType;
     if (responseObject.campaigns[0].action) {
+        payoutType = 'CPA';
         switch (responseObject.campaigns[0].action.event) {
             case 'registration':
                 this.action = 'Complete Registration';
@@ -48,6 +58,7 @@ Offer.prototype.parseAppliftResponse = function(responseObject, userId, userCoun
                 break;
         }
     } else {
+        payoutType = 'CPI';
         this.action = 'Install';        
     }
     this.cta_text = responseObject.creatives[0].cta_text;
@@ -56,18 +67,21 @@ Offer.prototype.parseAppliftResponse = function(responseObject, userId, userCoun
     this.store_rating = responseObject.app_details.store_rating;
     this.bundle_id = responseObject.app_details.bundle_id;
     this.platform = responseObject.app_details.platform;
+    let applift_click_url_parameters = parseQueryString(this.original_click_url);    
+    this.click_url = `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_APPLIFT}&uid=${userId}&offer=&token=${applift_click_url_parameters.token}&op=${payout}&payout_type=${payoutType}`;
 
 }
 
-Offer.prototype.parseCpaLeadResponse = function(responseObject, userId, userCountryCode, userDevice, userPlatform) {
+Offer.prototype.parseCpaLeadResponse = function(responseObject, userId) {
     this.id = responseObject.campid;
     this.original_click_url = responseObject.link;
-    this.click_url = process.env.SERVER_API_URL + 'offer_click?partner=1&uid=' + userId + '&offer=' + this.id + '&countryCode='+ userCountryCode + '&device=' + userDevice + '&platform=' + userPlatform;
     this.countries = [responseObject.country];
     this.devices = 'phone';
-    this.points = Math.floor(Number(responseObject.amount) * consts.CPALEAD_USD_TO_POINTS_RATIO);
-    if (responseObject.payout_type) {
-        switch (responseObject.payout_type) {
+    let payout = Number(responseObject.amount);
+    this.points = Math.floor(payout * consts.CPALEAD_USD_TO_POINTS_RATIO);
+    let payoutType = responseObject.payout_type;
+    if (payoutType) {
+        switch (payoutType) {
             case 'CPI':
                 this.action = 'Install';
                 break;
@@ -76,7 +90,7 @@ Offer.prototype.parseCpaLeadResponse = function(responseObject, userId, userCoun
                 break;
         }
     } else {
-        this.action = 'Install';        
+        this.action = 'Install';
     }
     this.cta_text = responseObject.button_text;
     if (responseObject.creatives && responseObject.creatives.length > 0) {
@@ -90,6 +104,7 @@ Offer.prototype.parseCpaLeadResponse = function(responseObject, userId, userCoun
     this.store_rating = null;
     this.bundle_id = null;
     this.platform = responseObject.mobile_app_type;
+    this.click_url = `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_CPA_LEAD}&uid=${userId}&offer=${this.id}&token=&op=${payout}&payout_type=${payoutType}`;
 }
 
 var parseQueryString = function(url) {

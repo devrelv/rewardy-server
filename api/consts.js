@@ -7,6 +7,7 @@ module.exports = {
     PARTNER_DAILY_BONUS : 'Daily Bonus',
     PARTNER_STUB : 'Stub',
     PARTNER_APPLIFT : 'Applift',
+    PARTNER_CPA_LEAD : 'CpaLead',
     SUPER_REWARDS_SECRET_KEY : '30691850651147dabd9938e8d3ec995d',
     OFFERWALL_SECRET_KEY: '92a528dfb37c253ecb42f5974ca0c504', // REAL KEY
     VOLUUM_APPLIFT_SECRET_KEY: 'dfa06729-0f36-4570-9c06-7e64e6883c2b', 
@@ -28,6 +29,9 @@ module.exports = {
     EMAIL_REGEX: new RegExp(/^[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/),
     APPLIFT_USD_TO_POINTS_RATIO: 100, // 1 USD = 170 Points on Redeem => If the ratio is 60:40, then 60%*170 = 100+-
     CPALEAD_USD_TO_POINTS_RATIO: 100, // 1 USD = 170 Points on Redeem => If the ratio is 60:40, then 60%*170 = 100+-
-    VOLUUM_URL: 'http://stribeled-hortletin.com/363acfd1-3dc9-4350-9321-2dd6715f1989'
+    MOBILITR_APPLIFT_URL: 'http://stribeled-hortletin.com/363acfd1-3dc9-4350-9321-2dd6715f1989',
+    MOBILITR_CPALEAD_URL: 'http://stribeled-hortletin.com/dd3e8f74-461b-4470-9cad-5f9aa297d87f',
+    PARTNER_ID_APPLIFT: 1,
+    PARTNER_ID_CPA_LEAD: 2
 
 }
