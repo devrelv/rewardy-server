@@ -499,10 +499,21 @@ function getAvailableOffers(req) {
                 let offersResult = stubForApplift();
                 resolve(offersResult);
             } else {
-                getAvailableOffersWithParams(partner, userId, countryCode, platform, device).then(offers => {
-                    resolve(offers);
+                let offersPromise = [];
+                offersPromise.push(getAppliftAvailableOffersWithParams(userId, countryCode, platform, device).catch(e=>e));
+                offersPromise.push(getCpaLeadAvailableOffersWithParams(userId, countryCode, platform, device).catch(e=>e));
+                Promise.all(offersPromise).then(offers => {
+                // getAppliftAvailableOffersWithParams(userId, countryCode, platform, device).then(offers => {
+                // getCpaLeadAvailableOffersWithParams(userId, countryCode, platform, device).then(offers => {
+                    let allOffers = [];
+                    for (let i=0; i<offers.length; i++) {
+                        if (Array.isArray(offers[i])) {
+                            allOffers = allOffers.concat(offers[i]);
+                        }
+                    }
+                    resolve(allOffers);
                 }).catch(err => {
-                    logger.log.error('getAvailableOffers: error occured on calling to getAvailableOffersWithParams', {error: serializeError(err)});
+                    logger.log.error('getAvailableOffers: error occured on calling to getAppliftAvailableOffersWithParams', {error: serializeError(err)});
                     reject(err);     
                 })
             }
@@ -563,7 +574,7 @@ function getPlatformAndDeviceFromUA(userAgent) {
     
 }
 
-function getAvailableOffersWithParams(partner, userId, countryCode, platform, device) {
+function getAppliftAvailableOffersWithParams(userId, countryCode, platform, device) {
     return new Promise((resolve, reject) => {
         try {
             let offersResult = [];
@@ -574,7 +585,7 @@ function getAvailableOffersWithParams(partner, userId, countryCode, platform, de
                 let offersJson = JSON.parse(offersText);
                 for (let i=0; i<offersJson.length; i++) {
                     let offer = new Offer();
-                    offer.parseResponse(offersJson[i], userId, countryCode, device, platform);
+                    offer.parseAppliftResponse(offersJson[i], userId, countryCode, device, platform);
                     if (offer.countries.includes(countryCode) && 
                         (device == null || offer.devices == 'all' || offer.devices.includes(device)) &&
                         (platform == null || offer.platform == platform)) {
@@ -585,12 +596,47 @@ function getAvailableOffersWithParams(partner, userId, countryCode, platform, de
                 resolve(offersResult);                    
             })
             .catch(function (err) {
-                logger.log.error('getAvailableOffers: unable to call applift url: ' + fullUrl, {error: serializeError(err)});
+                logger.log.error('getAppliftAvailableOffersWithParams: unable to call applift url: ' + fullUrl, {error: serializeError(err)});
                 reject(err);
             });
         }
         catch (err) {
-            logger.log.error('getAvailableOffers: error occured', {error: serializeError(err)});
+            logger.log.error('getAppliftAvailableOffersWithParams: error occured', {error: serializeError(err)});
+            reject(err);            
+        }
+        
+    });    
+}
+
+function getCpaLeadAvailableOffersWithParams(userId, countryCode, platform, device) {
+    return new Promise((resolve, reject) => {
+        try {
+            let offersResult = [];
+            let fullUrl = 'https://cpalead.com/dashboard/reports/campaign_json.php?id=818141&mobile_app=1';
+            rp(fullUrl)
+            .then(function (offersText) {
+                let offersJson = JSON.parse(offersText).offers;
+                for (let i=0; i<offersJson.length; i++) {
+                    if (offersJson[i].payout_type=='CPI' && offersJson[i].payout_currency == 'USD') {
+                        let offer = new Offer();
+                        offer.parseCpaLeadResponse(offersJson[i], userId, countryCode, device, platform);
+                        if (offer.countries.includes(countryCode) && 
+                            (device == null || offer.devices == 'all' || offer.devices.includes(device)) &&
+                            (platform == null || offer.platform == platform)) {
+                                offersResult.push(offer);
+                            }
+                    }
+                }
+
+                resolve(offersResult);                    
+            })
+            .catch(function (err) {
+                logger.log.error('getAppliftAvailableOffersWithParams: unable to call applift url: ' + fullUrl, {error: serializeError(err)});
+                reject(err);
+            });
+        }
+        catch (err) {
+            logger.log.error('getAppliftAvailableOffersWithParams: error occured', {error: serializeError(err)});
             reject(err);            
         }
         
@@ -661,7 +707,7 @@ function offerClick(req) {
             let platform = deviceData.osType;
             let device = deviceData.device;
 
-            getAvailableOffersWithParams(partner, userId, countryCode, platform, device).then(offers => {
+            getAppliftAvailableOffersWithParams(userId, countryCode, platform, device).then(offers => {
                 let selectedOffer;
                 for (let i=0; i<offers.length; i++) {
                     if (offers[i].id == offerId) {
@@ -679,7 +725,7 @@ function offerClick(req) {
                 reject("can't load points - offerId " + offerId + " not found");
                 }
             }).catch(err => {
-                logger.log.error('getAvailableOffers: error occured calling to getAvailableOffersWithParams', {error: serializeError(err)});
+                logger.log.error('getAvailableOffers: error occured calling to getAppliftAvailableOffersWithParams', {error: serializeError(err)});
                 reject(err);       
             })
 
