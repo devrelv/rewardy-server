@@ -261,6 +261,7 @@ module.exports = ({ config, db }) => {
 		logger.log.debug('request to /offer_click made', {request: req});
 		monetizationHandler.offerClick(req).then((redirectParams) => {
 			// on success - redirect to VOLUUM
+			logger.log.info('redirecting to ' + redirectParams.redirectUrl);			
 			res.redirect(redirectParams.redirectUrl);
 			//res.json({result: 'Success'});
 		}).catch(err => {

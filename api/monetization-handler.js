@@ -723,8 +723,8 @@ function offerClick(req) {
                     voluumUrl = consts.MOBILITR_CPALEAD_URL;
                     break;
             }
-            let fullVoluumUrl = `${voluumUrl}?token=${token}&offer_id=${offerId}&user_id=${userId}&original_payout=${originalPayout}&payout_type=${payoutType}&partner_id=${partner}`;
-            
+            let fullVoluumUrl = `${voluumUrl}?token=${encodeURIComponent(token)} &user_id=${userId}&original_payout=${originalPayout}&payout_type=${payoutType}&partner_id=${partner}`;
+                        
             dal.getBotUserById(userId).then(user => {
                 if (user.proactive_address && user.proactive_address.channelId) {
                     fullVoluumUrl += `&source_name=${user.proactive_address.channelId}`;
