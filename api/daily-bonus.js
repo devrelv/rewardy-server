@@ -52,6 +52,7 @@ function handleUser (db, req) {
                         
                     } else {
                         result.isRewarded = false;   
+                        result.points = consts.daily_bonus_points;
                         resolve(result);                        
                     }
                     
