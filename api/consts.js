@@ -31,8 +31,8 @@ module.exports = {
     CPALEAD_USD_TO_POINTS_RATIO: 100, // 1 USD = 170 Points on Redeem => If the ratio is 60:40, then 60%*170 = 100+-
     MOBILITR_APPLIFT_URL: 'http://stribeled-hortletin.com/363acfd1-3dc9-4350-9321-2dd6715f1989',
     MOBILITR_CPALEAD_URL: 'http://stribeled-hortletin.com/dd3e8f74-461b-4470-9cad-5f9aa297d87f',
-    PARTNER_ID_APPLIFT: 1,
-    PARTNER_ID_CPA_LEAD: 2,
+    PARTNER_ID_APPLIFT: '1',
+    PARTNER_ID_CPA_LEAD: '2',
     CPA_LEAD_CACHE_OFFERS_HOURS: 3,
     APPLIFT_CACHE_OFFERS_HOURS: 3,
 

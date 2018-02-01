@@ -500,7 +500,7 @@ function getAvailableOffers(req) {
                 resolve(offersResult);
             } else {
                 let offersPromise = [];
-                offersPromise.push(getAppliftAvailableOffersWithParams(userId, countryCode, platform, device).catch(e=>e));
+                // offersPromise.push(getAppliftAvailableOffersWithParams(userId, countryCode, platform, device).catch(e=>e));
                 offersPromise.push(getCpaLeadAvailableOffersWithParams(userId, countryCode, platform, device).catch(e=>e));
                 Promise.all(offersPromise).then(offers => {
                     let allOffers = [];
@@ -740,7 +740,7 @@ function offerClick(req) {
 
             // let sig = getSigForAppliftToVoluum(selectedOffer.id, userId, selectedOffer.points, consts.VOLUUM_APPLIFT_SECRET_KEY);
             let voluumUrl = '';
-            switch (Number(partner)) {
+            switch (partner) {
                 case consts.PARTNER_ID_APPLIFT:
                     voluumUrl = consts.MOBILITR_APPLIFT_URL;
                     break;
@@ -860,7 +860,7 @@ function postback_mobilitr(req) {
             let payout =  req.query.payout;
             let offerCredits = 0; 
             switch (partner) {
-                case consts.PARTNER_APPLIFT:
+                case consts.PARTNER_ID_APPLIFT:
                     offerCredits = payout*consts.APPLIFT_USD_TO_POINTS_RATIO;
                     partnerName = consts.PARTNER_APPLIFT;
                     break;
