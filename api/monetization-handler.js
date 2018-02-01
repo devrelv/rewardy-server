@@ -503,8 +503,6 @@ function getAvailableOffers(req) {
                 offersPromise.push(getAppliftAvailableOffersWithParams(userId, countryCode, platform, device).catch(e=>e));
                 offersPromise.push(getCpaLeadAvailableOffersWithParams(userId, countryCode, platform, device).catch(e=>e));
                 Promise.all(offersPromise).then(offers => {
-                // getAppliftAvailableOffersWithParams(userId, countryCode, platform, device).then(offers => {
-                // getCpaLeadAvailableOffersWithParams(userId, countryCode, platform, device).then(offers => {
                     let allOffers = [];
                     for (let i=0; i<offers.length; i++) {
                         if (Array.isArray(offers[i])) {
@@ -574,31 +572,28 @@ function getPlatformAndDeviceFromUA(userAgent) {
     
 }
 
+let appliftOffersResponse = {lastResponse: null, offersJson: null};
 function getAppliftAvailableOffersWithParams(userId, countryCode, platform, device) {
     return new Promise((resolve, reject) => {
         try {
-            let offersResult = [];
-            // let fullUrl = 'https://virtserver.swaggerhub.com/gaiar/pull/1.0.0/ads?token=' + process.env.APPLIFT_TOKEN;
-            let fullUrl = 'https://pull.applift.com/ads/' + process.env.APPLIFT_TOKEN;
-            rp(fullUrl)
-            .then(function (offersText) {
-                let offersJson = JSON.parse(offersText);
-                for (let i=0; i<offersJson.length; i++) {
-                    let offer = new Offer();
-                    offer.parseAppliftResponse(offersJson[i], userId);
-                    if (offer.countries.includes(countryCode) && 
-                        (device == null || offer.devices == 'all' || offer.devices.includes(device)) &&
-                        (platform == null || offer.platform == platform)) {
-                            offersResult.push(offer);
-                        }
-                }
-
-                resolve(offersResult);                    
-            })
-            .catch(function (err) {
-                logger.log.error('getAppliftAvailableOffersWithParams: unable to call applift url: ' + fullUrl, {error: serializeError(err)});
-                reject(err);
-            });
+            if (appliftOffersResponse && appliftOffersResponse.lastResponse && (new Date())-appliftOffersResponse.lastResponse<consts.APPLIFT_CACHE_OFFERS_HOURS*1000*60*60) {
+                let offersResult = getAppliftOffersByResponse(appliftOffersResponse.offersJson, userId, countryCode, platform, device);
+                resolve(offersResult);
+            } else {
+                let fullUrl = 'https://pull.applift.com/ads/' + process.env.APPLIFT_TOKEN;
+                rp(fullUrl)
+                .then(function (offersText) {
+                    appliftOffersResponse.offersJson = JSON.parse(offersText);
+                    appliftOffersResponse.lastResponse = new Date();
+                    let offersResult = getAppliftOffersByResponse(appliftOffersResponse.offersJson, userId, countryCode, platform, device);
+                    
+                    resolve(offersResult);             
+                })
+                .catch(function (err) {
+                    logger.log.error('getAppliftAvailableOffersWithParams: unable to call applift url: ' + fullUrl, {error: serializeError(err)});
+                    reject(err);
+                });
+            }
         }
         catch (err) {
             logger.log.error('getAppliftAvailableOffersWithParams: error occured', {error: serializeError(err)});
@@ -608,32 +603,44 @@ function getAppliftAvailableOffersWithParams(userId, countryCode, platform, devi
     });    
 }
 
+function getAppliftOffersByResponse(offersJson, userId, countryCode, platform, device) {
+    let offersResult = [];
+
+    for (let i=0; i<offersJson.length; i++) {
+        let offer = new Offer();
+        offer.parseAppliftResponse(offersJson[i], userId);
+        if (offer.countries.includes(countryCode) && 
+            (device == null || offer.devices == 'all' || offer.devices.includes(device)) &&
+            (platform == null || offer.platform == platform)) {
+                offersResult.push(offer);
+            }
+    }
+    return offersResult;
+}
+
+let cpaLeadOffersResponse = {lastResponse: null, offersJson: null};
 function getCpaLeadAvailableOffersWithParams(userId, countryCode, platform, device) {
     return new Promise((resolve, reject) => {
         try {
-            let offersResult = [];
-            let fullUrl = 'https://cpalead.com/dashboard/reports/campaign_json.php?id=818141&mobile_app=1';
-            rp(fullUrl)
-            .then(function (offersText) {
-                let offersJson = JSON.parse(offersText).offers;
-                for (let i=0; i<offersJson.length; i++) {
-                    if (offersJson[i].payout_type=='CPI' && offersJson[i].payout_currency == 'USD') {
-                        let offer = new Offer();
-                        offer.parseCpaLeadResponse(offersJson[i], userId);
-                        if (offer.countries.includes(countryCode) && 
-                            (device == null || offer.devices == 'all' || offer.devices.includes(device)) &&
-                            (platform == null || offer.platform == platform)) {
-                                offersResult.push(offer);
-                            }
-                    }
-                }
-
-                resolve(offersResult);                    
-            })
-            .catch(function (err) {
-                logger.log.error('getAppliftAvailableOffersWithParams: unable to call applift url: ' + fullUrl, {error: serializeError(err)});
-                reject(err);
-            });
+            if (cpaLeadOffersResponse && cpaLeadOffersResponse.lastResponse && (new Date())-cpaLeadOffersResponse.lastResponse<consts.CPA_LEAD_CACHE_OFFERS_HOURS*1000*60*60) {
+                let offersResult = getCpaLeadsOffersByResponse(cpaLeadOffersResponse.offersJson, userId, countryCode, platform, device);
+                resolve(offersResult);
+            } else {
+                let fullUrl = 'https://cpalead.com/dashboard/reports/campaign_json.php?id=818141&mobile_app=1';
+                rp(fullUrl)
+                .then(function (offersText) {
+                    cpaLeadOffersResponse.offersJson = JSON.parse(offersText).offers;
+                    cpaLeadOffersResponse.lastResponse = new Date();
+                    let offersResult = getCpaLeadsOffersByResponse(cpaLeadOffersResponse.offersJson, userId, countryCode, platform, device);
+                    
+                    resolve(offersResult);                    
+                })
+                .catch(function (err) {
+                    logger.log.error('getAppliftAvailableOffersWithParams: unable to call applift url: ' + fullUrl, {error: serializeError(err)});
+                    reject(err);
+                });
+            }
+            
         }
         catch (err) {
             logger.log.error('getAppliftAvailableOffersWithParams: error occured', {error: serializeError(err)});
@@ -641,6 +648,24 @@ function getCpaLeadAvailableOffersWithParams(userId, countryCode, platform, devi
         }
         
     });    
+}
+
+function getCpaLeadsOffersByResponse(offersJson, userId, countryCode, platform, device) {
+    let offersResult = [];
+    
+    for (let i=0; i<offersJson.length; i++) {
+        if (offersJson[i].payout_type=='CPI' && offersJson[i].payout_currency == 'USD') {
+            let offer = new Offer();
+            offer.parseCpaLeadResponse(offersJson[i], userId);
+            if (offer.countries.includes(countryCode) && 
+                (device == null || offer.devices == 'all' || offer.devices.includes(device)) &&
+                (platform == null || offer.platform == platform)) {
+                    offersResult.push(offer);
+                }
+        }
+    }
+
+    return offersResult;
 }
 
 function stubForApplift() {
