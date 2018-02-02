@@ -576,7 +576,7 @@ let appliftOffersResponse = {lastResponse: null, offersJson: null};
 function getAppliftAvailableOffersWithParams(userId, countryCode, platform, device) {
     return new Promise((resolve, reject) => {
         try {
-            if (appliftOffersResponse && appliftOffersResponse.lastResponse && (new Date())-appliftOffersResponse.lastResponse<consts.APPLIFT_CACHE_OFFERS_HOURS*1000*60*60) {
+            if (appliftOffersResponse && appliftOffersResponse.lastResponse && (new Date())-appliftOffersResponse.lastResponse<consts.APPLIFT_CACHE_OFFERS_MINUTES*1000*60) {
                 let offersResult = getAppliftOffersByResponse(appliftOffersResponse.offersJson, userId, countryCode, platform, device);
                 resolve(offersResult);
             } else {
@@ -622,7 +622,7 @@ let cpaLeadOffersResponse = {lastResponse: null, offersJson: null};
 function getCpaLeadAvailableOffersWithParams(userId, countryCode, platform, device) {
     return new Promise((resolve, reject) => {
         try {
-            if (cpaLeadOffersResponse && cpaLeadOffersResponse.lastResponse && (new Date())-cpaLeadOffersResponse.lastResponse<consts.CPA_LEAD_CACHE_OFFERS_HOURS*1000*60*60) {
+            if (cpaLeadOffersResponse && cpaLeadOffersResponse.lastResponse && (new Date())-cpaLeadOffersResponse.lastResponse<consts.CPA_LEAD_CACHE_OFFERS_MINUTES*1000*60) {
                 let offersResult = getCpaLeadsOffersByResponse(cpaLeadOffersResponse.offersJson, userId, countryCode, platform, device);
                 resolve(offersResult);
             } else {
@@ -740,12 +740,15 @@ function offerClick(req) {
 
             // let sig = getSigForAppliftToVoluum(selectedOffer.id, userId, selectedOffer.points, consts.VOLUUM_APPLIFT_SECRET_KEY);
             let voluumUrl = '';
+            let partnerName = '';
             switch (partner) {
                 case consts.PARTNER_ID_APPLIFT:
                     voluumUrl = consts.MOBILITR_APPLIFT_URL;
+                    partnerName = consts.PARTNER_APPLIFT;
                     break;
                 case consts.PARTNER_ID_CPA_LEAD:
                     voluumUrl = consts.MOBILITR_CPALEAD_URL;
+                    partnerName = consts.PARTNER_CPA_LEAD;
                     break;
             }
             let fullVoluumUrl = `${voluumUrl}?token=${encodeURIComponent(token)}&offer_id=${offerId}&user_id=${userId}&original_payout=${originalPayout}&payout_type=${payoutType}&partner_id=${partner}`;
@@ -754,7 +757,12 @@ function offerClick(req) {
                 if (user.proactive_address && user.proactive_address.channelId) {
                     fullVoluumUrl += `&source_name=${user.proactive_address.channelId}`;
                 }
-                resolve({redirectUrl: fullVoluumUrl});
+                saveOfferClick(partner,partnerName, userId,offerId,token,originalPayout,payoutType,fullVoluumUrl).then(()=>{
+                    resolve({redirectUrl: fullVoluumUrl});
+                }).catch(err=>{
+                    logger.log.error('offerClick: error on saveOfferClick', {error: serializeError(err)});
+                    resolve({redirectUrl: fullVoluumUrl});
+                })
             }).catch(err => {
                 logger.log.error('offerClick: unable to get user details', {error: serializeError(err), userId: userId});
                 resolve({redirectUrl: fullVoluumUrl});                
@@ -763,21 +771,26 @@ function offerClick(req) {
             
             
 
-            /*           
-           dal.saveOfferClick(userId, offerId, points)
-            .then(() => {
-                resolve();
-            })
-            .catch(function (err) {
-                logger.log.error('offerClick: error saving to database', {error: serializeError(err), userId: userId, offerId: offerId, points: points});
-                reject(err);
-            });*/
+          
         }
         catch (err) {
             logger.log.error('offerClick: error occured', {error: serializeError(err)});
             reject(err);            
         }
         
+    });
+}
+
+function saveOfferClick(partner,partnerName, userId,offerId,token,originalPayout,payoutType,fullVoluumUrl) {
+    return new Promise((resolve, reject) => {
+        dal.saveOfferClick(partner,partnerName, userId,offerId,token,originalPayout,payoutType,fullVoluumUrl)
+        .then(() => {
+            resolve();
+        })
+        .catch(function (err) {
+            logger.log.error('saveOfferClick: error saving to database', {error: serializeError(err)});
+            reject(err);
+        });
     });
 }
 

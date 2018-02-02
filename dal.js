@@ -179,14 +179,36 @@ let OfferClickSchema = new Schema({
         type: String,
         required: true
     },
-    offer_id: {
+    partner: {
         type: String,
         required: true
     },
-    points: {
+    partner_name: {
+        type: String,
+        required: false
+    },
+    offer_id: {
+        type: String,
+        required: false
+    },
+    token: {
+        type: String,
+        required: false
+    },
+    original_payout: {
         type: Number,
         default: 0,
-        required: true
+        required: false
+    },
+    payout_type: {
+        type: String,
+        default: 0,
+        required: false
+    },
+    redirect_url: {
+        type: String,
+        default: 0,
+        required: false
     },
     created_at: {
         type: Date,
@@ -451,13 +473,18 @@ function updateUserEmail(userId, email) {
     }); 
 }
 
-function saveOfferClick(userId, offerId, points) {
+function saveOfferClick(partner,partnerName, userId,offerId,token,originalPayout,payoutType,fullVoluumUrl) {
     return new Promise((resolve, reject) => {
         try {
             let offerClick = new OfferClick({
                 user_id : userId,
+                partner: partner,
+                partner_name: partnerName,
                 offer_id: offerId,
-                points: points
+                token: token,
+                original_payout: originalPayout,
+                payout_type: payoutType,
+                redirect_url: fullVoluumUrl
             });
 
             offerClick.save(function(err) {
