@@ -275,7 +275,7 @@ module.exports = ({ config, db }) => {
 		file - log file name (without the path)
 	*/
 	api.get('/get_log_file', (req, res) => {
-		logger.readLogFile(req).then(content => {
+		logger.readLogFile(req.query.file).then(content => {
 			res.write(content);
 		}).catch(err => {
 			logger.log.error('error in /get_log_file', {request: req, error: serializeError(err)});			
