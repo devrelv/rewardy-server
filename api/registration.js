@@ -29,7 +29,7 @@ function registerUserFromLink (db, req) {
             // Verifying the invitationId
             var generatedInvitationId = generateInvitationCode(name, email, referrerUserId);
             if (invitationId != generatedInvitationId) {
-                logger.log.error('registerUserFromLink: incorrect invitation code', {data: {invitationId: invitationId, generatedInvitationId: generatedInvitationId}, request: req});
+                logger.log.error('registerUserFromLink: incorrect invitation code', {error: 'registerUserFromLink: incorrect invitation code', data: {invitationId: invitationId, generatedInvitationId: generatedInvitationId}, request: req});
                 reject("incorrect invitation code");
             }
 
@@ -103,7 +103,7 @@ function sendEmailToReferral(req) {
 
 function getVerificationUrl(referrerUserId, email, name, invitationCode) {
     return process.env.SERVER_API_URL + 'register?refId=' + referrerUserId + 
-    '&email=' + email + '&name=' + name + '&invitationCode=' + invitationCode
+    '&email=' + encodeURIComponent(email) + '&name=' + encodeURIComponent(name) + '&invitationCode=' + invitationCode
 }
 
 module.exports = {
