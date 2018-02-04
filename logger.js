@@ -67,6 +67,19 @@ var log = new (winston.Logger)({
     return [year, month, day].join('-') + '_' + [hour,minute, second].join('-');
 }
 
+function readLogFile(fileName) {
+    return new Promise((resolve, reject) => {
+        fs.readFile(dir + '/' + fileName, (err, data) => {
+            if (err){
+                reject(err);
+            } else {
+                resolve(data);
+            }
+        });
+    });
+}
+
   module.exports = {
-      log: log
+      log: log,
+      readLogFile
   }

@@ -270,5 +270,18 @@ module.exports = ({ config, db }) => {
 		});
 	});
 
+	/*
+		Query arguments:
+		file - log file name (without the path)
+	*/
+	api.get('/get_log_file', (req, res) => {
+		logger.readLogFile(req).then(content => {
+			res.write(content);
+		}).catch(err => {
+			logger.log.error('error in /get_log_file', {request: req, error: serializeError(err)});			
+			res.status(500).send({result: "Error", info: serializeError(err)});
+		});
+	});
+
 	return api;
 }
