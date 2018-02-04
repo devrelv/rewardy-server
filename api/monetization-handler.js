@@ -758,6 +758,7 @@ function offerClick(req) {
                     fullVoluumUrl += `&source_name=${user.proactive_address.channelId}`;
                 }
                 saveOfferClick(partner,partnerName, userId,offerId,token,originalPayout,payoutType,fullVoluumUrl).then(()=>{
+                    sendEventToKean('data-offerclick', {partner: partnerName, userId,offerId,token,originalPayout,payoutType,fullVoluumUrl});
                     resolve({redirectUrl: fullVoluumUrl});
                 }).catch(err=>{
                     logger.log.error('offerClick: error on saveOfferClick', {error: serializeError(err)});
@@ -842,6 +843,7 @@ function postback_applift(req) {
     });
 }
 
+
 /*
     Query Params
     partner_id: monitization partner id (applift / cpalead)
@@ -887,7 +889,7 @@ function postback_mobilitr(req) {
             }
             let offerOriginalPayout = req.query.original_payout;
             let payoutType = req.query.payout_type;
-            let source_name = req.query.source_name;
+            let sourceName = req.query.source_name;
 
             let date = new Date();
             let innerTransactionId = uuid.v1();
@@ -899,8 +901,9 @@ function postback_mobilitr(req) {
             //     reject('Signature key is not valid');
             //     return;
             // }
+            sendEventToKean('data-postback', {dataId: innerTransactionId, partner: partnerName, userId, offerCredits, sourceName, payoutType, offerOriginalPayout, payout, token, offerId, date});
         
-            dal.addUserAction(innerTransactionId, partnerName, userId, offerCredits, date, {offerId, token, payout, offerOriginalPayout, payoutType, source_name}).then(()=> {
+            dal.addUserAction(innerTransactionId, partnerName, userId, offerCredits, date, {offerId, token, payout, offerOriginalPayout, payoutType, sourceName}).then(()=> {
                 rewardUserWithCredits(null, userId, offerCredits, partner).then(()=> {
                     resolve();
                 }).catch(err => {
@@ -918,6 +921,22 @@ function postback_mobilitr(req) {
             reject(err);
         }
     });  
+}
+
+const KeenTracking = require('keen-tracking');
+function sendEventToKean(eventName, eventData) {
+    try {
+        const client = new KeenTracking({
+            projectId: '5a736fb3c9e77c00018eb9e4',
+            writeKey: '952724917B0A3E4F25897F1A2B88C7DF32CB7999DAEF5BDDF2FE7B8486742EE18827F6B2633890ABBE4901E7858CBB29B8F706E30E97D85E6126FB5732D3DFFBDBBB56B817FE3FCC06CB5CBDEBA64F501E2AAD11812FBF951C68F418F7AB0666'
+          });
+
+        client.recordEvent(eventName, eventData);
+
+    } catch (err) {
+        logger.log.error('sendEventToKean: error occured', {error: serializeError(err)});
+        
+    }
 }
 
 function getSigForAppliftPostBack(offerId, userId, offerCredits, secretKey) {
