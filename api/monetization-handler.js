@@ -952,6 +952,10 @@ function postback_mobilitr(req) {
                     offerCredits = payout*consts.CPALEAD_USD_TO_POINTS_RATIO;
                     partnerName = consts.PARTNER_CPA_LEAD;
                     break;
+                case consts.PARTNER_ID_MOBILITR_INHOUSE:
+                    offerCredits = payout*consts.MOBILITR_INHOUSE_USD_TO_POINTS_RATIO;
+                    partnerName = consts.PARTNER_MOBILITR_INHOUSE;
+                    break;
                 default:
                     offerCredits = payout*100;
                     partnerName = 'PartnerId: ' + partner;
