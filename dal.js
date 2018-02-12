@@ -147,6 +147,20 @@ let BotUserSchema = new Schema({
     },
     proactive_address: {
         type: Schema.Types.Mixed
+    },
+    user_agent_details: {
+        country: {
+            type: String,
+            required: false
+        },
+        os_type: {
+            type: String,
+            required: false
+        },
+        device: {
+            type: String,
+            required: false
+        }
     }
 });
 
@@ -504,6 +518,21 @@ function saveOfferClick(partner,partnerName, userId,offerId,token,originalPayout
     });
 }
 
+function updateUserUADetails(userId, osType, device, countryCode) {
+    return new Promise((resolve, reject) => {
+        BotUser.update({user_id: userId}, {$set: {'user_agent_details.country' : countryCode, 'user_agent_details.os_type' : osType, 'user_agent_details.device' : device }}
+        , err => {
+            if (err) {
+                logger.log.error('dal: updateUserUADetails.update error', {error: serializeError(err), user_id: userId});
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
+    }); 
+}
+
+
 module.exports = {
     getAllMonetizationPartners: getAllMonetizationPartners,
     getAllMonetizationPartnersWithOffers: getAllMonetizationPartnersWithOffers,
@@ -517,7 +546,8 @@ module.exports = {
     getBotUserByEmail: getBotUserByEmail,
     saveInvitation: saveInvitation,
     updateUserEmail: updateUserEmail,
-    saveOfferClick: saveOfferClick
+    saveOfferClick: saveOfferClick,
+    updateUserUADetails
 }
 
 

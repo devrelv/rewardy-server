@@ -495,26 +495,11 @@ function getAvailableOffers(req) {
             let platform = deviceData.osType;
             let device = deviceData.device;
 
-            if (stub != 0) {
-                let offersResult = stubForApplift();
-                resolve(offersResult);
-            } else {
-                let offersPromise = [];
-                // offersPromise.push(getAppliftAvailableOffersWithParams(userId, countryCode, platform, device).catch(e=>e));
-                offersPromise.push(getCpaLeadAvailableOffersWithParams(userId, countryCode, platform, device).catch(e=>e));
-                Promise.all(offersPromise).then(offers => {
-                    let allOffers = [];
-                    for (let i=0; i<offers.length; i++) {
-                        if (Array.isArray(offers[i])) {
-                            allOffers = allOffers.concat(offers[i]);
-                        }
-                    }
-                    resolve(allOffers);
-                }).catch(err => {
-                    logger.log.error('getAvailableOffers: error occured on calling to getAppliftAvailableOffersWithParams', {error: serializeError(err)});
-                    reject(err);     
-                })
-            }
+            dal.updateUserUADetails(userId, platform, device, countryCode).then(()=>{
+                getOffers(stub, partner, userId, countryCode, deviceData, platform, device).then(data => resolve(data)).catch(err => reject(err));
+            }).catch(err => {
+                getOffers(stub, partner, userId, countryCode, deviceData, platform, device).then(data => resolve(data)).catch(err => reject(err));;
+            });
         }
         catch (err) {
             logger.log.error('getAvailableOffers: error occured', {error: serializeError(err)});
@@ -522,6 +507,31 @@ function getAvailableOffers(req) {
         }
         
     });    
+}
+
+function getOffers(stub, partner, userId, countryCode, deviceData, platform, device) {
+    return new Promise((resolve, reject) => {
+        if (stub != 0) {
+            let offersResult = stubForApplift();
+            resolve(offersResult);
+        } else {
+            let offersPromise = [];
+            // offersPromise.push(getAppliftAvailableOffersWithParams(userId, countryCode, platform, device).catch(e=>e));
+            offersPromise.push(getCpaLeadAvailableOffersWithParams(userId, countryCode, platform, device).catch(e=>e));
+            Promise.all(offersPromise).then(offers => {
+                let allOffers = [];
+                for (let i=0; i<offers.length; i++) {
+                    if (Array.isArray(offers[i])) {
+                        allOffers = allOffers.concat(offers[i]);
+                    }
+                }
+                resolve(allOffers);
+            }).catch(err => {
+                logger.log.error('getAvailableOffers: error occured on calling to getAppliftAvailableOffersWithParams', {error: serializeError(err)});
+                reject(err);     
+            })
+        }
+    });
 }
 
 const geoip = require('geoip-lite');
@@ -636,14 +646,14 @@ function getCpaLeadAvailableOffersWithParams(userId, countryCode, platform, devi
                     resolve(offersResult);                    
                 })
                 .catch(function (err) {
-                    logger.log.error('getAppliftAvailableOffersWithParams: unable to call applift url: ' + fullUrl, {error: serializeError(err)});
+                    logger.log.error('getCpaLeadAvailableOffersWithParams: unable to call applift url: ' + fullUrl, {error: serializeError(err)});
                     reject(err);
                 });
             }
             
         }
         catch (err) {
-            logger.log.error('getAppliftAvailableOffersWithParams: error occured', {error: serializeError(err)});
+            logger.log.error('getCpaLeadAvailableOffersWithParams: error occured', {error: serializeError(err)});
             reject(err);            
         }
         
