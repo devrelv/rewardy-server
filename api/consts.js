@@ -29,10 +29,13 @@ module.exports = {
     EMAIL_REGEX: new RegExp(/^[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/),
     APPLIFT_USD_TO_POINTS_RATIO: 100, // 1 USD = 170 Points on Redeem => If the ratio is 60:40, then 60%*170 = 100+-
     CPALEAD_USD_TO_POINTS_RATIO: 100, // 1 USD = 170 Points on Redeem => If the ratio is 60:40, then 60%*170 = 100+-
+    MOBILITR_INHOUSE_USD_TO_POINTS_RATIO: 100, // 1 USD = 170 Points on Redeem => If the ratio is 60:40, then 60%*170 = 100+-
     MOBILITR_APPLIFT_URL: 'http://stribeled-hortletin.com/363acfd1-3dc9-4350-9321-2dd6715f1989',
     MOBILITR_CPALEAD_URL: 'http://stribeled-hortletin.com/dd3e8f74-461b-4470-9cad-5f9aa297d87f',
+    MOBILITR_INHOUSE_URL_PREFIX: 'http://stribeled-hortletin.com/',
     PARTNER_ID_APPLIFT: '1',
     PARTNER_ID_CPA_LEAD: '2',
+    PARTNER_ID_MOBILITR_INHOUSE: '3',
     CPA_LEAD_CACHE_OFFERS_MINUTES: 5,
     APPLIFT_CACHE_OFFERS_MINUTES: 5,
 
