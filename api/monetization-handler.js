@@ -819,6 +819,8 @@ function offerClick(req) {
                     break;
                 case consts.PARTNER_ID_MOBILITR_INHOUSE:
                     voluumUrl = `${consts.MOBILITR_INHOUSE_URL_PREFIX}/${offerId}`;
+                    partnerName = consts.PARTNER_MOBILITR_INHOUSE;
+                    break;
             }
             let fullVoluumUrl = `${voluumUrl}?token=${encodeURIComponent(token)}&offer_id=${offerId}&user_id=${userId}&original_payout=${originalPayout}&payout_type=${payoutType}&partner_id=${partner}`;
 
