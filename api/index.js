@@ -185,17 +185,17 @@ module.exports = ({ config, db }) => {
 		sig: the security hash that proves that this postback comes from us.
 		payout: payout amount from applify
     */
-	api.get('/postback/applift', (req, res) => { // TODO: Delete in mid Feb
-		logger.log.info('request to /postback/applift made', {request: req});
-		monetizationHandler.postback_applift(req).then(()=> 
-		{
-			res.send('OK');
-		}).catch (err => 
-		{ 
-			res.status(500).send({result: "Error", info: err});
-		});
+	// api.get('/postback/applift', (req, res) => { // TODO: Delete in mid Feb
+	// 	logger.log.info('request to /postback/applift made', {request: req});
+	// 	monetizationHandler.postback_applift(req).then(()=> 
+	// 	{
+	// 		res.send('OK');
+	// 	}).catch (err => 
+	// 	{ 
+	// 		res.status(500).send({result: "Error", info: err});
+	// 	});
 		
-	});
+	// });
 
 	/* 
 		Query Params

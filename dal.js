@@ -532,6 +532,19 @@ function updateUserUADetails(userId, osType, device, countryCode) {
     }); 
 }
 
+function getUserActions(userId) {
+    return new Promise((resolve, reject) => {
+        UserAction.find({userId: userId}, (err, data) => {
+            if (err) {
+                logger.log.error('dal: getUserActions.find error', {error: serializeError(err)});        
+                reject(err);
+            } else {
+                resolve(data);
+            } 
+        });
+    });
+}
+
 
 module.exports = {
     getAllMonetizationPartners: getAllMonetizationPartners,
@@ -547,7 +560,8 @@ module.exports = {
     saveInvitation: saveInvitation,
     updateUserEmail: updateUserEmail,
     saveOfferClick: saveOfferClick,
-    updateUserUADetails
+    updateUserUADetails,
+    getUserActions
 }
 
 
