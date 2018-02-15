@@ -2,7 +2,7 @@
 const consts = require('../../consts');
 const NO_IMAGE_REPLACEMENT = 'https://rewardy.co/img/hero-fail@2x.png';
 
-function Offer (id, click_url, original_click_url, points, cta_text, icon_url, title, store_rating, action, countries, devices, bundle_id, platform) {
+function Offer (id, click_url, original_click_url, points, cta_text, icon_url, title, store_rating, action, countries, devices, bundle_id, platform, partner_name, is_completed) {
     this.id = id;
     this.click_url = click_url;
     this.original_click_url = original_click_url
@@ -16,10 +16,12 @@ function Offer (id, click_url, original_click_url, points, cta_text, icon_url, t
     this.devices = devices;
     this.bundle_id = bundle_id;
     this.platform = platform;
+    this.partner_name = partner_name;
+    this.is_completed = is_completed || false;
 }
 
 Offer.prototype.parseAppliftResponse = function(responseObject, userId) {
-    this.id = responseObject.campaigns[0].id;
+    // this.id = responseObject.campaigns[0].id;
     this.original_click_url = responseObject.campaigns[0].click_url;
     /*
         partner - partner Id (i.e. Applift)
@@ -69,7 +71,9 @@ Offer.prototype.parseAppliftResponse = function(responseObject, userId) {
     this.platform = responseObject.app_details.platform;
     let applift_click_url_parameters = parseQueryString(this.original_click_url);    
     this.click_url = `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_APPLIFT}&uid=${userId}&offer=&token=${applift_click_url_parameters.token}&op=${payout}&payout_type=${payoutType}`;
-
+    this.id = applift_click_url_parameters.token;
+    this.partner_name = consts.PARTNER_APPLIFT;
+    this.is_completed = false;
 }
 
 Offer.prototype.parseCpaLeadResponse = function(responseObject, userId) {
@@ -105,6 +109,28 @@ Offer.prototype.parseCpaLeadResponse = function(responseObject, userId) {
     this.bundle_id = null;
     this.platform = responseObject.mobile_app_type;
     this.click_url = `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_CPA_LEAD}&uid=${userId}&offer=${this.id}&token=&op=${payout}&payout_type=${payoutType}`;
+    this.partner_name = consts.PARTNER_CPA_LEAD;
+    this.is_completed = false;
+}
+
+Offer.prototype.isEqualToUserAction = function(userAction) {
+    if (this.partner_name == userAction.partner) {
+        switch (this.partner_name) {
+            case consts.PARTNER_APPLIFT:
+                if (this.id == userAction.partner_extended_data.token) {
+                    return true;
+                }
+                break;
+            case consts.PARTNER_MOBILITR_INHOUSE:
+            case consts.PARTNER_CPA_LEAD:
+                if (this.id == userAction.partner_extended_data.offerId) {
+                    return true;
+                }
+                break;
+            
+        }
+    }
+    return false;
 }
 
 var parseQueryString = function(url) {
