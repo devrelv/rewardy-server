@@ -526,27 +526,13 @@ function getOffers(stub, partner, userId, countryCode, deviceData, platform, dev
                         allOffers = allOffers.concat(offers[i]);
                     }
                 }
-                if (allOffers.length == 0) {
-                    // if there are no offers then we will push CPALead
-                    getCpaLeadAvailableOffersWithParams(userId, countryCode, platform, device).then(offers => {
-                        allOffers = allOffers.concat(offers);
-                        getUserCompletedOffers(userId).then(completedOffers => {
-                            markCompletedOffers(allOffers, completedOffers);
-                            resolve(allOffers)
-                        }).catch(err => {
-                            // just return the original offers
-                            resolve(allOffers);
-                        })
-                    })
-                } else {
-                    getUserCompletedOffers(userId).then(completedOffers => {
-                        markCompletedOffers(allOffers, completedOffers);
-                        resolve(allOffers)
-                    }).catch(err => {
-                        // just return the original offers
-                        resolve(allOffers);
-                    })
-                }
+                getUserCompletedOffers(userId).then(completedOffers => {
+                    markCompletedOffers(allOffers, completedOffers);
+                    resolve(allOffers)
+                }).catch(err => {
+                    // just return the original offers
+                    resolve(allOffers);
+                })
                 
             }).catch(err => {
                 logger.log.error('getAvailableOffers: error occured on calling to Promise.all(offersPromise)', {error: serializeError(err)});
