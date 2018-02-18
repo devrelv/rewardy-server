@@ -526,13 +526,24 @@ function getOffers(stub, partner, userId, countryCode, deviceData, platform, dev
                         allOffers = allOffers.concat(offers[i]);
                     }
                 }
-                getUserCompletedOffers(userId).then(completedOffers => {
-                    markCompletedOffers(allOffers, completedOffers);
-                    resolve(allOffers)
-                }).catch(err => {
-                    // just return the original offers
-                    resolve(allOffers);
-                })
+                if (allOffers.length == 0) {
+                    // writing the user locale details to DB
+                    dal.saveNoOffers(userId, countryCode, device, platform)
+                        .then(()=> resolve(allOffers))
+                        .catch(err=> {
+                            logger.log.error('getAvailableOffers: error occured on calling to saveNoOffers', {error: serializeError(err)});
+                            resolve(allOffers);
+                        })
+                } else {
+                    getUserCompletedOffers(userId).then(completedOffers => {
+                        markCompletedOffers(allOffers, completedOffers);
+                        resolve(allOffers)
+                    }).catch(err => {
+                        // just return the original offers
+                        resolve(allOffers);
+                    })
+                }
+                
                 
             }).catch(err => {
                 logger.log.error('getAvailableOffers: error occured on calling to Promise.all(offersPromise)', {error: serializeError(err)});
@@ -567,7 +578,7 @@ function getCounteryCode(req) {
     let geo = geoip.lookup(clientIp);
     if (!geo) {
         logger.log.error('getCounteryCode: geo is null - returning US', {clientIp: clientIp});        
-        return 'US';
+        return consts.DEFAULT_COUNTRY_CODE;
     }
     return geo.country;
 }

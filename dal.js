@@ -232,6 +232,31 @@ let OfferClickSchema = new Schema({
 });
 let  OfferClick = conn.model(' OfferClick',  OfferClickSchema);
 
+let NoOfferSchema = new Schema({
+    user_id : {
+        type: String,
+        required: true
+    },
+    country: {
+        type: String,
+        required: true
+    },
+    device: {
+        type: String,
+        required: false
+    },
+    os_type: {
+        type: String,
+        required: false
+    },
+    created_at: {
+        type: Date,
+        required: true,
+        default: Date.now
+    }
+});
+let NoOffer = conn.model('NoOffer',  NoOfferSchema);
+
 function getAllMonetizationPartners() {
 	return new Promise((resolve, reject) => {
         MonetizationPartner.find({}, function(err, data) {
@@ -545,6 +570,33 @@ function getUserActions(userId) {
     });
 }
 
+function saveNoOffers(userId, country, device, osType) {
+    return new Promise((resolve, reject) => {
+        try {
+            let noOffer = new NoOffer({
+                user_id: userId,
+                country,
+                device,
+                os_type: osType
+            });
+
+            noOffer.save(function(err) {
+                if (err) {
+                    logger.log.error('dal: saveNoOffers error', {error: serializeError(err)});                        
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            })
+
+        }
+        catch (err) {
+            logger.log.error('dal: saveNoOffers error', {error: serializeError(err)});                        
+            reject(err);
+        }
+    });
+}
+
 
 module.exports = {
     getAllMonetizationPartners: getAllMonetizationPartners,
@@ -561,7 +613,8 @@ module.exports = {
     updateUserEmail: updateUserEmail,
     saveOfferClick: saveOfferClick,
     updateUserUADetails,
-    getUserActions
+    getUserActions,
+    saveNoOffers
 }
 
 
