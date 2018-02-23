@@ -161,6 +161,20 @@ let BotUserSchema = new Schema({
             type: String,
             required: false
         }
+    },
+    daily_bonus: {
+        type: Array,
+        default: []
+    },
+    vouchers_redeem: {
+        type: [{
+            voucher_id: String,
+            points: Number,
+            request_date: Date,
+            issue_date: Date,
+            voucher_reference_data: Schema.Types.Mixed
+        }],
+        default: []
     }
 });
 
@@ -340,7 +354,7 @@ function addUserAction(innerTransactionId, partner, userId, offerCredits, date, 
     });    
 }
 
-function increaseUserCredits(userId, credits, isUpdateDailyBonusDate) {
+function increaseUserCredits(userId, credits, isUpdateDailyBonusDate, bonusDate) {
     return new Promise((resolve, reject) => {
         try {   
             BotUser.findOne({user_id: userId}, (err,res)=> {
@@ -354,7 +368,10 @@ function increaseUserCredits(userId, credits, isUpdateDailyBonusDate) {
                         var currentPoints = Number(res.points) + Number(credits);
                         var updateFields = {points: currentPoints};
                         if (isUpdateDailyBonusDate) {
-                            updateFields.last_daily_bonus = new Date();
+                            if (!bonusDate) {
+                                bonusDate = new Date();
+                            }
+                            updateFields.last_daily_bonus =bonusDate;
                         }
                         BotUser.update({user_id: userId}, {$set: updateFields}, (err, res) => {
                             if (err) {
@@ -597,6 +614,47 @@ function saveNoOffers(userId, country, device, osType) {
     });
 }
 
+function pushDailyBonus(userId, amount, bonusDate) {
+    return new Promise((resolve, reject) => {
+        try {
+            
+            BotUser.update({user_id: userId}, {$push: {daily_bonus: {amount:amount, date:bonusDate}}}, (err, res) => {
+                if (err) {
+                    logger.log.error('dal: addDailyBonus.update error', {error: serializeError(err), user_id: userId, amount: amount, bonusDate: bonusDate});                        
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+
+        }
+        catch (err) {
+            logger.log.error('dal: addDailyBonus error', {error: serializeError(err)});                        
+            reject(err);
+        }
+    });
+}
+
+function pushVoucherRedeem(userId, voucherId, points, requestDate, issueDate, voucherReferenceData) {
+    return new Promise((resolve, reject) => {
+        try {
+            //TODO: Search for the voucher in the user's vouchers and if exists only update this item, otherwise push a new one
+            BotUser.update({user_id: userId}, {$push: {vouchers_redeem: {voucher_id: voucherId, points: points, request_date: requestDate, issue_date: issueDate, voucher_reference_data: voucherReferenceData}}}, (err, res) => {
+                if (err) {
+                    logger.log.error('dal: pushVoucherRedeem.update error', {error: serializeError(err), user_id: userId});                        
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+
+        }
+        catch (err) {
+            logger.log.error('dal: pushVoucherRedeem error', {error: serializeError(err)});                        
+            reject(err);
+        }
+    });
+}
 
 module.exports = {
     getAllMonetizationPartners: getAllMonetizationPartners,
@@ -614,7 +672,9 @@ module.exports = {
     saveOfferClick: saveOfferClick,
     updateUserUADetails,
     getUserActions,
-    saveNoOffers
+    saveNoOffers,
+    pushDailyBonus,
+    pushVoucherRedeem
 }
 
 

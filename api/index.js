@@ -283,5 +283,24 @@ module.exports = ({ config, db }) => {
 		});
 	});
 
+
+	/*
+		uid = userId
+		vid = voucherId
+		points = points
+		request_date
+		issue_date
+		voucher_reference_data 
+	*/
+	api.get('/redeem_voucher', (req, res) => {
+		logger.log.debug('request to /redeem_voucher made', {request: req});
+		voucher_redeem.pushVoucherRedeem(req).then(() => {
+			res.send("Done");
+		}).catch(err => {
+			logger.log.error('error in /redeem_voucher', {request: req, error: serializeError(err)});			
+			res.status(500).json({result: "Error", info: err});
+		});
+	});
+
 	return api;
 }
