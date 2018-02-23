@@ -37,16 +37,21 @@ function handleUser (db, req) {
                         logger.log.debug('in if (dailyBonusQualified)');
                     
                         // give the daily bonus & update last_daily_bonus
-                        dal.increaseUserCredits(userId, consts.daily_bonus_points, true).then(()=>
+                        let bonusDate = new Date();
+                        dal.increaseUserCredits(userId, consts.daily_bonus_points, true, bonusDate).then(()=>
                         {
                             logger.log.debug('in dal.increaseUserCredits.then');
-                        
-                            result.isRewarded = true;
-                            result.points = consts.daily_bonus_points;
-                            resolve(result);
-                        
+                            
+                            dal.pushDailyBonus(userId, consts.daily_bonus_points, bonusDate).then(()=>{
+                                result.isRewarded = true;
+                                result.points = consts.daily_bonus_points;
+                                resolve(result);
+                            }).catch(err => {
+                                logger.log.error('daily-bonus pushDailyBonus.catch: error occured', {error: serializeError(err), request: req});
+                                reject(err);
+                            });
                         }).catch (err => {
-                            logger.log.error('daily-bonus getUserLastBonusDate.catch: error occured', {error: serializeError(err), request: req});
+                            logger.log.error('daily-bonus increaseUserCredits.catch: error occured', {error: serializeError(err), request: req});
                             reject(err);
                         });                
                         
