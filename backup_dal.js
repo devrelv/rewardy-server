@@ -63,8 +63,15 @@ function getAllBackups() {
 
 function backupDb(backupDir) {
     return new Promise((resolve, reject) => {
+        let mongoConnectionString = '';
+        if (process.env.CURRENT_ENV == 'PROD') {
+            mongoConnectionString = process.env.PROD_MONGO_CONNECTION_STRING;
+        } else {
+            mongoConnectionString = process.env.DEV_MONGO_CONNECTION_STRING;
+        }
+
        backup({
-         uri: process.env.MONGO_CONNECTION_STRING, // mongodb://<dbuser>:<dbpassword>@<dbdomain>.mongolab.com:<dbport>/<dbdatabase> 
+         uri: mongoConnectionString, // mongodb://<dbuser>:<dbpassword>@<dbdomain>.mongolab.com:<dbport>/<dbdatabase> 
          root: backupDir,
          callback: backupDone
        });

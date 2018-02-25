@@ -5,7 +5,13 @@ const logger = require('./logger');
 const serializeError = require('serialize-error');
 
 logger.log.info('dal: ####### connecting to the database #######');
-let conn = mongoose.connect(process.env.MONGO_CONNECTION_STRING, {useMongoClient: true});
+let mongoConnectionString = '';
+if (process.env.CURRENT_ENV == 'PROD') {
+    mongoConnectionString = process.env.PROD_MONGO_CONNECTION_STRING;
+} else {
+    mongoConnectionString = process.env.DEV_MONGO_CONNECTION_STRING;
+}
+let conn = mongoose.connect(mongoConnectionString, {useMongoClient: true});
 
 mongoose.Promise = require('bluebird');
 let Schema = mongoose.Schema;

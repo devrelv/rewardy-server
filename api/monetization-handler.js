@@ -703,45 +703,16 @@ function getMobilitrInHouseAvailableOffersWithParams(userId, countryCode, platfo
         try {
             let offersResult = [];
             
-            // iOS
-            // US
-            if (countryCode=='US' && platform == 'ios') {
-                offersResult.push(new Offer('3dc13aa3-6641-4c44-95aa-39c508565e6a', `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_MOBILITR_INHOUSE}&uid=${userId}&offer=3dc13aa3-6641-4c44-95aa-39c508565e6a&op=1.00&payout_type=CPI`, '',
-                1*consts.MOBILITR_INHOUSE_USD_TO_POINTS_RATIO,'Install', 'https://is5-ssl.mzstatic.com/image/thumb/Purple118/v4/ae/86/37/ae8637db-b5f0-49a5-b65f-372ffa2f3264/mzl.ifcoibem.png/246x0w.jpg',
-                'GSN Casino: Slot Machine Games', 4.5, 'Install', ['US'], ['ios'], '','ios', consts.PARTNER_MOBILITR_INHOUSE, false));
+            let mobilitrOffersData = fs.readFileSync(path.join(__dirname, '../data') + '/mobilitr_offers.json', { encoding: 'utf8' });
+            let offersJson = JSON.parse(mobilitrOffersData);
 
-                offersResult.push(new Offer('253ef9cc-5718-47c2-adb5-51afb718a42a', `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_MOBILITR_INHOUSE}&uid=${userId}&offer=253ef9cc-5718-47c2-adb5-51afb718a42a&op=1.00&payout_type=CPI`, '',
-                    1*consts.MOBILITR_INHOUSE_USD_TO_POINTS_RATIO,'Install', 'https://is2-ssl.mzstatic.com/image/thumb/Purple118/v4/37/33/93/3733936b-6e79-c23d-d6de-00a96c421a5b/AppIconIPhone-1x_U007emarketing-0-85-220-0-1.png/246x0w.jpg',
-                    'Caesars Casino Official Slots', 5, 'Install', ['US'], ['ios'], '','ios', consts.PARTNER_MOBILITR_INHOUSE, false));
-                
-                offersResult.push(new Offer('38f47304-83e1-4ece-80b9-23a6595a96fb', `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_MOBILITR_INHOUSE}&uid=${userId}&offer=38f47304-83e1-4ece-80b9-23a6595a96fb&op=1.00&payout_type=CPI`, '',
-                    1*consts.MOBILITR_INHOUSE_USD_TO_POINTS_RATIO,'Install', 'https://is1-ssl.mzstatic.com/image/thumb/Purple118/v4/00/ae/ff/00aeff29-6e01-a479-0cab-0aae24d97d5b/mzl.zzbbgdaf.jpg/246x0w.jpg',
-                    'Slotomania: Vegas Slots Casino', 4, 'Install', ['US'], ['ios'], '','ios', consts.PARTNER_MOBILITR_INHOUSE, false));
-                
-                offersResult.push(new Offer('57329226-bf95-445b-bd9b-74ff09fad8c5', `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_MOBILITR_INHOUSE}&uid=${userId}&offer=57329226-bf95-445b-bd9b-74ff09fad8c5&op=1.00&payout_type=CPI`, '',
-                    1*consts.MOBILITR_INHOUSE_USD_TO_POINTS_RATIO,'Install', 'https://is1-ssl.mzstatic.com/image/thumb/Purple118/v4/1d/68/cf/1d68cfc6-c8d6-8e35-622e-1efaadf70b59/mzl.zhwrgtwh.png/246x0w.jpg',
-                    'Slots Casino - House of Fun', 4.5, 'Install', ['US'], ['ios'], '','ios', consts.PARTNER_MOBILITR_INHOUSE, false));
-                
-                offersResult.push(new Offer('7a69c140-5d4a-4bbb-bc1f-c2a477eeba44', `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_MOBILITR_INHOUSE}&uid=${userId}&offer=7a69c140-5d4a-4bbb-bc1f-c2a477eeba44&op=1.00&payout_type=CPI`, '',
-                    1*consts.MOBILITR_INHOUSE_USD_TO_POINTS_RATIO,'Install', 'https://is4-ssl.mzstatic.com/image/thumb/Purple128/v4/d1/61/20/d1612024-5271-e747-cc37-4c3a4c99117a/mzl.qnxcjmxj.jpg/246x0w.jpg',
-                    'World Series of Poker - WSOP', 4.5, 'Install', ['US'], ['ios'], '','ios', consts.PARTNER_MOBILITR_INHOUSE, false));
-
-                offersResult.push(new Offer('d70f295a-6d5f-47c7-9a14-8921fd6da2c3', `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_MOBILITR_INHOUSE}&uid=${userId}&offer=d70f295a-6d5f-47c7-9a14-8921fd6da2c3&op=1.00&payout_type=CPI`, '',
-                    1*consts.MOBILITR_INHOUSE_USD_TO_POINTS_RATIO,'Install', 'https://is5-ssl.mzstatic.com/image/thumb/Purple118/v4/32/ae/95/32ae95e1-1da5-810f-8b2d-a917b3ed03ee/AppIcons-1x_U007emarketing-0-85-220-0-4.png/246x0w.jpg',
-                    'Vegas Words – Downtown Slots', 5, 'Install', ['US'], ['ios'], '','ios', consts.PARTNER_MOBILITR_INHOUSE, false));
-            } else if (countryCode=='UK' && platform == 'ios') {
-                // UK
-                offersResult.push(new Offer('4876e8fa-4c16-43fa-9b7d-abaddc1364f3', `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_MOBILITR_INHOUSE}&uid=${userId}&offer=4876e8fa-4c16-43fa-9b7d-abaddc1364f3&op=1.00&payout_type=CPI`, '',
-                    1*consts.MOBILITR_INHOUSE_USD_TO_POINTS_RATIO,'Install', 'https://is4-ssl.mzstatic.com/image/thumb/Purple128/v4/2e/54/bc/2e54bc4d-3755-34ab-e177-e38daea894d2/AppIcon-1x_U007emarketing-85-220-0-5.png/246x0w.jpg',
-                    'Coral Sports Betting & Casino', 4, 'Install', ['UK'], ['ios'], '','ios', consts.PARTNER_MOBILITR_INHOUSE, false));
-
-                offersResult.push(new Offer('dde4855e-7f51-4bee-9372-fce3b1bae5d8', `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_MOBILITR_INHOUSE}&uid=${userId}&offer=dde4855e-7f51-4bee-9372-fce3b1bae5d8&op=1.00&payout_type=CPI`, '',
-                    1*consts.MOBILITR_INHOUSE_USD_TO_POINTS_RATIO,'Install', 'https://is1-ssl.mzstatic.com/image/thumb/Purple128/v4/44/a7/7d/44a77d22-d87a-e792-8707-5db5213c1f61/AppIcon-1x_U007emarketing-0-0-GLES2_U002c0-512MB-sRGB-0-0-0-85-220-0-0-0-9.png/246x0w.jpg',
-                    'Ladbrokes Sports Betting', 4, 'Install', ['UK'], ['ios'], '','ios', consts.PARTNER_MOBILITR_INHOUSE, false));
-                
-                offersResult.push(new Offer('f4ff04d3-7bbe-485d-a426-b8bef43a8399', `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_MOBILITR_INHOUSE}&uid=${userId}&offer=f4ff04d3-7bbe-485d-a426-b8bef43a8399&op=1.00&payout_type=CPI`, '',
-                    1*consts.MOBILITR_INHOUSE_USD_TO_POINTS_RATIO,'Install', 'https://is5-ssl.mzstatic.com/image/thumb/Purple128/v4/ea/65/5b/ea655bf6-181c-bc3e-ced3-b112667c2b24/AppIcon-1-1x_U007emarketing-85-220-0-8.png/246x0w.jpg',
-                    'William Hill Sports Betting', 4.5, 'Install', ['UK'], ['ios'], '','ios', consts.PARTNER_MOBILITR_INHOUSE, false));
+            for (let i=0; i<offersJson.length; i++) {
+                let offer = new Offer();
+                offer.parseMobilitrResponse(offersJson[i], userId);
+                if (offer.countries.includes(countryCode) && 
+                    (platform == null || offer.platform == platform)) {
+                        offersResult.push(offer);
+                }
             }
 
             resolve(offersResult);            

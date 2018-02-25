@@ -113,6 +113,37 @@ Offer.prototype.parseCpaLeadResponse = function(responseObject, userId) {
     this.is_completed = false;
 }
 
+Offer.prototype.parseMobilitrResponse = function(responseObject, userId) {
+    this.id = responseObject.offer_id;
+    this.original_click_url = '';
+    this.countries = responseObject.countries;
+    this.devices = responseObject.devices;
+    let payout = Number(responseObject.payout_amount);
+    this.points = Math.floor(payout * consts.MOBILITR_INHOUSE_USD_TO_POINTS_RATIO);
+    let payoutType = responseObject.payout_type;
+    if (payoutType) {
+        switch (payoutType) {
+            case 'CPI':
+                this.action = 'Install';
+                break;
+            case 'CPA':
+                this.action = responseObject.payout_action;
+                break;
+        }
+    } else {
+        this.action = 'Install';
+    }
+    this.cta_text = this.action;
+    this.icon_url = responseObject.imageUrl;
+    this.title = responseObject.title;
+    this.store_rating = responseObject.store_rating;
+    this.bundle_id = null;
+    this.platform = responseObject.platform;
+    this.click_url = `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_MOBILITR_INHOUSE}&uid=${userId}&offer=${this.id}&op=${payout}&payout_type=${payoutType}`;
+    this.partner_name = consts.PARTNER_MOBILITR_INHOUSE;
+    this.is_completed = false;
+}
+
 Offer.prototype.isEqualToUserAction = function(userAction) {
     if (this.partner_name == userAction.partner) {
         switch (this.partner_name) {
