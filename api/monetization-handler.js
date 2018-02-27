@@ -498,7 +498,6 @@ function getAvailableOffers(req) {
             let dalsPromise = [];
             dalsPromise.push(dal.updateUserUADetails(userId, platform, device, countryCode).catch(e=>e));            
             dalsPromise.push(dal.updateUserVisitsOffers(userId, new Date()).catch(e=>e));
-            //offersPromise.push(getCpaLeadAvailableOffersWithParams(userId, countryCode, platform, device).catch(e=>e));
             Promise.all(dalsPromise).then(() => {
                 getOffers(stub, partner, userId, countryCode, deviceData, platform, device).then(data => resolve(data)).catch(err => reject(err));
             }).catch(err => {
