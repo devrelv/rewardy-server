@@ -181,6 +181,10 @@ let BotUserSchema = new Schema({
             voucher_reference_data: Schema.Types.Mixed
         }],
         default: []
+    },
+    offers_page_visits: {
+        type: Array,
+        default: []
     }
 });
 
@@ -662,6 +666,25 @@ function pushVoucherRedeem(userId, voucherId, points, requestDate, issueDate, vo
     });
 }
 
+function updateUserVisitsOffers(userId, date) {
+    return new Promise((resolve, reject) => {
+        try {
+            BotUser.update({user_id: userId}, {$push: {offers_page_visits: date}}, (err, res) => {
+                if (err) {
+                    logger.log.error('dal: updateUserVisitsOffers.update error', {error: serializeError(err), user_id: userId});                        
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        }
+        catch (err) {
+            logger.log.error('dal: updateUserVisitsOffers error', {error: serializeError(err)});                        
+            reject(err);
+        }
+    })
+}
+
 module.exports = {
     getAllMonetizationPartners: getAllMonetizationPartners,
     getAllMonetizationPartnersWithOffers: getAllMonetizationPartnersWithOffers,
@@ -680,7 +703,8 @@ module.exports = {
     getUserActions,
     saveNoOffers,
     pushDailyBonus,
-    pushVoucherRedeem
+    pushVoucherRedeem,
+    updateUserVisitsOffers
 }
 
 
