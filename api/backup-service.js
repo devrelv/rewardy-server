@@ -109,8 +109,15 @@ function handleBackupSource(currentBackupSource, restoreProcesses, now, backupDi
 
 function addDBToRestores(restoreProcesses, currentBackupSource, backupDir, now) {
     logger.log.info('restoring database into ' + currentBackupSource.connection_string);
+
+    let mongoConnectionString = '';
+    if (process.env.CURRENT_ENV == 'PROD') {
+        mongoConnectionString = process.env.PROD_MONGO_CONNECTION_STRING
+    } else {
+        mongoConnectionString = process.env.DEV_MONGO_CONNECTION_STRING        
+    }
     // Restore to this db: currentBackupSource
-    let backedupDbName = getDbNameFromConnectionString(process.env.MONGO_CONNECTION_STRING);
+    let backedupDbName = getDbNameFromConnectionString(mongoConnectionString);
     restoreProcesses.push(backup_dal.restoreDb(currentBackupSource.connection_string, backupDir + '/' + backedupDbName, true, now).catch(e => e));
 }
 

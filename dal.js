@@ -5,7 +5,13 @@ const logger = require('./logger');
 const serializeError = require('serialize-error');
 
 logger.log.info('dal: ####### connecting to the database #######');
-let conn = mongoose.connect(process.env.MONGO_CONNECTION_STRING, {useMongoClient: true});
+let mongoConnectionString = '';
+if (process.env.CURRENT_ENV == 'PROD') {
+    mongoConnectionString = process.env.PROD_MONGO_CONNECTION_STRING;
+} else {
+    mongoConnectionString = process.env.DEV_MONGO_CONNECTION_STRING;
+}
+let conn = mongoose.connect(mongoConnectionString, {useMongoClient: true});
 
 mongoose.Promise = require('bluebird');
 let Schema = mongoose.Schema;
@@ -174,6 +180,10 @@ let BotUserSchema = new Schema({
             issue_date: Date,
             voucher_reference_data: Schema.Types.Mixed
         }],
+        default: []
+    },
+    offers_page_visits: {
+        type: Array,
         default: []
     }
 });
@@ -656,6 +666,25 @@ function pushVoucherRedeem(userId, voucherId, points, requestDate, issueDate, vo
     });
 }
 
+function updateUserVisitsOffers(userId, date) {
+    return new Promise((resolve, reject) => {
+        try {
+            BotUser.update({user_id: userId}, {$push: {offers_page_visits: date}}, (err, res) => {
+                if (err) {
+                    logger.log.error('dal: updateUserVisitsOffers.update error', {error: serializeError(err), user_id: userId});                        
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        }
+        catch (err) {
+            logger.log.error('dal: updateUserVisitsOffers error', {error: serializeError(err)});                        
+            reject(err);
+        }
+    })
+}
+
 module.exports = {
     getAllMonetizationPartners: getAllMonetizationPartners,
     getAllMonetizationPartnersWithOffers: getAllMonetizationPartnersWithOffers,
@@ -674,7 +703,8 @@ module.exports = {
     getUserActions,
     saveNoOffers,
     pushDailyBonus,
-    pushVoucherRedeem
+    pushVoucherRedeem,
+    updateUserVisitsOffers
 }
 
 
