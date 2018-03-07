@@ -1,12 +1,25 @@
 [
     {
+        "offer_id": "b8b7e35b-411b-4fab-8bcd-30788c700b9c",
+        "title": "Football Strike",
+        "payout_amount": 1.00,
+        "payout_type": "CPI",
+        "payout_action": "Install",
+        "countries": ["US"],
+        "platform": ["ios", "android"],
+        "devices": ["phone", "tablet"],
+        "imageUrl": "https://is2-ssl.mzstatic.com/image/thumb/Purple118/v4/cb/e1/3f/cbe13f10-6aa9-a8b0-4832-3a1cc3c7501f/AppIcon-1x_U007emarketing-0-85-220-0-7.png/230x0w.jpg",
+        "store_rating": 4.5,
+        "idfa_extractor" : true
+    },
+    {
         "offer_id": "3dc13aa3-6641-4c44-95aa-39c508565e6a",
         "title": "GSN Casino: Slot Machine Games",
         "payout_amount": 1.00,
         "payout_type": "CPI",
         "payout_action": "Install",
         "countries": ["US"],
-        "platform": "ios",
+        "platform": ["ios"],
         "devices": ["phone", "tablet"],
         "imageUrl": "https://is5-ssl.mzstatic.com/image/thumb/Purple118/v4/ae/86/37/ae8637db-b5f0-49a5-b65f-372ffa2f3264/mzl.ifcoibem.png/246x0w.jpg",
         "store_rating": 4.5
@@ -18,7 +31,7 @@
         "payout_type": "CPI",
         "payout_action": "Install",
         "countries": ["US"],
-        "platform": "ios",
+        "platform": ["ios"],
         "devices": ["phone", "tablet"],
         "imageUrl": "https://is2-ssl.mzstatic.com/image/thumb/Purple118/v4/37/33/93/3733936b-6e79-c23d-d6de-00a96c421a5b/AppIconIPhone-1x_U007emarketing-0-85-220-0-1.png/246x0w.jpg",
         "store_rating": 5
@@ -30,7 +43,7 @@
         "payout_type": "CPI",
         "payout_action": "Install",
         "countries": ["US"],
-        "platform": "ios",
+        "platform": ["ios"],
         "devices": ["phone", "tablet"],
         "imageUrl": "https://is1-ssl.mzstatic.com/image/thumb/Purple118/v4/00/ae/ff/00aeff29-6e01-a479-0cab-0aae24d97d5b/mzl.zzbbgdaf.jpg/246x0w.jpg",
         "store_rating": 4
@@ -42,7 +55,7 @@
         "payout_type": "CPI",
         "payout_action": "Install",
         "countries": ["US"],
-        "platform": "ios",
+        "platform": ["ios"],
         "devices": ["phone", "tablet"],
         "imageUrl": "https://is1-ssl.mzstatic.com/image/thumb/Purple118/v4/1d/68/cf/1d68cfc6-c8d6-8e35-622e-1efaadf70b59/mzl.zhwrgtwh.png/246x0w.jpg",
         "store_rating": 4.5
@@ -54,7 +67,7 @@
         "payout_type": "CPI",
         "payout_action": "Install",
         "countries": ["US"],
-        "platform": "ios",
+        "platform": ["ios"],
         "devices": ["phone", "tablet"],
         "imageUrl": "https://is4-ssl.mzstatic.com/image/thumb/Purple128/v4/d1/61/20/d1612024-5271-e747-cc37-4c3a4c99117a/mzl.qnxcjmxj.jpg/246x0w.jpg",
         "store_rating": 4.5
@@ -66,7 +79,7 @@
         "payout_type": "CPI",
         "payout_action": "Install",
         "countries": ["US"],
-        "platform": "ios",
+        "platform": ["ios"],
         "devices": ["phone", "tablet"],
         "imageUrl": "https://is5-ssl.mzstatic.com/image/thumb/Purple118/v4/32/ae/95/32ae95e1-1da5-810f-8b2d-a917b3ed03ee/AppIcons-1x_U007emarketing-0-85-220-0-4.png/246x0w.jpg",
         "store_rating": 5

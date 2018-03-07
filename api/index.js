@@ -208,6 +208,7 @@ module.exports = ({ config, db }) => {
 		original_payout: original payout when the user clicked
 		payout_type: CPI/CPA
 		source_name: user chat platform (viber, facebook, kik etc.)
+    	idfa: user's idfa
     */
 	api.get('/postback/mobilitr', (req, res) => {
 		logger.log.info('request to /postback/mobilitr made', {request: req});
@@ -256,6 +257,7 @@ module.exports = ({ config, db }) => {
 		original_payout - original payout value
 		payout_type - CPI/CPA
 		source_name - chat platform (viber, facebook, kik etc)
+    	idfa - user's idfa
 	*/
 	api.get('/offer_click', (req, res) => {
 		logger.log.debug('request to /offer_click made', {request: req});

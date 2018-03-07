@@ -2,7 +2,7 @@
 const consts = require('../../consts');
 const NO_IMAGE_REPLACEMENT = 'https://rewardy.co/img/hero-fail@2x.png';
 
-function Offer (id, click_url, original_click_url, points, cta_text, icon_url, title, store_rating, action, countries, devices, bundle_id, platform, partner_name, is_completed) {
+function Offer (id, click_url, original_click_url, points, cta_text, icon_url, title, store_rating, action, countries, devices, bundle_id, platform, partner_name, is_completed, is_enabled) {
     this.id = id;
     this.click_url = click_url;
     this.original_click_url = original_click_url
@@ -18,9 +18,10 @@ function Offer (id, click_url, original_click_url, points, cta_text, icon_url, t
     this.platform = platform;
     this.partner_name = partner_name;
     this.is_completed = is_completed || false;
+    this.is_enabled = is_enabled || false;
 }
 
-Offer.prototype.parseAppliftResponse = function(responseObject, userId) {
+Offer.prototype.parseAppliftResponse = function(responseObject, userId, idfa) {
     // this.id = responseObject.campaigns[0].id;
     this.original_click_url = responseObject.campaigns[0].click_url;
     /*
@@ -70,13 +71,19 @@ Offer.prototype.parseAppliftResponse = function(responseObject, userId) {
     this.bundle_id = responseObject.app_details.bundle_id;
     this.platform = responseObject.app_details.platform;
     let applift_click_url_parameters = parseQueryString(this.original_click_url);    
-    this.click_url = `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_APPLIFT}&uid=${userId}&offer=&token=${applift_click_url_parameters.token}&op=${payout}&payout_type=${payoutType}`;
     this.id = applift_click_url_parameters.token;
     this.partner_name = consts.PARTNER_APPLIFT;
     this.is_completed = false;
+    if (idfa) {
+        this.is_enabled = true;
+    } else {
+        this.is_enabled = false;
+        idfa = '';
+    }
+    this.click_url = `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_APPLIFT}&uid=${userId}&offer=&token=${applift_click_url_parameters.token}&op=${payout}&payout_type=${payoutType}&idfa=${idfa}`;
 }
 
-Offer.prototype.parseCpaLeadResponse = function(responseObject, userId) {
+Offer.prototype.parseCpaLeadResponse = function(responseObject, userId, idfa) {
     this.id = responseObject.campid;
     this.original_click_url = responseObject.link;
     this.countries = [responseObject.country];
@@ -108,12 +115,18 @@ Offer.prototype.parseCpaLeadResponse = function(responseObject, userId) {
     this.store_rating = null;
     this.bundle_id = null;
     this.platform = responseObject.mobile_app_type;
-    this.click_url = `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_CPA_LEAD}&uid=${userId}&offer=${this.id}&token=&op=${payout}&payout_type=${payoutType}`;
     this.partner_name = consts.PARTNER_CPA_LEAD;
     this.is_completed = false;
+    if (idfa) {
+        this.is_enabled = true;
+    } else {
+        this.is_enabled = false;
+        idfa = '';
+    }
+    this.click_url = `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_CPA_LEAD}&uid=${userId}&offer=${this.id}&token=&op=${payout}&payout_type=${payoutType}&idfa=${idfa}`;
 }
 
-Offer.prototype.parseMobilitrResponse = function(responseObject, userId) {
+Offer.prototype.parseMobilitrResponse = function(responseObject, userId, idfa) {
     this.id = responseObject.offer_id;
     this.original_click_url = '';
     this.countries = responseObject.countries;
@@ -139,9 +152,20 @@ Offer.prototype.parseMobilitrResponse = function(responseObject, userId) {
     this.store_rating = responseObject.store_rating;
     this.bundle_id = null;
     this.platform = responseObject.platform;
-    this.click_url = `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_MOBILITR_INHOUSE}&uid=${userId}&offer=${this.id}&op=${payout}&payout_type=${payoutType}`;
     this.partner_name = consts.PARTNER_MOBILITR_INHOUSE;
     this.is_completed = false;
+    if ((idfa && !responseObject.idfa_extractor) || 
+        (!idfa && responseObject.idfa_extractor)) {
+        this.is_enabled = true;
+    } else {
+        this.is_enabled = false;
+        if (responseObject.idfa_extractor) {
+            this.is_completed = true;
+        }
+    }
+    if (!idfa) idfa = '';
+    
+    this.click_url = `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_MOBILITR_INHOUSE}&uid=${userId}&offer=${this.id}&op=${payout}&payout_type=${payoutType}&idfa=${idfa}`;
 }
 
 Offer.prototype.isEqualToUserAction = function(userAction) {
