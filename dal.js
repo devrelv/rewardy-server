@@ -185,6 +185,10 @@ let BotUserSchema = new Schema({
     offers_page_visits: {
         type: Array,
         default: []
+    },
+    idfa: {
+        type: Array,
+        default: []
     }
 });
 
@@ -246,6 +250,10 @@ let OfferClickSchema = new Schema({
     redirect_url: {
         type: String,
         default: 0,
+        required: false
+    },
+    idfa: {
+        type: String,
         required: false
     },
     created_at: {
@@ -539,7 +547,7 @@ function updateUserEmail(userId, email) {
     }); 
 }
 
-function saveOfferClick(partner,partnerName, userId,offerId,token,originalPayout,payoutType,fullVoluumUrl) {
+function saveOfferClick(partner,partnerName, userId,offerId,token,originalPayout,payoutType,fullVoluumUrl, idfa) {
     return new Promise((resolve, reject) => {
         try {
             let offerClick = new OfferClick({
@@ -550,7 +558,8 @@ function saveOfferClick(partner,partnerName, userId,offerId,token,originalPayout
                 token: token,
                 original_payout: originalPayout,
                 payout_type: payoutType,
-                redirect_url: fullVoluumUrl
+                redirect_url: fullVoluumUrl,
+                idfa: idfa
             });
 
             offerClick.save(function(err) {
@@ -685,6 +694,30 @@ function updateUserVisitsOffers(userId, date) {
     })
 }
 
+function updateUserIdfa(userId, idfa) {
+    return new Promise((resolve, reject) => {
+        try {
+            if (idfa && idfa.length > 0) {
+                BotUser.update({user_id: userId}, {$push: {idfa: {date: new Date(), idfa: idfa}}}, (err, res) => {
+                    if (err) {
+                        logger.log.error('dal: updateUserIdfa.update error', {error: serializeError(err), user_id: userId});                        
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                });
+            } else {
+                resolve();
+            }
+            
+        }
+        catch (err) {
+            logger.log.error('dal: updateUserIdfa error', {error: serializeError(err)});                        
+            reject(err);
+        }
+    })
+}
+
 module.exports = {
     getAllMonetizationPartners: getAllMonetizationPartners,
     getAllMonetizationPartnersWithOffers: getAllMonetizationPartnersWithOffers,
@@ -704,7 +737,8 @@ module.exports = {
     saveNoOffers,
     pushDailyBonus,
     pushVoucherRedeem,
-    updateUserVisitsOffers
+    updateUserVisitsOffers,
+    updateUserIdfa
 }
 
 
