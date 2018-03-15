@@ -530,6 +530,7 @@ function getOffers(stub, partner, userId, countryCode, deviceData, platform, dev
             offersPromise.push(getMobilitrInHouseAvailableOffersWithParams(userId, countryCode, platform, idfa).catch(e=>e));            
             offersPromise.push(getAppliftAvailableOffersWithParams(userId, countryCode, platform, device, idfa).catch(e=>e));
             //offersPromise.push(getCpaLeadAvailableOffersWithParams(userId, countryCode, platform, device, idfa).catch(e=>e));
+            offersPromise.push(getSaysoAvailableOffersWithParams(userId, countryCode, platform, device, idfa).catch(e=>e));            
             Promise.all(offersPromise).then(offers => {
                 let allOffers = [];
                 for (let i=0; i<offers.length; i++) {
@@ -736,6 +737,32 @@ function getMobilitrInHouseAvailableOffersWithParams(userId, countryCode, platfo
     });    
 }
 
+function getSaysoAvailableOffersWithParams(userId, countryCode, platform, idfa) {
+    return new Promise((resolve, reject) => {
+        try {
+            let offersResult = [];
+            
+            let saysoOffersData = fs.readFileSync(path.join(__dirname, '../data') + '/sayso_offers.json', { encoding: 'utf8' });
+            let offersJson = JSON.parse(saysoOffersData);
+
+            for (let i=0; i<offersJson.length; i++) {
+                let offer = new Offer();
+                offer.parseSaysoResponse(offersJson[i], userId, idfa);
+                if (offer.countries.includes(countryCode)  || offer.countries.includes('WW')) {
+                    offersResult.push(offer);
+                }
+            }
+
+            resolve(offersResult);            
+        }
+        catch (err) {
+            logger.log.error('getSaysoAvailableOffersWithParams: error occured', {error: serializeError(err)});
+            reject(err);            
+        }
+        
+    });    
+}
+
 function getCpaLeadsOffersByResponse(offersJson, userId, countryCode, platform, device, idfa) {
     let offersResult = [];
     
@@ -845,6 +872,10 @@ function offerClick(req) {
                     voluumUrl = `${consts.MOBILITR_INHOUSE_URL_PREFIX}/${offerId}`;
                     partnerName = consts.PARTNER_MOBILITR_INHOUSE;
                     break;
+                case consts.PARTNER_ID_SAYSO:
+                    voluumUrl = `${consts.MOBILITR_INHOUSE_URL_PREFIX}/${offerId}`;
+                    partnerName = consts.PARTNER_SAYSO;
+                    break;
             }
             let fullVoluumUrl = `${voluumUrl}?token=${encodeURIComponent(token)}&offer_id=${offerId}&user_id=${userId}&original_payout=${originalPayout}&payout_type=${payoutType}&partner_id=${partner}&idfa=${idfa}`;
 
@@ -862,12 +893,7 @@ function offerClick(req) {
             }).catch(err => {
                 logger.log.error('offerClick: unable to get user details', {error: serializeError(err), userId: userId});
                 resolve({redirectUrl: fullVoluumUrl});                
-            });
-            
-            
-            
-
-          
+            });          
         }
         catch (err) {
             logger.log.error('offerClick: error occured', {error: serializeError(err)});
@@ -983,6 +1009,10 @@ function postback_mobilitr(req) {
                 case consts.PARTNER_ID_MOBILITR_INHOUSE:
                     offerCredits = payout*consts.MOBILITR_INHOUSE_USD_TO_POINTS_RATIO;
                     partnerName = consts.PARTNER_MOBILITR_INHOUSE;
+                    break;
+                case consts.PARTNER_ID_SAYSO:
+                    offerCredits = payout*consts.SAYSO_USD_TO_POINTS_RATIO;
+                    partnerName = consts.PARTNER_SAYSO;
                     break;
                 default:
                     offerCredits = payout*100;

@@ -168,6 +168,43 @@ Offer.prototype.parseMobilitrResponse = function(responseObject, userId, idfa) {
     this.click_url = `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_MOBILITR_INHOUSE}&uid=${userId}&offer=${this.id}&op=${payout}&payout_type=${payoutType}&idfa=${idfa}`;
 }
 
+Offer.prototype.parseSaysoResponse = function(responseObject, userId, idfa) {
+    this.id = responseObject.offer_id;
+    this.original_click_url = '';
+    this.countries = responseObject.countries;
+    this.devices = responseObject.devices;
+    let payout = Number(responseObject.payout_amount);
+    this.points = Math.floor(payout * consts.SAYSO_USD_TO_POINTS_RATIO);
+    let payoutType = responseObject.payout_type;
+    if (payoutType) {
+        switch (payoutType) {
+            case 'SURVEY':
+                this.action = 'Fill the survey';
+                break;
+            case 'CPI':
+                this.action = 'Install';
+                break;
+            case 'CPA':
+                this.action = responseObject.payout_action;
+                break;
+        }
+    } else {
+        this.action = 'Fill the survey';
+    }
+    this.cta_text = this.action;
+    this.icon_url = responseObject.imageUrl;
+    this.title = responseObject.title;
+    this.store_rating = null;
+    this.bundle_id = null;
+    this.platform = responseObject.platform;
+    this.partner_name = consts.PARTNER_SAYSO;
+    this.is_completed = false;
+    this.is_enabled = true;
+    if (!idfa) idfa = '';
+    
+    this.click_url = `${process.env.SERVER_API_URL}offer_click?partner=${consts.PARTNER_ID_SAYSO}&uid=${userId}&offer=${this.id}&op=${payout}&payout_type=${payoutType}&idfa=${idfa}`;
+}
+
 Offer.prototype.isEqualToUserAction = function(userAction) {
     if (this.partner_name == userAction.partner) {
         switch (this.partner_name) {
