@@ -2,7 +2,7 @@
     {
         "offer_id": "e12adab7-eb10-40e7-89c8-e4ea7c481d1c",
         "title": "SaySo - Our Favorite",
-        "payout_amount": 2.00,
+        "payout_amount": 1.00,
         "payout_type": "SURVEY",
         "payout_action": "Fill the survey",
         "countries": ["US", "CA", "AU", "GB", "UK", "DE", "FR", "ES", "IT", "MX", "BR"],
@@ -13,7 +13,7 @@
     {
         "offer_id": "2ec718e3-1179-443d-b07f-44fdeab78040",
         "title": "SaySo - Most Popular",
-        "payout_amount": 1.50,
+        "payout_amount": 0.75,
         "payout_type": "SURVEY",
         "payout_action": "Fill the survey",
         "countries": ["US", "CA", "AU", "GB","UK", "DE", "FR","ES", "IT", "MX", "BR", "JP", "RU", "CN"],
@@ -24,7 +24,7 @@
     {
         "offer_id": "e11a1490-5aea-46b1-9ee9-7a56f54a25a0",
         "title": "SaySo - Best Opportunity",
-        "payout_amount": 1.00,
+        "payout_amount": 0.50,
         "payout_type": "SURVEY",
         "payout_action": "Fill the survey",
         "countries": ["US", "CA", "AU", "GB","UK", "DE", "FR","ES", "IT", "MX", "BR", "JP", "RU", "CN"],
